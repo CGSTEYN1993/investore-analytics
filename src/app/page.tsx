@@ -1,9 +1,13 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowRight, BarChart3, Globe, Shield, Zap, TrendingUp, Database, Search, Terminal, Activity, Layers, PlayCircle, Brain, Sparkles, MessageSquare, AlertTriangle, Target } from 'lucide-react';
+import { ArrowRight, BarChart3, Globe, Shield, Zap, TrendingUp, Database, Search, Terminal, Activity, Layers, PlayCircle, Brain, Sparkles, MessageSquare, AlertTriangle, Target, Rocket, Lock, Gauge } from 'lucide-react';
 import TickerTape from '@/components/ui/TickerTape';
 import MapInterfaceMockup from '@/components/dashboard/MapInterfaceMockup';
+import LaptopSlider from '@/components/ui/LaptopSlider';
+import HowItWorksSlider from '@/components/ui/HowItWorksSlider';
+import TestimonialsSection from '@/components/ui/TestimonialsSection';
+import VideoThumbnail from '@/components/ui/VideoThumbnail';
 
 // Helper Components
 function ModuleCard({ icon, title, description, stats }: { icon: React.ReactNode, title: string, description: string, stats: string[] }) {
@@ -221,13 +225,128 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* About Section with Video */}
+      <section id="about" className="py-24 bg-metallic-950 border-b border-metallic-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            {/* Text Side */}
+            <div>
+              <span className="text-primary-400 font-medium text-sm tracking-wider uppercase mb-4 block">About</span>
+              <h2 className="text-3xl lg:text-4xl font-bold text-metallic-100 mb-6 leading-tight">
+                InvestOre provides comprehensive data on thousands of listed mining and exploration companies globally.
+              </h2>
+              <p className="text-metallic-400 mb-6 leading-relaxed">
+                Our platform enables users to define groups of companies based on specific criteria, 
+                offering detailed insights into company valuations and resource comparisons relative to peer groups.
+              </p>
+              <p className="text-metallic-400 mb-8 leading-relaxed">
+                InvestOre aims to be the go-to platform for mining investment analytics, offering 
+                key decision-makers the ability to access critical information on geological prospectivity 
+                that drives economic potential — all powered by AI interpretation.
+              </p>
+              <div className="flex flex-wrap gap-4">
+                <Link
+                  href="/register"
+                  className="px-6 py-3 bg-primary-600 hover:bg-primary-500 text-white font-semibold rounded-lg transition-all"
+                >
+                  Start Exploring
+                </Link>
+                <Link
+                  href="/demo"
+                  className="px-6 py-3 bg-transparent text-primary-400 font-semibold rounded-lg border border-primary-500/50 hover:bg-primary-900/20 transition-all flex items-center gap-2"
+                >
+                  <PlayCircle className="w-5 h-5" />
+                  Video Walkthrough
+                </Link>
+              </div>
+            </div>
+            
+            {/* Video Thumbnail Side */}
+            <div>
+              <VideoThumbnail 
+                videoUrl="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+                title="See InvestOre in Action"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works Section */}
+      <section className="py-24 bg-metallic-900/30 border-b border-metallic-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-3xl mb-16">
+            <span className="text-primary-400 font-medium text-sm tracking-wider uppercase mb-4 block">How It Works</span>
+            <h2 className="text-3xl lg:text-4xl font-bold text-metallic-100 mb-6">
+              Explore and identify mining companies that fit your investment needs using customizable filters.
+            </h2>
+            <p className="text-metallic-400 leading-relaxed">
+              InvestOre allows you to narrow down your search by selecting specific criteria, such as 
+              company classification, market cap, commodities, and jurisdiction. This targeted approach 
+              helps you quickly access detailed valuation and resource data for companies that match your focus.
+            </p>
+          </div>
+
+          <HowItWorksSlider />
+        </div>
+      </section>
+
+      {/* Feature Icons Row */}
+      <section className="py-16 bg-metallic-950 border-b border-metallic-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="flex items-center gap-4 p-6 bg-metallic-900/50 rounded-xl border border-metallic-800">
+              <div className="p-3 bg-primary-500/20 rounded-xl">
+                <Rocket className="w-6 h-6 text-primary-400" />
+              </div>
+              <p className="text-metallic-200 font-medium">Sign up free — no credit card required</p>
+            </div>
+            <div className="flex items-center gap-4 p-6 bg-metallic-900/50 rounded-xl border border-metallic-800">
+              <div className="p-3 bg-primary-500/20 rounded-xl">
+                <Gauge className="w-6 h-6 text-primary-400" />
+              </div>
+              <p className="text-metallic-200 font-medium">Delve deeper with full Pro access</p>
+            </div>
+            <div className="flex items-center gap-4 p-6 bg-metallic-900/50 rounded-xl border border-metallic-800">
+              <div className="p-3 bg-primary-500/20 rounded-xl">
+                <Lock className="w-6 h-6 text-primary-400" />
+              </div>
+              <p className="text-metallic-200 font-medium">Unlock AI-powered mining insights</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Platform Preview - Laptop Slider */}
+      <section className="py-24 bg-metallic-950 border-b border-metallic-800 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-primary-950/10 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-[url('/circuit-pattern.svg')] bg-repeat opacity-[0.02]" />
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl font-bold text-metallic-100 mb-4">
+              See the Platform in Action
+            </h2>
+            <p className="text-metallic-400 max-w-2xl mx-auto">
+              Powerful analytics tools designed for mining investors. Filter thousands of projects, 
+              compare peer valuations, and discover opportunities in seconds.
+            </p>
+          </div>
+
+          <LaptopSlider />
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <TestimonialsSection />
+
       {/* CTA Section */}
       <section className="py-24 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-metallic-900 to-metallic-950"></div>
         <div className="absolute inset-0 bg-[url('/topo-pattern.svg')] bg-repeat opacity-10" />
         
         <div className="max-w-4xl mx-auto px-4 text-center relative z-10">
-          <h2 className="text-4xl font-bold text-metallic-100 mb-6">Ready to uncover your next opportunity?</h2>
+          <h2 className="text-4xl font-bold text-metallic-100 mb-6">Ready to dig deeper and explore valuable opportunities?</h2>
           <p className="text-xl text-metallic-400 mb-10">
             Join elite analysts and investors making data-driven decisions with InvestOre Analytics.
           </p>
@@ -235,7 +354,7 @@ export default function HomePage() {
             href="/register"
             className="inline-flex items-center justify-center px-10 py-5 bg-gradient-to-r from-primary-600 to-primary-500 text-white font-bold text-lg rounded-lg hover:from-primary-500 hover:to-primary-400 transition-all shadow-lg shadow-primary-900/50"
           >
-            Create Free Account
+            Start Exploring
             <ArrowRight className="w-6 h-6 ml-2" />
           </Link>
         </div>
