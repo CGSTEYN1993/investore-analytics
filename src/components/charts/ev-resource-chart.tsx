@@ -2,6 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import { useMemo } from 'react';
+import type { Config } from 'plotly.js';
 import type { EVResourceChart as EVResourceChartData } from '@/types';
 import { formatCurrency, formatMetal, getCommodityColor } from '@/lib/utils';
 
@@ -97,10 +98,10 @@ export function EVResourceScatterChart({
     [data]
   );
 
-  const config = {
+  const config: Partial<Config> = {
     responsive: true,
     displayModeBar: true,
-    modeBarButtonsToRemove: ['lasso2d', 'select2d'],
+    modeBarButtonsToRemove: ['lasso2d', 'select2d'] as Config['modeBarButtonsToRemove'],
     displaylogo: false,
   };
 
