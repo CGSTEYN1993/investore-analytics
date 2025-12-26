@@ -21,7 +21,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL('http://localhost:3000'),
+  metadataBase: new URL('https://www.investoreanalytics.com'),
   title: 'InvestOre Analytics - Mining & Exploration Valuation Platform',
   description: 'Compare mining and exploration companies with peer group analytics, resource normalization, and interactive visualizations. Build custom peer sets, normalize to AuEq/CuEq, and make data-driven decisions.',
   keywords: ['mining', 'exploration', 'valuation', 'analytics', 'peer comparison', 'gold', 'copper', 'lithium', 'AuEq', 'enterprise value', 'mining stocks'],
@@ -51,7 +51,6 @@ export const metadata: Metadata = {
     description: 'Mining & Exploration Valuation Platform',
     images: ['/og-image.png'],
   },
-  themeColor: '#14b8a6',
 };
 
 export default function RootLayout({

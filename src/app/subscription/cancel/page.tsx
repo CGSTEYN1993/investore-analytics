@@ -13,7 +13,7 @@ export default function SubscriptionCancelPage() {
         </h1>
         <p className="mt-2 text-gray-600">
           No worries! Your subscription was not processed. You can continue
-          using the free tier or try again when you're ready.
+          using the free tier or try again when you&apos;re ready.
         </p>
         
         <div className="mt-8 space-y-4">
@@ -37,7 +37,7 @@ export default function SubscriptionCancelPage() {
             Have questions about our plans?
           </h2>
           <p className="mt-2 text-sm text-gray-600">
-            We're happy to help you choose the right plan for your needs.
+            We&apos;re happy to help you choose the right plan for your needs.
             Contact us anytime.
           </p>
           <a

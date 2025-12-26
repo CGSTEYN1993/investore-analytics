@@ -289,7 +289,7 @@ export default function PricingPage() {
               </h3>
               <p className="mt-2 text-metallic-400">
                 Yes! You can upgrade or downgrade at any time. Changes take effect
-                immediately, and we'll prorate your billing.
+                immediately, and we&apos;ll prorate your billing.
               </p>
             </div>
             <div className="p-4 rounded-lg bg-metallic-900 border border-metallic-800">
@@ -313,7 +313,7 @@ export default function PricingPage() {
             </div>
             <div className="p-4 rounded-lg bg-metallic-900 border border-metallic-800">
               <h3 className="font-semibold text-metallic-100">
-                What's included in API access?
+                What&apos;s included in API access?
               </h3>
               <p className="mt-2 text-metallic-400">
                 Professional subscribers get programmatic access to all data and
