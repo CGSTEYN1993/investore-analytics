@@ -68,13 +68,13 @@ export function EVResourceScatterChart({
         font: { size: 18, color: '#1e293b' },
       },
       xaxis: {
-        title: data.x_label || 'Contained Metal (oz AuEq)',
+        title: { text: data.x_label || 'Contained Metal (oz AuEq)' },
         type: 'log' as const,
         gridcolor: '#e2e8f0',
         tickformat: '.2s',
       },
       yaxis: {
-        title: data.y_label || 'Enterprise Value (USD)',
+        title: { text: data.y_label || 'Enterprise Value (USD)' },
         type: 'log' as const,
         gridcolor: '#e2e8f0',
         tickprefix: '$',
