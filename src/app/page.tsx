@@ -8,6 +8,7 @@ import LaptopSlider from '@/components/ui/LaptopSlider';
 import HowItWorksSlider from '@/components/ui/HowItWorksSlider';
 import TestimonialsSection from '@/components/ui/TestimonialsSection';
 import VideoThumbnail from '@/components/ui/VideoThumbnail';
+import AnimatedMetalsBackground from '@/components/ui/AnimatedMetalsBackground';
 
 // Helper Components
 function ModuleCard({ icon, title, description, stats }: { icon: React.ReactNode, title: string, description: string, stats: string[] }) {
@@ -62,6 +63,9 @@ export default function HomePage() {
           <div className="absolute inset-0 opacity-20 bg-[url('/topo-pattern.svg')] bg-repeat" />
           <div className="absolute inset-0 bg-gradient-to-t from-metallic-950 via-transparent to-transparent" />
         </div>
+        
+        {/* Animated Metals Background */}
+        <AnimatedMetalsBackground />
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
           <div className="flex flex-col items-center text-center max-w-4xl mx-auto mb-16">
