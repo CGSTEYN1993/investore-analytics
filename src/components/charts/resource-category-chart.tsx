@@ -2,6 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import { useMemo } from 'react';
+import type { Config } from 'plotly.js';
 import type { ResourceSummary } from '@/types';
 import { formatNumber, getCommodityColor, COMMODITY_LABELS } from '@/lib/utils';
 
@@ -47,10 +48,10 @@ export function ResourceCategoryChart({ data, height = 400 }: ResourceCategoryCh
         font: { size: 16, color: '#1e293b' },
       },
       xaxis: {
-        title: 'Commodity',
+        title: { text: 'Commodity' },
       },
       yaxis: {
-        title: 'Contained Metal',
+        title: { text: 'Contained Metal' },
         tickformat: '.2s',
       },
       barmode: 'stack' as const,
@@ -70,7 +71,7 @@ export function ResourceCategoryChart({ data, height = 400 }: ResourceCategoryCh
     []
   );
 
-  const config = {
+  const config: Partial<Config> = {
     responsive: true,
     displayModeBar: false,
   };
