@@ -96,6 +96,22 @@ export function getStageColor(stage: string): string {
 }
 
 /**
+ * Commodity labels
+ */
+export const COMMODITY_LABELS: Record<string, string> = {
+  Au: 'Gold',
+  Ag: 'Silver',
+  Cu: 'Copper',
+  Li: 'Lithium',
+  Zn: 'Zinc',
+  Ni: 'Nickel',
+  Co: 'Cobalt',
+  Pt: 'Platinum',
+  Pd: 'Palladium',
+  U: 'Uranium',
+};
+
+/**
  * Get color for commodity
  */
 export function getCommodityColor(commodity: string): string {

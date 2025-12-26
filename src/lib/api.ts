@@ -235,6 +235,20 @@ class ApiClient {
     });
     return response.data;
   }
+
+  // ============================================================================
+  // Generic HTTP Methods
+  // ============================================================================
+
+  async post<T>(url: string, data?: unknown): Promise<T> {
+    const response = await this.client.post<T>(url, data);
+    return response.data;
+  }
+
+  async get<T>(url: string, params?: Record<string, unknown>): Promise<T> {
+    const response = await this.client.get<T>(url, { params });
+    return response.data;
+  }
 }
 
 // Singleton instance
