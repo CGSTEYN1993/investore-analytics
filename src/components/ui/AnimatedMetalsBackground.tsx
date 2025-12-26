@@ -1,298 +1,538 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+
+type CommodityStage = 'copper' | 'gold' | 'lithium' | 'silver' | 'diamond';
+
+const STAGE_DURATION = 6000; // 6 seconds per commodity
+const STAGES: CommodityStage[] = ['copper', 'gold', 'lithium', 'silver', 'diamond'];
 
 export default function AnimatedMetalsBackground() {
+  const [currentStage, setCurrentStage] = useState<CommodityStage>('copper');
+  const [isTransitioning, setIsTransitioning] = useState(false);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIsTransitioning(true);
+      
+      setTimeout(() => {
+        setCurrentStage((prev) => {
+          const currentIndex = STAGES.indexOf(prev);
+          return STAGES[(currentIndex + 1) % STAGES.length];
+        });
+        setIsTransitioning(false);
+      }, 500);
+    }, STAGE_DURATION);
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {/* Copper Wire - Left Side */}
-      <div className="absolute left-[5%] top-[20%] opacity-40">
-        <svg width="120" height="200" viewBox="0 0 120 200" className="animate-copper-coil">
-          <defs>
-            <linearGradient id="copperGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#b87333" />
-              <stop offset="50%" stopColor="#da8a67" />
-              <stop offset="100%" stopColor="#8b4513" />
-            </linearGradient>
-          </defs>
-          {/* Coiling copper wire */}
-          <path
-            d="M60,10 Q90,30 60,50 Q30,70 60,90 Q90,110 60,130 Q30,150 60,170 Q90,190 60,190"
-            fill="none"
-            stroke="url(#copperGradient)"
-            strokeWidth="6"
-            strokeLinecap="round"
-            className="copper-wire-path"
+    <div className="absolute inset-0 overflow-hidden pointer-events-none flex items-center justify-center">
+      {/* Central Animation Container */}
+      <div className={`relative w-[600px] h-[400px] transition-opacity duration-500 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}>
+        
+        {/* Copper Wire Animation */}
+        {currentStage === 'copper' && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <svg width="500" height="300" viewBox="0 0 500 300" className="opacity-60">
+              <defs>
+                <linearGradient id="copperGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#b87333" />
+                  <stop offset="30%" stopColor="#da8a67" />
+                  <stop offset="60%" stopColor="#cd7f32" />
+                  <stop offset="100%" stopColor="#8b4513" />
+                </linearGradient>
+                <filter id="copperShine">
+                  <feGaussianBlur stdDeviation="1" result="blur" />
+                  <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                </filter>
+              </defs>
+              
+              {/* Straight wire that draws in, then curls at the end */}
+              <path
+                d="M-50,150 L280,150 Q320,150 340,130 Q360,110 380,130 Q400,150 380,170 Q360,190 340,170 Q330,155 350,145"
+                fill="none"
+                stroke="url(#copperGrad)"
+                strokeWidth="8"
+                strokeLinecap="round"
+                filter="url(#copperShine)"
+                className="copper-wire-draw"
+              />
+              
+              {/* Wire highlight */}
+              <path
+                d="M-50,148 L280,148 Q320,148 340,128"
+                fill="none"
+                stroke="rgba(255,200,150,0.4)"
+                strokeWidth="2"
+                strokeLinecap="round"
+                className="copper-wire-draw"
+                style={{ animationDelay: '0.1s' }}
+              />
+
+              {/* Commodity Label */}
+              <text x="250" y="250" textAnchor="middle" className="commodity-label" fill="rgba(184,115,51,0.8)" fontSize="24" fontWeight="300" letterSpacing="8">
+                COPPER
+              </text>
+            </svg>
+          </div>
+        )}
+
+        {/* Gold Pour Animation */}
+        {currentStage === 'gold' && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <svg width="400" height="350" viewBox="0 0 400 350" className="opacity-60">
+              <defs>
+                <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#ffd700" />
+                  <stop offset="25%" stopColor="#ffec8b" />
+                  <stop offset="50%" stopColor="#ffd700" />
+                  <stop offset="75%" stopColor="#daa520" />
+                  <stop offset="100%" stopColor="#b8860b" />
+                </linearGradient>
+                <linearGradient id="goldPour" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#ffd700" />
+                  <stop offset="100%" stopColor="#ff8c00" />
+                </linearGradient>
+                <linearGradient id="moldGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#4a4a4a" />
+                  <stop offset="100%" stopColor="#2a2a2a" />
+                </linearGradient>
+                <filter id="goldGlow">
+                  <feGaussianBlur stdDeviation="3" result="glow" />
+                  <feMerge>
+                    <feMergeNode in="glow" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+              </defs>
+              
+              {/* Crucible/Ladle at top */}
+              <g className="gold-ladle">
+                <path d="M170,20 L230,20 L240,60 L160,60 Z" fill="url(#moldGrad)" />
+                <ellipse cx="200" cy="20" rx="30" ry="8" fill="#3a3a3a" />
+              </g>
+              
+              {/* Pouring stream */}
+              <path
+                d="M200,60 Q200,100 200,180"
+                fill="none"
+                stroke="url(#goldPour)"
+                strokeWidth="12"
+                strokeLinecap="round"
+                filter="url(#goldGlow)"
+                className="gold-stream"
+              />
+              
+              {/* Mold */}
+              <g>
+                <path d="M120,180 L280,180 L260,260 L140,260 Z" fill="url(#moldGrad)" stroke="#555" strokeWidth="2" />
+                {/* Inner mold cavity */}
+                <path d="M140,185 L260,185 L245,255 L155,255 Z" fill="#1a1a1a" />
+              </g>
+              
+              {/* Gold filling the mold */}
+              <path
+                d="M142,250 L258,250 L248,190 L152,190 Z"
+                fill="url(#goldGrad)"
+                filter="url(#goldGlow)"
+                className="gold-fill"
+              />
+              
+              {/* Shine on gold */}
+              <path
+                d="M155,200 L200,200 L195,215 L160,215 Z"
+                fill="rgba(255,255,255,0.3)"
+                className="gold-shine"
+              />
+
+              {/* Commodity Label */}
+              <text x="200" y="310" textAnchor="middle" className="commodity-label" fill="rgba(255,215,0,0.8)" fontSize="24" fontWeight="300" letterSpacing="8">
+                GOLD
+              </text>
+            </svg>
+          </div>
+        )}
+
+        {/* Lithium to Battery Animation */}
+        {currentStage === 'lithium' && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <svg width="450" height="300" viewBox="0 0 450 300" className="opacity-60">
+              <defs>
+                <linearGradient id="batteryGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#2d5016" />
+                  <stop offset="50%" stopColor="#4a7c23" />
+                  <stop offset="100%" stopColor="#2d5016" />
+                </linearGradient>
+                <linearGradient id="batteryCharge" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#32cd32" />
+                  <stop offset="50%" stopColor="#7cfc00" />
+                  <stop offset="100%" stopColor="#32cd32" />
+                </linearGradient>
+                <filter id="lithiumGlow">
+                  <feGaussianBlur stdDeviation="2" result="glow" />
+                  <feMerge>
+                    <feMergeNode in="glow" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+              </defs>
+
+              {/* Lithium powder particles converging */}
+              <g className="lithium-particles">
+                {[...Array(20)].map((_, i) => (
+                  <circle
+                    key={i}
+                    r="3"
+                    fill="rgba(255,255,255,0.8)"
+                    className="lithium-particle"
+                    style={{
+                      '--start-x': `${50 + Math.random() * 350}px`,
+                      '--start-y': `${50 + Math.random() * 200}px`,
+                      '--delay': `${i * 0.1}s`,
+                    } as React.CSSProperties}
+                  />
+                ))}
+              </g>
+              
+              {/* Battery outline */}
+              <g className="battery-appear">
+                {/* Main body */}
+                <rect x="140" y="100" width="150" height="80" rx="8" fill="url(#batteryGrad)" stroke="#1a1a1a" strokeWidth="3" />
+                {/* Terminal */}
+                <rect x="290" y="125" width="15" height="30" rx="2" fill="#555" stroke="#333" strokeWidth="2" />
+                {/* Charge level */}
+                <rect x="150" y="110" width="0" height="60" rx="4" fill="url(#batteryCharge)" filter="url(#lithiumGlow)" className="battery-charge" />
+                {/* Battery segments */}
+                <line x1="185" y1="105" x2="185" y2="175" stroke="rgba(0,0,0,0.3)" strokeWidth="1" />
+                <line x1="220" y1="105" x2="220" y2="175" stroke="rgba(0,0,0,0.3)" strokeWidth="1" />
+                <line x1="255" y1="105" x2="255" y2="175" stroke="rgba(0,0,0,0.3)" strokeWidth="1" />
+              </g>
+              
+              {/* Lightning bolt */}
+              <path
+                d="M215,85 L205,105 L220,105 L200,130 L230,100 L215,100 Z"
+                fill="#7cfc00"
+                filter="url(#lithiumGlow)"
+                className="lightning-bolt"
+              />
+
+              {/* Commodity Label */}
+              <text x="225" y="250" textAnchor="middle" className="commodity-label" fill="rgba(124,252,0,0.8)" fontSize="24" fontWeight="300" letterSpacing="8">
+                LITHIUM
+              </text>
+            </svg>
+          </div>
+        )}
+
+        {/* Silver Ingot Animation */}
+        {currentStage === 'silver' && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <svg width="400" height="300" viewBox="0 0 400 300" className="opacity-60">
+              <defs>
+                <linearGradient id="silverGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#e8e8e8" />
+                  <stop offset="25%" stopColor="#c0c0c0" />
+                  <stop offset="50%" stopColor="#d8d8d8" />
+                  <stop offset="75%" stopColor="#a8a8a8" />
+                  <stop offset="100%" stopColor="#909090" />
+                </linearGradient>
+                <linearGradient id="silverShine" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="rgba(255,255,255,0.6)" />
+                  <stop offset="100%" stopColor="rgba(255,255,255,0)" />
+                </linearGradient>
+                <filter id="silverGlow">
+                  <feGaussianBlur stdDeviation="2" result="glow" />
+                  <feMerge>
+                    <feMergeNode in="glow" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+              </defs>
+
+              {/* Silver bar - 3D perspective */}
+              <g className="silver-bar-emerge">
+                {/* Top face */}
+                <polygon points="100,100 300,100 280,130 120,130" fill="url(#silverGrad)" className="silver-top" />
+                {/* Front face */}
+                <polygon points="120,130 280,130 280,180 120,180" fill="#b0b0b0" className="silver-front" />
+                {/* Right face */}
+                <polygon points="280,130 300,100 300,150 280,180" fill="#888" className="silver-right" />
+                
+                {/* Shine effect */}
+                <polygon points="105,102 180,102 165,125 120,125" fill="url(#silverShine)" className="silver-shine-effect" />
+                
+                {/* Stamp/hallmark */}
+                <rect x="170" y="145" width="60" height="25" rx="2" fill="none" stroke="rgba(80,80,80,0.5)" strokeWidth="1" />
+                <text x="200" y="162" textAnchor="middle" fill="rgba(80,80,80,0.6)" fontSize="10" fontWeight="bold">.999</text>
+                <text x="200" y="173" textAnchor="middle" fill="rgba(80,80,80,0.5)" fontSize="6">FINE SILVER</text>
+              </g>
+              
+              {/* Reflection shine sweep */}
+              <rect x="100" y="100" width="20" height="80" fill="url(#silverShine)" className="shine-sweep" />
+
+              {/* Commodity Label */}
+              <text x="200" y="240" textAnchor="middle" className="commodity-label" fill="rgba(192,192,192,0.8)" fontSize="24" fontWeight="300" letterSpacing="8">
+                SILVER
+              </text>
+            </svg>
+          </div>
+        )}
+
+        {/* Diamond Ring Animation */}
+        {currentStage === 'diamond' && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <svg width="400" height="320" viewBox="0 0 400 320" className="opacity-60">
+              <defs>
+                <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#ffd700" />
+                  <stop offset="50%" stopColor="#daa520" />
+                  <stop offset="100%" stopColor="#b8860b" />
+                </linearGradient>
+                <linearGradient id="diamondGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#ffffff" />
+                  <stop offset="25%" stopColor="#e0ffff" />
+                  <stop offset="50%" stopColor="#b0e0e6" />
+                  <stop offset="75%" stopColor="#e0ffff" />
+                  <stop offset="100%" stopColor="#ffffff" />
+                </linearGradient>
+                <filter id="diamondSparkle">
+                  <feGaussianBlur stdDeviation="2" result="glow" />
+                  <feMerge>
+                    <feMergeNode in="glow" />
+                    <feMergeNode in="glow" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+                <filter id="ringShine">
+                  <feGaussianBlur stdDeviation="1" />
+                </filter>
+              </defs>
+
+              {/* Ring band */}
+              <g className="ring-appear">
+                {/* Ring - ellipse to show 3D */}
+                <ellipse cx="200" cy="180" rx="70" ry="25" fill="none" stroke="url(#ringGrad)" strokeWidth="12" />
+                {/* Inner ring highlight */}
+                <ellipse cx="200" cy="180" rx="70" ry="25" fill="none" stroke="rgba(255,236,139,0.4)" strokeWidth="2" strokeDasharray="20,10" />
+                
+                {/* Prong setting */}
+                <path d="M185,155 L200,120 L215,155" fill="none" stroke="url(#ringGrad)" strokeWidth="4" />
+                <path d="M180,160 L200,125 L220,160" fill="none" stroke="url(#ringGrad)" strokeWidth="3" />
+              </g>
+              
+              {/* Diamond */}
+              <g className="diamond-set" filter="url(#diamondSparkle)">
+                {/* Diamond crown (top) */}
+                <polygon points="200,70 230,100 200,115 170,100" fill="url(#diamondGrad)" />
+                {/* Diamond table (flat top) */}
+                <polygon points="185,85 215,85 220,95 180,95" fill="#ffffff" opacity="0.9" />
+                {/* Left facet */}
+                <polygon points="170,100 200,115 200,70" fill="#b0e0e6" opacity="0.7" />
+                {/* Right facet */}
+                <polygon points="230,100 200,115 200,70" fill="#e0ffff" opacity="0.8" />
+                {/* Pavilion (bottom point) */}
+                <polygon points="175,105 225,105 200,140" fill="#87ceeb" opacity="0.6" />
+              </g>
+              
+              {/* Sparkles */}
+              <g className="sparkles">
+                <circle cx="160" cy="80" r="2" fill="white" className="sparkle-1" />
+                <circle cx="240" cy="90" r="1.5" fill="white" className="sparkle-2" />
+                <circle cx="200" cy="60" r="2" fill="white" className="sparkle-3" />
+                <circle cx="175" cy="110" r="1" fill="white" className="sparkle-4" />
+                <circle cx="225" cy="75" r="1.5" fill="white" className="sparkle-5" />
+              </g>
+
+              {/* Commodity Label */}
+              <text x="200" y="270" textAnchor="middle" className="commodity-label" fill="rgba(176,224,230,0.8)" fontSize="24" fontWeight="300" letterSpacing="8">
+                DIAMONDS
+              </text>
+            </svg>
+          </div>
+        )}
+      </div>
+
+      {/* Stage Indicators */}
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-3">
+        {STAGES.map((stage) => (
+          <div
+            key={stage}
+            className={`w-2 h-2 rounded-full transition-all duration-300 ${
+              currentStage === stage ? 'bg-primary-400 w-6' : 'bg-metallic-700'
+            }`}
           />
-          {/* Additional coil detail */}
-          <ellipse cx="60" cy="50" rx="25" ry="8" fill="none" stroke="url(#copperGradient)" strokeWidth="4" opacity="0.6" />
-          <ellipse cx="60" cy="90" rx="25" ry="8" fill="none" stroke="url(#copperGradient)" strokeWidth="4" opacity="0.6" />
-          <ellipse cx="60" cy="130" rx="25" ry="8" fill="none" stroke="url(#copperGradient)" strokeWidth="4" opacity="0.6" />
-        </svg>
-      </div>
-
-      {/* Gold Ingot - Right Side */}
-      <div className="absolute right-[8%] top-[15%] opacity-50 animate-gold-shimmer">
-        <svg width="100" height="80" viewBox="0 0 100 80">
-          <defs>
-            <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#ffd700">
-                <animate attributeName="stop-color" values="#ffd700;#ffec8b;#ffd700" dur="3s" repeatCount="indefinite" />
-              </stop>
-              <stop offset="50%" stopColor="#ffec8b">
-                <animate attributeName="stop-color" values="#ffec8b;#ffd700;#ffec8b" dur="3s" repeatCount="indefinite" />
-              </stop>
-              <stop offset="100%" stopColor="#daa520" />
-            </linearGradient>
-            <linearGradient id="goldSide" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#b8860b" />
-              <stop offset="100%" stopColor="#daa520" />
-            </linearGradient>
-          </defs>
-          {/* Ingot top face */}
-          <polygon points="20,20 80,20 90,35 10,35" fill="url(#goldGradient)" />
-          {/* Ingot front face */}
-          <polygon points="10,35 90,35 80,70 20,70" fill="url(#goldSide)" />
-          {/* Ingot left face */}
-          <polygon points="10,35 20,20 20,70 10,55" fill="#8b7500" />
-          {/* Shine effect */}
-          <polygon points="25,25 45,25 50,32 20,32" fill="rgba(255,255,255,0.3)" className="animate-pulse" />
-        </svg>
-      </div>
-
-      {/* Silver Bars - Bottom Left */}
-      <div className="absolute left-[10%] bottom-[25%] opacity-30 animate-float-slow">
-        <svg width="80" height="60" viewBox="0 0 80 60">
-          <defs>
-            <linearGradient id="silverGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#c0c0c0" />
-              <stop offset="50%" stopColor="#e8e8e8" />
-              <stop offset="100%" stopColor="#a9a9a9" />
-            </linearGradient>
-          </defs>
-          <rect x="5" y="10" width="60" height="20" rx="2" fill="url(#silverGradient)" />
-          <rect x="10" y="32" width="60" height="20" rx="2" fill="url(#silverGradient)" opacity="0.8" />
-          {/* Shine */}
-          <rect x="8" y="12" width="20" height="3" fill="rgba(255,255,255,0.4)" rx="1" />
-        </svg>
-      </div>
-
-      {/* Lithium Crystal - Top Center-Left */}
-      <div className="absolute left-[25%] top-[10%] opacity-35 animate-float-medium">
-        <svg width="60" height="80" viewBox="0 0 60 80">
-          <defs>
-            <linearGradient id="lithiumGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#e0ffff" />
-              <stop offset="50%" stopColor="#87ceeb" />
-              <stop offset="100%" stopColor="#4a90a4" />
-            </linearGradient>
-          </defs>
-          {/* Crystal shape */}
-          <polygon points="30,5 50,25 45,60 15,60 10,25" fill="url(#lithiumGradient)" opacity="0.8" />
-          <polygon points="30,5 50,25 30,35 10,25" fill="rgba(255,255,255,0.2)" />
-          {/* Inner facet */}
-          <polygon points="30,35 45,60 15,60" fill="rgba(74,144,164,0.6)" />
-        </svg>
-      </div>
-
-      {/* Iron Ore Chunk - Right Side Middle */}
-      <div className="absolute right-[15%] top-[45%] opacity-30 animate-rotate-slow">
-        <svg width="70" height="70" viewBox="0 0 70 70">
-          <defs>
-            <radialGradient id="ironGradient" cx="30%" cy="30%" r="70%">
-              <stop offset="0%" stopColor="#8b4513" />
-              <stop offset="50%" stopColor="#654321" />
-              <stop offset="100%" stopColor="#3d2314" />
-            </radialGradient>
-          </defs>
-          {/* Rough ore shape */}
-          <path d="M35,5 L55,15 L65,35 L55,55 L35,65 L15,55 L5,35 L15,15 Z" fill="url(#ironGradient)" />
-          {/* Metallic specks */}
-          <circle cx="25" cy="30" r="3" fill="#cd853f" opacity="0.7" />
-          <circle cx="40" cy="25" r="2" fill="#daa520" opacity="0.6" />
-          <circle cx="35" cy="45" r="2.5" fill="#cd853f" opacity="0.7" />
-          <circle cx="50" cy="40" r="2" fill="#b8860b" opacity="0.5" />
-        </svg>
-      </div>
-
-      {/* Nickel Coin/Disc - Bottom Right */}
-      <div className="absolute right-[20%] bottom-[20%] opacity-35 animate-spin-very-slow">
-        <svg width="50" height="50" viewBox="0 0 50 50">
-          <defs>
-            <linearGradient id="nickelGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#b0c4de" />
-              <stop offset="50%" stopColor="#778899" />
-              <stop offset="100%" stopColor="#696969" />
-            </linearGradient>
-          </defs>
-          <circle cx="25" cy="25" r="22" fill="url(#nickelGradient)" />
-          <circle cx="25" cy="25" r="18" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1" />
-          <text x="25" y="30" textAnchor="middle" fill="rgba(255,255,255,0.3)" fontSize="12" fontWeight="bold">Ni</text>
-        </svg>
-      </div>
-
-      {/* Zinc Hexagon - Left Side Middle */}
-      <div className="absolute left-[3%] top-[50%] opacity-25 animate-float-fast">
-        <svg width="50" height="55" viewBox="0 0 50 55">
-          <defs>
-            <linearGradient id="zincGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#d3d3d3" />
-              <stop offset="100%" stopColor="#a0a0a0" />
-            </linearGradient>
-          </defs>
-          <polygon points="25,2 47,15 47,40 25,53 3,40 3,15" fill="url(#zincGradient)" />
-          <polygon points="25,2 47,15 25,28 3,15" fill="rgba(255,255,255,0.15)" />
-        </svg>
-      </div>
-
-      {/* Platinum Bar - Top Right */}
-      <div className="absolute right-[25%] top-[8%] opacity-30 animate-float-medium">
-        <svg width="70" height="35" viewBox="0 0 70 35">
-          <defs>
-            <linearGradient id="platinumGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#e5e4e2" />
-              <stop offset="50%" stopColor="#c0c0c0" />
-              <stop offset="100%" stopColor="#a8a8a8" />
-            </linearGradient>
-          </defs>
-          <rect x="5" y="8" width="55" height="18" rx="1" fill="url(#platinumGradient)" />
-          <rect x="8" y="10" width="15" height="3" fill="rgba(255,255,255,0.3)" rx="1" />
-          <text x="35" y="21" textAnchor="middle" fill="rgba(0,0,0,0.2)" fontSize="8" fontWeight="bold">Pt</text>
-        </svg>
-      </div>
-
-      {/* Uranium Rod (Green glow) - Bottom Center */}
-      <div className="absolute left-[40%] bottom-[15%] opacity-25 animate-uranium-glow">
-        <svg width="30" height="80" viewBox="0 0 30 80">
-          <defs>
-            <linearGradient id="uraniumGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#228b22" />
-              <stop offset="50%" stopColor="#32cd32" />
-              <stop offset="100%" stopColor="#228b22" />
-            </linearGradient>
-            <filter id="uraniumGlow">
-              <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
-              <feMerge>
-                <feMergeNode in="coloredBlur"/>
-                <feMergeNode in="SourceGraphic"/>
-              </feMerge>
-            </filter>
-          </defs>
-          <rect x="8" y="5" width="14" height="70" rx="2" fill="url(#uraniumGradient)" filter="url(#uraniumGlow)" />
-        </svg>
-      </div>
-
-      {/* Cobalt Blue Crystal - Right Bottom */}
-      <div className="absolute right-[5%] bottom-[35%] opacity-30 animate-float-slow">
-        <svg width="45" height="60" viewBox="0 0 45 60">
-          <defs>
-            <linearGradient id="cobaltGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#0047ab" />
-              <stop offset="50%" stopColor="#4169e1" />
-              <stop offset="100%" stopColor="#0047ab" />
-            </linearGradient>
-          </defs>
-          <polygon points="22,3 40,20 35,55 10,55 5,20" fill="url(#cobaltGradient)" />
-          <polygon points="22,3 40,20 22,30 5,20" fill="rgba(255,255,255,0.2)" />
-        </svg>
-      </div>
-
-      {/* Floating Particles - Scattered */}
-      <div className="absolute inset-0">
-        {/* Gold particles */}
-        <div className="absolute w-2 h-2 rounded-full bg-yellow-500/40 left-[15%] top-[30%] animate-particle-1" />
-        <div className="absolute w-1.5 h-1.5 rounded-full bg-yellow-400/30 left-[70%] top-[25%] animate-particle-2" />
-        <div className="absolute w-1 h-1 rounded-full bg-amber-500/40 left-[45%] top-[60%] animate-particle-3" />
-        
-        {/* Copper particles */}
-        <div className="absolute w-2 h-2 rounded-full bg-orange-600/30 left-[20%] top-[70%] animate-particle-2" />
-        <div className="absolute w-1.5 h-1.5 rounded-full bg-orange-500/40 left-[80%] top-[55%] animate-particle-1" />
-        
-        {/* Silver particles */}
-        <div className="absolute w-1.5 h-1.5 rounded-full bg-gray-300/40 left-[60%] top-[40%] animate-particle-3" />
-        <div className="absolute w-1 h-1 rounded-full bg-gray-400/30 left-[35%] top-[20%] animate-particle-1" />
+        ))}
       </div>
 
       {/* CSS Animations */}
       <style jsx>{`
-        @keyframes copperCoil {
-          0%, 100% { transform: translateY(0) rotate(0deg); }
-          50% { transform: translateY(-10px) rotate(5deg); }
+        /* Copper Wire Draw Animation */
+        .copper-wire-draw {
+          stroke-dasharray: 600;
+          stroke-dashoffset: 600;
+          animation: drawCopper 3s ease-out forwards;
         }
         
-        @keyframes goldShimmer {
-          0%, 100% { transform: scale(1) translateY(0); filter: brightness(1); }
-          50% { transform: scale(1.02) translateY(-5px); filter: brightness(1.2); }
+        @keyframes drawCopper {
+          0% { stroke-dashoffset: 600; }
+          70% { stroke-dashoffset: 100; }
+          100% { stroke-dashoffset: 0; }
         }
         
-        @keyframes floatSlow {
-          0%, 100% { transform: translateY(0) rotate(0deg); }
-          50% { transform: translateY(-15px) rotate(3deg); }
+        /* Gold Pour Animation */
+        .gold-ladle {
+          animation: ladleTilt 1s ease-out forwards;
         }
         
-        @keyframes floatMedium {
-          0%, 100% { transform: translateY(0) rotate(0deg); }
-          50% { transform: translateY(-10px) rotate(-2deg); }
+        @keyframes ladleTilt {
+          0% { transform: rotate(0deg) translateY(-20px); opacity: 0; }
+          50% { transform: rotate(0deg) translateY(0); opacity: 1; }
+          100% { transform: rotate(15deg); transform-origin: 200px 40px; }
         }
         
-        @keyframes floatFast {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-8px); }
+        .gold-stream {
+          stroke-dasharray: 150;
+          stroke-dashoffset: 150;
+          animation: pourGold 1.5s ease-in forwards 0.5s;
         }
         
-        @keyframes rotateSlow {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
+        @keyframes pourGold {
+          0% { stroke-dashoffset: 150; opacity: 0; }
+          20% { opacity: 1; }
+          100% { stroke-dashoffset: 0; }
         }
         
-        @keyframes spinVerySlow {
-          0% { transform: rotateY(0deg); }
-          100% { transform: rotateY(360deg); }
+        .gold-fill {
+          transform-origin: bottom;
+          animation: fillMold 2s ease-out forwards 1s;
+          transform: scaleY(0);
         }
         
-        @keyframes uraniumGlow {
-          0%, 100% { filter: drop-shadow(0 0 3px #32cd32); opacity: 0.25; }
-          50% { filter: drop-shadow(0 0 8px #32cd32); opacity: 0.4; }
+        @keyframes fillMold {
+          0% { transform: scaleY(0); }
+          100% { transform: scaleY(1); }
         }
         
-        @keyframes particle1 {
-          0%, 100% { transform: translateY(0) translateX(0); opacity: 0.4; }
-          25% { transform: translateY(-20px) translateX(10px); opacity: 0.6; }
-          50% { transform: translateY(-10px) translateX(-5px); opacity: 0.3; }
-          75% { transform: translateY(-30px) translateX(5px); opacity: 0.5; }
+        .gold-shine {
+          animation: goldShine 1s ease-in-out infinite 2.5s;
         }
         
-        @keyframes particle2 {
-          0%, 100% { transform: translateY(0) translateX(0); opacity: 0.3; }
-          33% { transform: translateY(-15px) translateX(-10px); opacity: 0.5; }
-          66% { transform: translateY(-25px) translateX(8px); opacity: 0.4; }
+        @keyframes goldShine {
+          0%, 100% { opacity: 0.3; }
+          50% { opacity: 0.6; }
         }
         
-        @keyframes particle3 {
-          0%, 100% { transform: translateY(0) scale(1); opacity: 0.4; }
-          50% { transform: translateY(-20px) scale(1.2); opacity: 0.6; }
+        /* Lithium to Battery Animation */
+        .lithium-particle {
+          animation: convergeParticle 2s ease-out forwards;
+          animation-delay: var(--delay);
+          cx: var(--start-x);
+          cy: var(--start-y);
         }
         
-        .animate-copper-coil { animation: copperCoil 4s ease-in-out infinite; }
-        .animate-gold-shimmer { animation: goldShimmer 3s ease-in-out infinite; }
-        .animate-float-slow { animation: floatSlow 6s ease-in-out infinite; }
-        .animate-float-medium { animation: floatMedium 4s ease-in-out infinite; }
-        .animate-float-fast { animation: floatFast 3s ease-in-out infinite; }
-        .animate-rotate-slow { animation: rotateSlow 20s linear infinite; }
-        .animate-spin-very-slow { animation: spinVerySlow 15s linear infinite; }
-        .animate-uranium-glow { animation: uraniumGlow 2s ease-in-out infinite; }
-        .animate-particle-1 { animation: particle1 5s ease-in-out infinite; }
-        .animate-particle-2 { animation: particle2 6s ease-in-out infinite; }
-        .animate-particle-3 { animation: particle3 4s ease-in-out infinite; }
-        
-        .copper-wire-path {
-          stroke-dasharray: 400;
-          stroke-dashoffset: 400;
-          animation: drawWire 3s ease-out forwards, copperCoil 4s ease-in-out infinite 3s;
+        @keyframes convergeParticle {
+          0% { opacity: 1; }
+          80% { opacity: 0.8; cx: 215px; cy: 140px; }
+          100% { opacity: 0; cx: 215px; cy: 140px; }
         }
         
-        @keyframes drawWire {
-          to { stroke-dashoffset: 0; }
+        .battery-appear {
+          animation: fadeInBattery 1s ease-out forwards 1.5s;
+          opacity: 0;
+        }
+        
+        @keyframes fadeInBattery {
+          0% { opacity: 0; transform: scale(0.9); }
+          100% { opacity: 1; transform: scale(1); }
+        }
+        
+        .battery-charge {
+          animation: chargeUp 2s ease-out forwards 2s;
+        }
+        
+        @keyframes chargeUp {
+          0% { width: 0; }
+          100% { width: 125px; }
+        }
+        
+        .lightning-bolt {
+          animation: boltFlash 0.5s ease-in-out infinite 3s;
+          opacity: 0;
+        }
+        
+        @keyframes boltFlash {
+          0%, 100% { opacity: 0; }
+          50% { opacity: 1; }
+        }
+        
+        /* Silver Bar Animation */
+        .silver-bar-emerge {
+          animation: emergeBar 2s ease-out forwards;
+          transform: translateY(50px);
+          opacity: 0;
+        }
+        
+        @keyframes emergeBar {
+          0% { transform: translateY(50px) rotateX(30deg); opacity: 0; }
+          100% { transform: translateY(0) rotateX(0deg); opacity: 1; }
+        }
+        
+        .shine-sweep {
+          animation: sweepShine 2s ease-in-out infinite 2s;
+          transform: translateX(-100px);
+        }
+        
+        @keyframes sweepShine {
+          0% { transform: translateX(-100px); opacity: 0; }
+          50% { opacity: 0.6; }
+          100% { transform: translateX(300px); opacity: 0; }
+        }
+        
+        /* Diamond Ring Animation */
+        .ring-appear {
+          animation: ringFadeIn 1.5s ease-out forwards;
+          opacity: 0;
+        }
+        
+        @keyframes ringFadeIn {
+          0% { opacity: 0; transform: scale(0.8) rotateX(20deg); }
+          100% { opacity: 1; transform: scale(1) rotateX(0deg); }
+        }
+        
+        .diamond-set {
+          animation: setDiamond 1s ease-out forwards 1s;
+          opacity: 0;
+          transform: translateY(-30px);
+        }
+        
+        @keyframes setDiamond {
+          0% { opacity: 0; transform: translateY(-30px) scale(1.2); }
+          70% { transform: translateY(5px) scale(0.95); }
+          100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        
+        .sparkle-1 { animation: sparkle 1.5s ease-in-out infinite 2s; }
+        .sparkle-2 { animation: sparkle 1.5s ease-in-out infinite 2.2s; }
+        .sparkle-3 { animation: sparkle 1.5s ease-in-out infinite 2.4s; }
+        .sparkle-4 { animation: sparkle 1.5s ease-in-out infinite 2.6s; }
+        .sparkle-5 { animation: sparkle 1.5s ease-in-out infinite 2.8s; }
+        
+        @keyframes sparkle {
+          0%, 100% { opacity: 0; transform: scale(0); }
+          50% { opacity: 1; transform: scale(1.5); }
+        }
+        
+        /* Commodity Label */
+        .commodity-label {
+          animation: labelFade 1s ease-out forwards 0.5s;
+          opacity: 0;
+        }
+        
+        @keyframes labelFade {
+          0% { opacity: 0; transform: translateY(10px); }
+          100% { opacity: 1; transform: translateY(0); }
         }
       `}</style>
     </div>
