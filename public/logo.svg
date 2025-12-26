@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <defs>
+    <linearGradient id="silverFrame" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#e2e8f0;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#94a3b8;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#475569;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="tealFill" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#115e59;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0f766e;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="copperText" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f59e0b;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#b45309;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#78350f;stop-opacity:1" />
+    </linearGradient>
+    <pattern id="circuitPattern" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M10 10 L30 10 L30 30" fill="none" stroke="#14b8a6" stroke-width="1" opacity="0.3"/>
+      <circle cx="30" cy="30" r="2" fill="#14b8a6" opacity="0.3"/>
+    </pattern>
+  </defs>
+
+  <!-- Diamond Shape Frame -->
+  <path d="M200 20 L380 200 L200 380 L20 200 Z" fill="url(#silverFrame)" stroke="#475569" stroke-width="2"/>
+  
+  <!-- Inner Diamond Background -->
+  <path d="M200 35 L365 200 L200 365 L35 200 Z" fill="url(#tealFill)"/>
+  
+  <!-- Circuit Pattern Overlay -->
+  <path d="M200 35 L365 200 L200 365 L35 200 Z" fill="url(#circuitPattern)"/>
+
+  <!-- Stylized 'IO' or Graphic -->
+  <path d="M160 140 L160 260 M240 140 L240 260 M160 200 L240 200" stroke="url(#copperText)" stroke-width="12" stroke-linecap="round" />
+  
+  <!-- Text Label (Optional, usually logo is icon + text, but here is the icon part) -->
+</svg>
