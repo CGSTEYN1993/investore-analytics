@@ -100,7 +100,7 @@ export function EVResourceScatterChart({
   const config = {
     responsive: true,
     displayModeBar: true,
-    modeBarButtonsToRemove: ['lasso2d', 'select2d'] as const,
+    modeBarButtonsToRemove: ['lasso2d', 'select2d'],
     displaylogo: false,
   };
 
