@@ -73,12 +73,12 @@ export function ValuationBarChart({
         font: { size: 16, color: '#1e293b' },
       },
       xaxis: {
-        title: '',
+        title: { text: '' },
         tickangle: -45,
         tickfont: { size: 10 },
       },
       yaxis: {
-        title: metricLabels[metric],
+        title: { text: metricLabels[metric] },
         gridcolor: '#e2e8f0',
         tickprefix: metric === 'p_nav' ? '' : '$',
         tickformat: metric === 'p_nav' ? '.2f' : '.2s',
