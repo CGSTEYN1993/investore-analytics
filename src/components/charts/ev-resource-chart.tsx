@@ -44,10 +44,7 @@ export function EVResourceScatterChart({
           `Resource: ${formatMetal(p.contained_metal, 'oz')}<br>` +
           `Jurisdiction: ${p.jurisdiction}`
       ),
-      customdata: points.map((p) => ({
-        id: p.company_id,
-        ticker: p.ticker,
-      })),
+      customdata: points.map((p) => [p.company_id, p.ticker] as [number, string]),
       name: groupName,
       type: 'scatter' as const,
       mode: 'markers' as const,
