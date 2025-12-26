@@ -29,8 +29,35 @@ export function Header() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">
-            {isAuthenticated ? (
+            {/* Common navigation links */}
+            <Link
+              href="/about"
+              className="text-metallic-300 hover:text-primary-400 font-medium transition-colors"
+            >
+              About
+            </Link>
+            <Link
+              href="/pricing"
+              className="text-metallic-300 hover:text-primary-400 font-medium transition-colors"
+            >
+              Pricing
+            </Link>
+            <Link
+              href="/faq"
+              className="text-metallic-300 hover:text-primary-400 font-medium transition-colors"
+            >
+              FAQ
+            </Link>
+            <Link
+              href="/contact"
+              className="text-metallic-300 hover:text-primary-400 font-medium transition-colors"
+            >
+              Contact
+            </Link>
+            
+            {isAuthenticated && (
               <>
+                <div className="w-px h-5 bg-metallic-700" />
                 <Link
                   href="/dashboard"
                   className="text-metallic-300 hover:text-primary-400 font-medium transition-colors"
@@ -50,13 +77,6 @@ export function Header() {
                   Map
                 </Link>
               </>
-            ) : (
-              <Link
-                href="/pricing"
-                className="text-metallic-300 hover:text-primary-400 font-medium transition-colors"
-              >
-                Pricing
-              </Link>
             )}
           </div>
 
@@ -143,8 +163,39 @@ export function Header() {
         {mobileMenuOpen && (
           <div className="md:hidden py-4 border-t border-metallic-700">
             <div className="flex flex-col gap-4">
-              {isAuthenticated ? (
+              {/* Common links */}
+              <Link
+                href="/about"
+                className="text-metallic-300 hover:text-primary-400 font-medium"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                About
+              </Link>
+              <Link
+                href="/pricing"
+                className="text-metallic-300 hover:text-primary-400 font-medium"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Pricing
+              </Link>
+              <Link
+                href="/faq"
+                className="text-metallic-300 hover:text-primary-400 font-medium"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                FAQ
+              </Link>
+              <Link
+                href="/contact"
+                className="text-metallic-300 hover:text-primary-400 font-medium"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Contact
+              </Link>
+              
+              {isAuthenticated && (
                 <>
+                  <hr className="border-metallic-700" />
                   <Link
                     href="/dashboard"
                     className="text-metallic-300 hover:text-primary-400 font-medium"
@@ -167,14 +218,6 @@ export function Header() {
                     Map
                   </Link>
                 </>
-              ) : (
-                <Link
-                  href="/pricing"
-                  className="text-metallic-300 hover:text-primary-400 font-medium"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Pricing
-                </Link>
               )}
               <hr className="border-metallic-700" />
               {isAuthenticated ? (
