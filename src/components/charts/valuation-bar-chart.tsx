@@ -44,11 +44,7 @@ export function ValuationBarChart({
         if (metric === 'p_nav') return `${val.toFixed(2)}x`;
         return formatCurrency(val);
       }),
-      customdata: companies.map((c) => ({
-        id: c.company_id,
-        name: c.name,
-        exchange: c.exchange,
-      })),
+      customdata: companies.map((c) => [c.company_id, c.name, c.exchange] as [number, string, string]),
       type: 'bar' as const,
       marker: {
         color: '#0ea5e9',
