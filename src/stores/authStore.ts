@@ -5,6 +5,7 @@ interface User {
   id: string;
   email: string;
   name?: string;
+  tier?: string;
   subscription_tier?: string;
 }
 
