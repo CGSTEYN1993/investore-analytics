@@ -8,6 +8,7 @@ import LaptopSlider from '@/components/ui/LaptopSlider';
 import HowItWorksSlider from '@/components/ui/HowItWorksSlider';
 import TestimonialsSection from '@/components/ui/TestimonialsSection';
 import VideoThumbnail from '@/components/ui/VideoThumbnail';
+import NewsletterSignup from '@/components/ui/NewsletterSignup';
 
 // Helper Components
 function ModuleCard({ icon, title, description, stats }: { icon: React.ReactNode, title: string, description: string, stats: string[] }) {
@@ -339,6 +340,13 @@ export default function HomePage() {
 
       {/* Testimonials Section */}
       <TestimonialsSection />
+
+      {/* Newsletter Signup Section */}
+      <section className="py-16 bg-metallic-950 border-b border-metallic-800">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <NewsletterSignup variant="card" />
+        </div>
+      </section>
 
       {/* CTA Section */}
       <section className="py-24 relative overflow-hidden">
