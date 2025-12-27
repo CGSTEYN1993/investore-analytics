@@ -95,8 +95,14 @@ export default function RegisterPage() {
     setError(null);
 
     try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      
+      if (!apiUrl) {
+        throw new Error("Backend API is not configured. Please contact support.");
+      }
+
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/auth/register`,
+        `${apiUrl}/auth/register`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -108,6 +114,12 @@ export default function RegisterPage() {
         }
       );
 
+      // Check if response is JSON
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("Backend API is currently unavailable. Please try again later.");
+      }
+
       const data = await response.json();
 
       if (!response.ok) {
@@ -116,7 +128,11 @@ export default function RegisterPage() {
 
       setSuccess(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
+      if (err instanceof TypeError && err.message.includes("fetch")) {
+        setError("Unable to connect to the server. Please check your internet connection.");
+      } else {
+        setError(err instanceof Error ? err.message : "An error occurred");
+      }
     } finally {
       setIsLoading(false);
     }
