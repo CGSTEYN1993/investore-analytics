@@ -7,7 +7,7 @@ import {
   TrendingUp, TrendingDown, RefreshCw, Loader2, Search, 
   ArrowUpRight, ArrowDownRight, Building2, DollarSign,
   BarChart3, Activity, Gem, Fuel, Zap, Factory, ChevronDown,
-  Filter, Clock, AlertCircle
+  Filter, Clock, AlertCircle, Globe
 } from 'lucide-react';
 import marketService from '@/services/marketService';
 import { 
@@ -280,14 +280,23 @@ export default function MarketPage() {
                 )}
               </p>
             </div>
-            <button
-              onClick={() => refetch()}
-              disabled={isFetching}
-              className="flex items-center gap-2 px-4 py-2 bg-primary-500/20 text-primary-400 rounded-lg hover:bg-primary-500/30 transition-colors disabled:opacity-50"
-            >
-              <RefreshCw className={`w-4 h-4 ${isFetching ? 'animate-spin' : ''}`} />
-              Refresh
-            </button>
+            <div className="flex items-center gap-3">
+              <Link
+                href="/analysis/global"
+                className="flex items-center gap-2 px-4 py-2 bg-metallic-800 text-metallic-300 rounded-lg hover:bg-metallic-700 transition-colors"
+              >
+                <Globe className="w-4 h-4" />
+                Global View
+              </Link>
+              <button
+                onClick={() => refetch()}
+                disabled={isFetching}
+                className="flex items-center gap-2 px-4 py-2 bg-primary-500/20 text-primary-400 rounded-lg hover:bg-primary-500/30 transition-colors disabled:opacity-50"
+              >
+                <RefreshCw className={`w-4 h-4 ${isFetching ? 'animate-spin' : ''}`} />
+                Refresh
+              </button>
+            </div>
           </div>
         </div>
       </div>
