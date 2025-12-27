@@ -12,6 +12,26 @@ import ExcavatorLoader from '@/components/ui/ExcavatorLoader';
 // Analysis category cards
 const analysisCategories = [
   {
+    id: 'australia',
+    title: 'Australia Mining Map',
+    description: 'Interactive map with real data from Geoscience Australia',
+    icon: MapPin,
+    href: '/analysis/australia',
+    color: 'from-green-500 to-emerald-600',
+    stats: 'Live GA Data',
+    featured: true,
+  },
+  {
+    id: 'mining-analytics',
+    title: 'Mining Analytics',
+    description: 'Comprehensive analytics from government databases',
+    icon: BarChart3,
+    href: '/analysis/mining-analytics',
+    color: 'from-cyan-500 to-blue-600',
+    stats: 'Real-time Insights',
+    featured: true,
+  },
+  {
     id: 'commodities',
     title: 'By Commodity',
     description: 'Analyze companies by gold, copper, lithium, and 30+ commodities',
@@ -40,8 +60,8 @@ const analysisCategories = [
   },
   {
     id: 'map',
-    title: 'Interactive Map',
-    description: 'Visual exploration of global mining projects',
+    title: 'Global Map',
+    description: 'Visual exploration of worldwide mining projects',
     icon: MapPin,
     href: '/analysis/map',
     color: 'from-purple-500 to-purple-600',
@@ -58,13 +78,13 @@ const analysisCategories = [
     stats: 'All Stages',
   },
   {
-    id: 'drilling',
-    title: 'Drilling Activity',
-    description: 'Track ongoing campaigns and awaiting assay results',
+    id: 'exploration',
+    title: 'Exploration Data',
+    description: 'Drilling, rock samples, soil surveys, and stream sediments',
     icon: Factory,
-    href: '/analysis/drilling',
+    href: '/analysis/exploration',
     color: 'from-red-500 to-red-600',
-    stats: 'Live Updates',
+    stats: 'All Data Types',
     premium: true,
   },
   {
@@ -85,6 +105,16 @@ const analysisCategories = [
     color: 'from-pink-500 to-pink-600',
     stats: '24/7 Updates',
   },
+  {
+    id: 'constraints',
+    title: 'Legal Constraints',
+    description: 'Heritage, social, and environmental restrictions on tenements',
+    icon: MapPin,
+    href: '/analysis/constraints',
+    color: 'from-amber-500 to-amber-600',
+    stats: 'Compliance',
+    premium: true,
+  },
 ];
 
 // Quick stats (would be fetched from API)
@@ -97,13 +127,24 @@ const quickStats = [
 
 function CategoryCard({ category }: { category: typeof analysisCategories[0] }) {
   const Icon = category.icon;
+  const isFeatured = 'featured' in category && category.featured;
   
   return (
     <Link
       href={category.href}
-      className="group relative bg-metallic-900 border border-metallic-800 rounded-xl p-6 hover:border-primary-500/50 transition-all hover:bg-metallic-800/50 hover:-translate-y-1"
+      className={`group relative bg-metallic-900 border rounded-xl p-6 transition-all hover:-translate-y-1 ${
+        isFeatured 
+          ? 'border-primary-500/50 ring-1 ring-primary-500/20 hover:border-primary-400' 
+          : 'border-metallic-800 hover:border-primary-500/50 hover:bg-metallic-800/50'
+      }`}
     >
-      {category.premium && (
+      {isFeatured && (
+        <span className="absolute top-3 right-3 px-2 py-1 bg-primary-500/20 text-primary-400 text-xs font-medium rounded-full flex items-center gap-1">
+          <span className="w-1.5 h-1.5 bg-primary-400 rounded-full animate-pulse" />
+          NEW
+        </span>
+      )}
+      {category.premium && !isFeatured && (
         <span className="absolute top-3 right-3 px-2 py-1 bg-amber-500/20 text-amber-400 text-xs font-medium rounded-full">
           PRO
         </span>
@@ -227,18 +268,18 @@ export default function AnalysisDashboard() {
             <h3 className="text-lg font-semibold text-metallic-100 mb-4">Quick Filters</h3>
             <div className="space-y-3">
               <Link
-                href="/analysis/drilling?status=awaiting_assay"
+                href="/analysis/exploration"
                 className="flex items-center gap-3 p-3 rounded-lg bg-metallic-800/50 hover:bg-metallic-800 transition-colors"
               >
-                <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></div>
-                <span className="text-sm text-metallic-300">Awaiting Assay Results</span>
+                <div className="w-2 h-2 rounded-full bg-red-500"></div>
+                <span className="text-sm text-metallic-300">Drilling Programs</span>
               </Link>
               <Link
-                href="/analysis/drilling?status=in_progress"
+                href="/analysis/exploration"
                 className="flex items-center gap-3 p-3 rounded-lg bg-metallic-800/50 hover:bg-metallic-800 transition-colors"
               >
                 <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                <span className="text-sm text-metallic-300">Active Drilling</span>
+                <span className="text-sm text-metallic-300">Soil Surveys</span>
               </Link>
               <Link
                 href="/analysis/stages?stage=pre_feasibility"

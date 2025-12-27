@@ -4,9 +4,113 @@ import React, { useState, useCallback } from 'react';
 import Link from 'next/link';
 import { 
   Search, Filter, ChevronDown, MapPin, Layers, ZoomIn, ZoomOut,
-  ArrowUpRight, ArrowDownRight, Building2, X, Maximize2
+  ArrowUpRight, ArrowDownRight, Building2, X, Maximize2, Drill,
+  Mountain, Droplets, Waves, Shield, TreePine, Users, Landmark,
+  AlertTriangle
 } from 'lucide-react';
 import { getCommodityColor } from '@/lib/subscription-tiers';
+
+// Constraint types with colors
+const constraintTypes = {
+  heritage: { name: 'Heritage', color: '#f59e0b', icon: Landmark, description: 'Cultural & archaeological sites' },
+  social: { name: 'Social', color: '#8b5cf6', icon: Users, description: 'Indigenous & community lands' },
+  environmental: { name: 'Environmental', color: '#10b981', icon: TreePine, description: 'Protected & conservation areas' },
+};
+
+// Mock constraint areas data (within or overlapping tenements)
+const constraintAreas = [
+  { 
+    id: 'C001', 
+    name: 'Sacred Dreaming Site', 
+    type: 'heritage' as const,
+    tenement: 'E45/1234',
+    project: 'Mount Magnet Gold',
+    lat: -28.1, 
+    lng: 117.9, 
+    area: 2.5,
+    status: 'No-go',
+    restrictions: ['No ground disturbance', 'No drilling within 500m'],
+    expiryDate: null,
+  },
+  { 
+    id: 'C002', 
+    name: 'Wetland Conservation Zone', 
+    type: 'environmental' as const,
+    tenement: 'M77/5678',
+    project: 'Pilbara Iron',
+    lat: -22.4, 
+    lng: 118.5, 
+    area: 15.2,
+    status: 'Restricted',
+    restrictions: ['Seasonal access only (May-Oct)', 'No water extraction', 'EMP required'],
+    expiryDate: '2027-12-31',
+  },
+  { 
+    id: 'C003', 
+    name: 'Indigenous Community Reserve', 
+    type: 'social' as const,
+    tenement: 'E45/1234',
+    project: 'Mount Magnet Gold',
+    lat: -28.0, 
+    lng: 117.7, 
+    area: 8.0,
+    status: 'Conditional',
+    restrictions: ['Heritage survey required', 'Community consultation mandatory', 'Employment targets'],
+    expiryDate: null,
+  },
+  { 
+    id: 'C004', 
+    name: 'Rare Flora Habitat', 
+    type: 'environmental' as const,
+    tenement: 'P45/9012',
+    project: 'Lithium Hills',
+    lat: -33.5, 
+    lng: 121.8, 
+    area: 4.3,
+    status: 'No-go',
+    restrictions: ['No clearing permitted', 'Buffer zone 200m'],
+    expiryDate: null,
+  },
+  { 
+    id: 'C005', 
+    name: 'Historic Mining Heritage Site', 
+    type: 'heritage' as const,
+    tenement: 'M15/3456',
+    project: 'Kalgoorlie East',
+    lat: -30.8, 
+    lng: 121.5, 
+    area: 1.2,
+    status: 'Restricted',
+    restrictions: ['Archaeological assessment required', 'Preservation of structures'],
+    expiryDate: null,
+  },
+  { 
+    id: 'C006', 
+    name: 'Water Catchment Protection', 
+    type: 'environmental' as const,
+    tenement: 'E51/2345',
+    project: 'Tanami Project',
+    lat: -20.2, 
+    lng: 130.6, 
+    area: 25.0,
+    status: 'Conditional',
+    restrictions: ['Water quality monitoring', 'Spill prevention plan', 'No tailings disposal'],
+    expiryDate: '2030-06-30',
+  },
+  { 
+    id: 'C007', 
+    name: 'Native Title Determination Area', 
+    type: 'social' as const,
+    tenement: 'E77/8901',
+    project: 'Pilbara Iron',
+    lat: -22.2, 
+    lng: 118.7, 
+    area: 45.0,
+    status: 'Conditional',
+    restrictions: ['Native title agreement required', 'Cultural heritage clearance', 'Benefit sharing'],
+    expiryDate: null,
+  },
+];
 
 // Mock project data with coordinates
 const projects = [
@@ -27,14 +131,19 @@ function WorldMap({
   projects: projectData, 
   selectedCommodity, 
   selectedStage,
-  onProjectClick 
+  onProjectClick,
+  constraintLayers,
+  onConstraintClick
 }: { 
   projects: typeof projects;
   selectedCommodity: string;
   selectedStage: string;
   onProjectClick: (project: typeof projects[0]) => void;
+  constraintLayers: { heritage: boolean; social: boolean; environmental: boolean };
+  onConstraintClick: (constraint: typeof constraintAreas[0]) => void;
 }) {
   const [hoveredProject, setHoveredProject] = useState<typeof projects[0] | null>(null);
+  const [hoveredConstraint, setHoveredConstraint] = useState<typeof constraintAreas[0] | null>(null);
   const [zoom, setZoom] = useState(1);
 
   // Convert lat/lng to SVG coordinates (simplified projection)
@@ -49,6 +158,9 @@ function WorldMap({
     const matchesStage = selectedStage === 'all' || p.stage === selectedStage;
     return matchesCommodity && matchesStage;
   });
+
+  // Filter visible constraints based on layer toggles
+  const visibleConstraints = constraintAreas.filter(c => constraintLayers[c.type]);
 
   return (
     <div className="relative bg-metallic-900 rounded-xl border border-metallic-800 overflow-hidden">
@@ -112,6 +224,47 @@ function WorldMap({
               <line key={`v${i}`} x1={i * 55 + 55} y1="0" x2={i * 55 + 55} y2="500" />
             ))}
           </g>
+
+          {/* Constraint Area Zones - rendered first so projects appear on top */}
+          {visibleConstraints.map((constraint) => {
+            const { x, y } = toSvgCoords(constraint.lat, constraint.lng);
+            const color = constraintTypes[constraint.type].color;
+            const isHovered = hoveredConstraint?.id === constraint.id;
+            // Size based on area (scaled for visibility)
+            const radius = Math.max(8, Math.sqrt(constraint.area) * 3);
+
+            return (
+              <g key={constraint.id}>
+                {/* Constraint zone */}
+                <circle
+                  cx={x}
+                  cy={y}
+                  r={radius * (isHovered ? 1.3 : 1)}
+                  fill={color}
+                  opacity={0.25}
+                  stroke={color}
+                  strokeWidth={isHovered ? 2 : 1}
+                  strokeDasharray={constraint.status === 'No-go' ? '0' : '4 2'}
+                  className="cursor-pointer transition-all duration-200"
+                  onMouseEnter={() => setHoveredConstraint(constraint)}
+                  onMouseLeave={() => setHoveredConstraint(null)}
+                  onClick={() => onConstraintClick(constraint)}
+                />
+                {/* Warning icon for No-go areas */}
+                {constraint.status === 'No-go' && (
+                  <g transform={`translate(${x - 6}, ${y - 6})`}>
+                    <polygon 
+                      points="6,0 12,12 0,12" 
+                      fill={color}
+                      stroke="#fff"
+                      strokeWidth="0.5"
+                    />
+                    <text x="6" y="10" textAnchor="middle" fill="#fff" fontSize="8" fontWeight="bold">!</text>
+                  </g>
+                )}
+              </g>
+            );
+          })}
 
           {/* Project Markers */}
           {filteredProjects.map((project) => {
@@ -188,29 +341,105 @@ function WorldMap({
               </g>
             );
           })()}
+
+          {/* Constraint Tooltip */}
+          {hoveredConstraint && (() => {
+            const { x, y } = toSvgCoords(hoveredConstraint.lat, hoveredConstraint.lng);
+            const tooltipX = x > 750 ? x - 220 : x + 15;
+            const tooltipY = y > 380 ? y - 100 : y;
+            const color = constraintTypes[hoveredConstraint.type].color;
+            
+            return (
+              <g transform={`translate(${tooltipX}, ${tooltipY})`}>
+                <rect
+                  x="0"
+                  y="0"
+                  width="210"
+                  height="95"
+                  rx="8"
+                  fill="#1e1e2e"
+                  stroke={color}
+                  strokeWidth="2"
+                />
+                <rect
+                  x="0"
+                  y="0"
+                  width="210"
+                  height="24"
+                  rx="8"
+                  fill={color}
+                  opacity="0.3"
+                />
+                <text x="12" y="17" fill={color} fontSize="11" fontWeight="bold">
+                  {constraintTypes[hoveredConstraint.type].name.toUpperCase()} CONSTRAINT
+                </text>
+                <text x="12" y="42" fill="#fff" fontSize="11" fontWeight="bold">
+                  {hoveredConstraint.name}
+                </text>
+                <text x="12" y="58" fill="#888" fontSize="9">
+                  Tenement: {hoveredConstraint.tenement} • {hoveredConstraint.area} km²
+                </text>
+                <text x="12" y="74" fill={
+                  hoveredConstraint.status === 'No-go' ? '#ef4444' : 
+                  hoveredConstraint.status === 'Restricted' ? '#f59e0b' : '#10b981'
+                } fontSize="10" fontWeight="bold">
+                  Status: {hoveredConstraint.status}
+                </text>
+                <text x="12" y="88" fill="#666" fontSize="8">
+                  Click for details
+                </text>
+              </g>
+            );
+          })()}
         </svg>
       </div>
 
       {/* Legend */}
-      <div className="absolute bottom-4 left-4 bg-metallic-800/90 backdrop-blur-sm rounded-lg p-4">
-        <h4 className="text-xs font-medium text-metallic-400 mb-2">Commodities</h4>
-        <div className="flex flex-wrap gap-3">
-          {['Au', 'Cu', 'Li', 'U', 'Fe', 'Pt'].map((c) => (
-            <div key={c} className="flex items-center gap-1.5">
-              <div 
-                className="w-3 h-3 rounded-full"
-                style={{ backgroundColor: getCommodityColor(c) }}
-              />
-              <span className="text-xs text-metallic-300">{c}</span>
-            </div>
-          ))}
+      <div className="absolute bottom-4 left-4 bg-metallic-800/90 backdrop-blur-sm rounded-lg p-4 space-y-3">
+        <div>
+          <h4 className="text-xs font-medium text-metallic-400 mb-2">Commodities</h4>
+          <div className="flex flex-wrap gap-3">
+            {['Au', 'Cu', 'Li', 'U', 'Fe', 'Pt'].map((c) => (
+              <div key={c} className="flex items-center gap-1.5">
+                <div 
+                  className="w-3 h-3 rounded-full"
+                  style={{ backgroundColor: getCommodityColor(c) }}
+                />
+                <span className="text-xs text-metallic-300">{c}</span>
+              </div>
+            ))}
+          </div>
         </div>
+        {visibleConstraints.length > 0 && (
+          <div>
+            <h4 className="text-xs font-medium text-metallic-400 mb-2">Constraints</h4>
+            <div className="flex flex-wrap gap-3">
+              {Object.entries(constraintTypes).map(([key, value]) => {
+                if (!constraintLayers[key as keyof typeof constraintLayers]) return null;
+                return (
+                  <div key={key} className="flex items-center gap-1.5">
+                    <div 
+                      className="w-3 h-3 rounded-full opacity-60"
+                      style={{ backgroundColor: value.color }}
+                    />
+                    <span className="text-xs text-metallic-300">{value.name}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Project count */}
+      {/* Project & Constraint count */}
       <div className="absolute top-4 left-4 bg-metallic-800/90 backdrop-blur-sm rounded-lg px-4 py-2">
         <span className="text-sm text-metallic-300">
-          <span className="font-bold text-metallic-100">{filteredProjects.length}</span> projects shown
+          <span className="font-bold text-metallic-100">{filteredProjects.length}</span> projects
+          {visibleConstraints.length > 0 && (
+            <span className="ml-2 pl-2 border-l border-metallic-600">
+              <span className="font-bold text-amber-400">{visibleConstraints.length}</span> constraints
+            </span>
+          )}
         </span>
       </div>
     </div>
@@ -286,18 +515,149 @@ function ProjectDetailPanel({
   );
 }
 
+// Constraint Detail Panel Component
+function ConstraintDetailPanel({ 
+  constraint, 
+  onClose 
+}: { 
+  constraint: typeof constraintAreas[0];
+  onClose: () => void;
+}) {
+  const typeInfo = constraintTypes[constraint.type];
+  const Icon = typeInfo.icon;
+  const statusColors = {
+    'No-go': 'bg-red-500/20 text-red-400 border-red-500/30',
+    'Restricted': 'bg-amber-500/20 text-amber-400 border-amber-500/30',
+    'Conditional': 'bg-green-500/20 text-green-400 border-green-500/30',
+  };
+
+  return (
+    <div className="bg-metallic-900 border border-metallic-800 rounded-xl p-6">
+      <div className="flex items-start justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <div 
+            className="w-12 h-12 rounded-lg flex items-center justify-center"
+            style={{ backgroundColor: `${typeInfo.color}30` }}
+          >
+            <Icon className="w-6 h-6" style={{ color: typeInfo.color }} />
+          </div>
+          <div>
+            <span 
+              className="text-xs font-semibold px-2 py-0.5 rounded"
+              style={{ backgroundColor: `${typeInfo.color}30`, color: typeInfo.color }}
+            >
+              {typeInfo.name.toUpperCase()}
+            </span>
+            <p className="text-sm text-metallic-500 mt-1">{constraint.id}</p>
+          </div>
+        </div>
+        <button
+          onClick={onClose}
+          className="p-1.5 rounded-lg hover:bg-metallic-800 text-metallic-500"
+        >
+          <X className="w-5 h-5" />
+        </button>
+      </div>
+
+      <h3 className="text-lg font-medium text-metallic-100 mb-2">{constraint.name}</h3>
+      
+      <div className="flex items-center gap-2 text-sm text-metallic-400 mb-4">
+        <MapPin className="w-4 h-4" />
+        {constraint.project} • Tenement {constraint.tenement}
+      </div>
+
+      <div className="grid grid-cols-2 gap-3 mb-4">
+        <div className="bg-metallic-800/50 rounded-lg p-3">
+          <p className="text-xs text-metallic-500 mb-1">Status</p>
+          <span className={`text-xs font-medium px-2 py-1 rounded border ${statusColors[constraint.status as keyof typeof statusColors]}`}>
+            {constraint.status}
+          </span>
+        </div>
+        <div className="bg-metallic-800/50 rounded-lg p-3">
+          <p className="text-xs text-metallic-500 mb-1">Area</p>
+          <p className="text-sm font-medium text-metallic-100">{constraint.area} km²</p>
+        </div>
+        {constraint.expiryDate && (
+          <div className="col-span-2 bg-metallic-800/50 rounded-lg p-3">
+            <p className="text-xs text-metallic-500 mb-1">Review Date</p>
+            <p className="text-sm font-medium text-metallic-100">{constraint.expiryDate}</p>
+          </div>
+        )}
+      </div>
+
+      {/* Restrictions */}
+      <div className="mb-4">
+        <h4 className="text-sm font-medium text-metallic-300 mb-2 flex items-center gap-2">
+          <AlertTriangle className="w-4 h-4 text-amber-500" />
+          Restrictions
+        </h4>
+        <ul className="space-y-1.5">
+          {constraint.restrictions.map((restriction, i) => (
+            <li key={i} className="flex items-start gap-2 text-sm text-metallic-400">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-500 mt-1.5 flex-shrink-0" />
+              {restriction}
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div className="flex gap-2">
+        <button className="flex-1 py-2 bg-metallic-800 text-metallic-300 rounded-lg hover:bg-metallic-700 transition-colors text-sm font-medium">
+          View Documents
+        </button>
+        <button 
+          className="flex-1 py-2 rounded-lg transition-colors text-sm font-medium"
+          style={{ backgroundColor: `${typeInfo.color}30`, color: typeInfo.color }}
+        >
+          Request Review
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function MapPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCommodity, setSelectedCommodity] = useState('all');
   const [selectedStage, setSelectedStage] = useState('all');
   const [selectedProject, setSelectedProject] = useState<typeof projects[0] | null>(null);
+  const [selectedConstraint, setSelectedConstraint] = useState<typeof constraintAreas[0] | null>(null);
+  
+  // Exploration data layer toggles
+  const [explorationLayers, setExplorationLayers] = useState({
+    drilling: true,
+    rocks: false,
+    soils: false,
+    streams: false,
+  });
+
+  // Constraint layer toggles
+  const [constraintLayers, setConstraintLayers] = useState({
+    heritage: false,
+    social: false,
+    environmental: false,
+  });
 
   const commodities = ['all', 'Au', 'Cu', 'Li', 'U', 'Fe', 'Ag', 'Ni', 'Pt'];
   const stages = ['all', 'exploration', 'pfs', 'fs', 'construction', 'production'];
 
   const handleProjectClick = useCallback((project: typeof projects[0]) => {
     setSelectedProject(project);
+    setSelectedConstraint(null);
   }, []);
+
+  const handleConstraintClick = useCallback((constraint: typeof constraintAreas[0]) => {
+    setSelectedConstraint(constraint);
+    setSelectedProject(null);
+  }, []);
+  
+  const toggleExplorationLayer = (layer: keyof typeof explorationLayers) => {
+    setExplorationLayers(prev => ({ ...prev, [layer]: !prev[layer] }));
+  };
+
+  const toggleConstraintLayer = (layer: keyof typeof constraintLayers) => {
+    setConstraintLayers(prev => ({ ...prev, [layer]: !prev[layer] }));
+  };
 
   return (
     <div className="min-h-screen bg-metallic-950">
@@ -368,6 +728,8 @@ export default function MapPage() {
               selectedCommodity={selectedCommodity}
               selectedStage={selectedStage}
               onProjectClick={handleProjectClick}
+              constraintLayers={constraintLayers}
+              onConstraintClick={handleConstraintClick}
             />
           </div>
 
@@ -378,25 +740,278 @@ export default function MapPage() {
                 project={selectedProject} 
                 onClose={() => setSelectedProject(null)} 
               />
+            ) : selectedConstraint ? (
+              <ConstraintDetailPanel 
+                constraint={selectedConstraint} 
+                onClose={() => setSelectedConstraint(null)} 
+              />
             ) : (
-              <div className="bg-metallic-900 border border-metallic-800 rounded-xl p-6">
-                <h3 className="font-semibold text-metallic-100 mb-4 flex items-center gap-2">
-                  <Layers className="w-5 h-5" />
-                  Map Layers
-                </h3>
-                <div className="space-y-3">
-                  {['Mining Projects', 'Infrastructure', 'Geology', 'Tenements'].map((layer) => (
-                    <label key={layer} className="flex items-center gap-3 cursor-pointer">
-                      <input 
-                        type="checkbox" 
-                        defaultChecked={layer === 'Mining Projects'}
-                        className="w-4 h-4 rounded border-metallic-600 bg-metallic-800 text-primary-500 focus:ring-primary-500"
-                      />
-                      <span className="text-sm text-metallic-300">{layer}</span>
-                    </label>
-                  ))}
+              <>
+                {/* Map Layers */}
+                <div className="bg-metallic-900 border border-metallic-800 rounded-xl p-6">
+                  <h3 className="font-semibold text-metallic-100 mb-4 flex items-center gap-2">
+                    <Layers className="w-5 h-5" />
+                    Map Layers
+                  </h3>
+                  <div className="space-y-3">
+                    {['Mining Projects', 'Infrastructure', 'Geology', 'Tenements'].map((layer) => (
+                      <label key={layer} className="flex items-center gap-3 cursor-pointer">
+                        <input 
+                          type="checkbox" 
+                          defaultChecked={layer === 'Mining Projects'}
+                          className="w-4 h-4 rounded border-metallic-600 bg-metallic-800 text-primary-500 focus:ring-primary-500"
+                        />
+                        <span className="text-sm text-metallic-300">{layer}</span>
+                      </label>
+                    ))}
+                  </div>
                 </div>
-              </div>
+                
+                {/* Exploration Data Section */}
+                <div className="bg-metallic-900 border border-metallic-800 rounded-xl p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-semibold text-metallic-100 flex items-center gap-2">
+                      <Drill className="w-5 h-5 text-red-500" />
+                      Exploration Data
+                    </h3>
+                    <Link 
+                      href="/analysis/exploration"
+                      className="text-xs text-primary-400 hover:text-primary-300"
+                    >
+                      View All →
+                    </Link>
+                  </div>
+                  <div className="space-y-2">
+                    {/* Drilling Toggle */}
+                    <button
+                      onClick={() => toggleExplorationLayer('drilling')}
+                      className={`w-full flex items-center gap-3 p-2.5 rounded-lg transition-colors ${
+                        explorationLayers.drilling 
+                          ? 'bg-red-500/20 border border-red-500/30' 
+                          : 'bg-metallic-800/50 hover:bg-metallic-800'
+                      }`}
+                    >
+                      <div className={`w-8 h-8 rounded flex items-center justify-center ${
+                        explorationLayers.drilling ? 'bg-red-500' : 'bg-metallic-700'
+                      }`}>
+                        <Drill className="w-4 h-4 text-white" />
+                      </div>
+                      <div className="flex-1 text-left">
+                        <span className={`text-sm font-medium ${
+                          explorationLayers.drilling ? 'text-red-400' : 'text-metallic-300'
+                        }`}>Drilling</span>
+                        <span className="text-xs text-metallic-500 block">4 programs</span>
+                      </div>
+                      <div className={`w-2 h-2 rounded-full ${
+                        explorationLayers.drilling ? 'bg-red-500' : 'bg-metallic-600'
+                      }`} />
+                    </button>
+                    
+                    {/* Rocks Toggle */}
+                    <button
+                      onClick={() => toggleExplorationLayer('rocks')}
+                      className={`w-full flex items-center gap-3 p-2.5 rounded-lg transition-colors ${
+                        explorationLayers.rocks 
+                          ? 'bg-amber-500/20 border border-amber-500/30' 
+                          : 'bg-metallic-800/50 hover:bg-metallic-800'
+                      }`}
+                    >
+                      <div className={`w-8 h-8 rounded flex items-center justify-center ${
+                        explorationLayers.rocks ? 'bg-amber-500' : 'bg-metallic-700'
+                      }`}>
+                        <Mountain className="w-4 h-4 text-white" />
+                      </div>
+                      <div className="flex-1 text-left">
+                        <span className={`text-sm font-medium ${
+                          explorationLayers.rocks ? 'text-amber-400' : 'text-metallic-300'
+                        }`}>Rocks</span>
+                        <span className="text-xs text-metallic-500 block">3 samples</span>
+                      </div>
+                      <div className={`w-2 h-2 rounded-full ${
+                        explorationLayers.rocks ? 'bg-amber-500' : 'bg-metallic-600'
+                      }`} />
+                    </button>
+                    
+                    {/* Soils Toggle */}
+                    <button
+                      onClick={() => toggleExplorationLayer('soils')}
+                      className={`w-full flex items-center gap-3 p-2.5 rounded-lg transition-colors ${
+                        explorationLayers.soils 
+                          ? 'bg-green-500/20 border border-green-500/30' 
+                          : 'bg-metallic-800/50 hover:bg-metallic-800'
+                      }`}
+                    >
+                      <div className={`w-8 h-8 rounded flex items-center justify-center ${
+                        explorationLayers.soils ? 'bg-green-500' : 'bg-metallic-700'
+                      }`}>
+                        <Droplets className="w-4 h-4 text-white" />
+                      </div>
+                      <div className="flex-1 text-left">
+                        <span className={`text-sm font-medium ${
+                          explorationLayers.soils ? 'text-green-400' : 'text-metallic-300'
+                        }`}>Soils</span>
+                        <span className="text-xs text-metallic-500 block">3 surveys</span>
+                      </div>
+                      <div className={`w-2 h-2 rounded-full ${
+                        explorationLayers.soils ? 'bg-green-500' : 'bg-metallic-600'
+                      }`} />
+                    </button>
+                    
+                    {/* Streams Toggle */}
+                    <button
+                      onClick={() => toggleExplorationLayer('streams')}
+                      className={`w-full flex items-center gap-3 p-2.5 rounded-lg transition-colors ${
+                        explorationLayers.streams 
+                          ? 'bg-blue-500/20 border border-blue-500/30' 
+                          : 'bg-metallic-800/50 hover:bg-metallic-800'
+                      }`}
+                    >
+                      <div className={`w-8 h-8 rounded flex items-center justify-center ${
+                        explorationLayers.streams ? 'bg-blue-500' : 'bg-metallic-700'
+                      }`}>
+                        <Waves className="w-4 h-4 text-white" />
+                      </div>
+                      <div className="flex-1 text-left">
+                        <span className={`text-sm font-medium ${
+                          explorationLayers.streams ? 'text-blue-400' : 'text-metallic-300'
+                        }`}>Streams</span>
+                        <span className="text-xs text-metallic-500 block">3 surveys</span>
+                      </div>
+                      <div className={`w-2 h-2 rounded-full ${
+                        explorationLayers.streams ? 'bg-blue-500' : 'bg-metallic-600'
+                      }`} />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Legal Constraints Section */}
+                <div className="bg-metallic-900 border border-metallic-800 rounded-xl p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-semibold text-metallic-100 flex items-center gap-2">
+                      <Shield className="w-5 h-5 text-amber-500" />
+                      Legal Constraints
+                    </h3>
+                    <Link 
+                      href="/analysis/constraints"
+                      className="text-xs text-primary-400 hover:text-primary-300"
+                    >
+                      Manage →
+                    </Link>
+                  </div>
+                  <p className="text-xs text-metallic-500 mb-3">
+                    Areas with exploration/mining restrictions within tenements
+                  </p>
+                  <div className="space-y-2">
+                    {/* Heritage Toggle */}
+                    <button
+                      onClick={() => toggleConstraintLayer('heritage')}
+                      className={`w-full flex items-center gap-3 p-2.5 rounded-lg transition-colors ${
+                        constraintLayers.heritage 
+                          ? 'bg-amber-500/20 border border-amber-500/30' 
+                          : 'bg-metallic-800/50 hover:bg-metallic-800'
+                      }`}
+                    >
+                      <div className={`w-8 h-8 rounded flex items-center justify-center ${
+                        constraintLayers.heritage ? 'bg-amber-500' : 'bg-metallic-700'
+                      }`}>
+                        <Landmark className="w-4 h-4 text-white" />
+                      </div>
+                      <div className="flex-1 text-left">
+                        <span className={`text-sm font-medium ${
+                          constraintLayers.heritage ? 'text-amber-400' : 'text-metallic-300'
+                        }`}>Heritage</span>
+                        <span className="text-xs text-metallic-500 block">Cultural & archaeological</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs text-metallic-500">
+                          {constraintAreas.filter(c => c.type === 'heritage').length}
+                        </span>
+                        <div className={`w-2 h-2 rounded-full ${
+                          constraintLayers.heritage ? 'bg-amber-500' : 'bg-metallic-600'
+                        }`} />
+                      </div>
+                    </button>
+                    
+                    {/* Social Toggle */}
+                    <button
+                      onClick={() => toggleConstraintLayer('social')}
+                      className={`w-full flex items-center gap-3 p-2.5 rounded-lg transition-colors ${
+                        constraintLayers.social 
+                          ? 'bg-purple-500/20 border border-purple-500/30' 
+                          : 'bg-metallic-800/50 hover:bg-metallic-800'
+                      }`}
+                    >
+                      <div className={`w-8 h-8 rounded flex items-center justify-center ${
+                        constraintLayers.social ? 'bg-purple-500' : 'bg-metallic-700'
+                      }`}>
+                        <Users className="w-4 h-4 text-white" />
+                      </div>
+                      <div className="flex-1 text-left">
+                        <span className={`text-sm font-medium ${
+                          constraintLayers.social ? 'text-purple-400' : 'text-metallic-300'
+                        }`}>Social</span>
+                        <span className="text-xs text-metallic-500 block">Indigenous & community</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs text-metallic-500">
+                          {constraintAreas.filter(c => c.type === 'social').length}
+                        </span>
+                        <div className={`w-2 h-2 rounded-full ${
+                          constraintLayers.social ? 'bg-purple-500' : 'bg-metallic-600'
+                        }`} />
+                      </div>
+                    </button>
+                    
+                    {/* Environmental Toggle */}
+                    <button
+                      onClick={() => toggleConstraintLayer('environmental')}
+                      className={`w-full flex items-center gap-3 p-2.5 rounded-lg transition-colors ${
+                        constraintLayers.environmental 
+                          ? 'bg-emerald-500/20 border border-emerald-500/30' 
+                          : 'bg-metallic-800/50 hover:bg-metallic-800'
+                      }`}
+                    >
+                      <div className={`w-8 h-8 rounded flex items-center justify-center ${
+                        constraintLayers.environmental ? 'bg-emerald-500' : 'bg-metallic-700'
+                      }`}>
+                        <TreePine className="w-4 h-4 text-white" />
+                      </div>
+                      <div className="flex-1 text-left">
+                        <span className={`text-sm font-medium ${
+                          constraintLayers.environmental ? 'text-emerald-400' : 'text-metallic-300'
+                        }`}>Environmental</span>
+                        <span className="text-xs text-metallic-500 block">Protected & conservation</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs text-metallic-500">
+                          {constraintAreas.filter(c => c.type === 'environmental').length}
+                        </span>
+                        <div className={`w-2 h-2 rounded-full ${
+                          constraintLayers.environmental ? 'bg-emerald-500' : 'bg-metallic-600'
+                        }`} />
+                      </div>
+                    </button>
+                  </div>
+                  
+                  {/* Constraint Summary */}
+                  {(constraintLayers.heritage || constraintLayers.social || constraintLayers.environmental) && (
+                    <div className="mt-3 pt-3 border-t border-metallic-700">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-metallic-400">
+                          <span className="font-medium text-amber-400">
+                            {constraintAreas.filter(c => c.status === 'No-go' && constraintLayers[c.type]).length}
+                          </span> No-go zones
+                        </span>
+                        <span className="text-metallic-400">
+                          <span className="font-medium text-metallic-200">
+                            {constraintAreas.filter(c => constraintLayers[c.type]).reduce((acc, c) => acc + c.area, 0).toFixed(1)}
+                          </span> km² total
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </>
             )}
 
             {/* Quick Stats */}
