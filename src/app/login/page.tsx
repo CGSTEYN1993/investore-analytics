@@ -5,6 +5,7 @@
 import { useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { getPublicApiV1Url } from "@/lib/public-api-url";
 import { 
   Eye, EyeOff, Mail, Lock, AlertCircle, 
   CheckCircle, Loader2, Shield 
@@ -50,14 +51,10 @@ function LoginForm() {
     setError(null);
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      
-      if (!apiUrl) {
-        throw new Error("Backend API is not configured. Please contact support.");
-      }
+      const apiV1Url = getPublicApiV1Url();
 
       const response = await fetch(
-        `${apiUrl}/auth/login`,
+        `${apiV1Url}/auth/login`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

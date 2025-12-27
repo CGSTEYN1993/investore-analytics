@@ -2,6 +2,7 @@
 /**
  * InvestOre Analytics - Forgot Password Page
  */
+import { getPublicApiV1Url } from '@/lib/public-api-url';
 import { useState } from "react";
 import Link from "next/link";
 import { Mail, AlertCircle, Loader2, ArrowLeft } from "lucide-react";
@@ -19,7 +20,7 @@ export default function ForgotPasswordPage() {
 
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/auth/forgot-password`,
+        `${getPublicApiV1Url()}/auth/forgot-password`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

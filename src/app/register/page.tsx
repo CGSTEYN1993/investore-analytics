@@ -9,6 +9,7 @@ import {
   Eye, EyeOff, Mail, Lock, User, AlertCircle, 
   CheckCircle, Loader2, Shield, Check, X
 } from "lucide-react";
+import { getPublicApiV1Url } from "@/lib/public-api-url";
 
 interface RegisterFormData {
   fullName: string;
@@ -95,14 +96,10 @@ export default function RegisterPage() {
     setError(null);
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      
-      if (!apiUrl) {
-        throw new Error("Backend API is not configured. Please contact support.");
-      }
+      const apiV1Url = getPublicApiV1Url();
 
       const response = await fetch(
-        `${apiUrl}/auth/register`,
+        `${apiV1Url}/auth/register`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

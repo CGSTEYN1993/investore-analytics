@@ -17,7 +17,9 @@ import type {
   ApiError,
 } from '@/types';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+import { getPublicApiV1Url } from '@/lib/public-api-url';
+
+const API_V1_BASE_URL = getPublicApiV1Url();
 
 class ApiClient {
   private client: AxiosInstance;
@@ -25,7 +27,7 @@ class ApiClient {
 
   constructor() {
     this.client = axios.create({
-      baseURL: `${API_BASE_URL}/api/v1`,
+      baseURL: API_V1_BASE_URL,
       headers: {
         'Content-Type': 'application/json',
       },
