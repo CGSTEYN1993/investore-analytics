@@ -7,6 +7,13 @@ import { formatCurrency, getStageColor } from '@/lib/utils';
 
 const Plot = dynamic(() => import('react-plotly.js'), { ssr: false });
 
+const metricLabels: Record<string, string> = {
+  ev_per_aueq_oz: 'EV per AuEq oz (USD)',
+  market_cap_usd: 'Market Cap (USD)',
+  enterprise_value_usd: 'Enterprise Value (USD)',
+  p_nav: 'Price to NAV Ratio',
+};
+
 interface ValuationBarChartProps {
   data: ValuationComparison;
   metric?: 'ev_per_aueq_oz' | 'market_cap_usd' | 'enterprise_value_usd' | 'p_nav';
@@ -58,13 +65,6 @@ export function ValuationBarChart({
         '%{text}<extra></extra>',
     };
   }, [data, metric, sortBy]);
-
-  const metricLabels: Record<string, string> = {
-    ev_per_aueq_oz: 'EV per AuEq oz (USD)',
-    market_cap_usd: 'Market Cap (USD)',
-    enterprise_value_usd: 'Enterprise Value (USD)',
-    p_nav: 'Price to NAV Ratio',
-  };
 
   const layout = useMemo(
     () => ({
