@@ -203,7 +203,7 @@ export default function PricingPage() {
   const handleSelectPlan = async (priceKey: string) => {
     if (!isAuthenticated) {
       // Redirect to login with return URL
-      window.location.href = `/auth/login?redirect=/pricing&plan=${priceKey}`;
+      window.location.href = `/login?redirect=/pricing&plan=${priceKey}`;
       return;
     }
     
