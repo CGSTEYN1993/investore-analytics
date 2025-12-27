@@ -3,7 +3,7 @@
 import React, { useState, Suspense } from 'react';
 import Link from 'next/link';
 import { 
-  BarChart3, Globe, Building2, MapPin, Pickaxe, TrendingUp, 
+  BarChart3, Globe, Building2, MapPin, Hammer, TrendingUp, 
   Filter, Bell, Bookmark, Briefcase, Search, ChevronRight,
   Gem, Factory, FileText, Clock
 } from 'lucide-react';
@@ -52,7 +52,7 @@ const analysisCategories = [
     id: 'stage',
     title: 'By Project Stage',
     description: 'Filter by exploration, feasibility, or operational status',
-    icon: Pickaxe,
+    icon: Hammer,
     href: '/analysis/stages',
     color: 'from-orange-500 to-orange-600',
     stats: 'All Stages',
