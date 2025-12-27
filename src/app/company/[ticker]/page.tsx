@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { 
   ArrowLeft, ExternalLink, MapPin, Building2, Calendar, TrendingUp, TrendingDown,
-  Bookmark, BookmarkCheck, Bell, Share2, FileText, Pickaxe, Globe, ChevronRight,
+  Bookmark, BookmarkCheck, Bell, Share2, FileText, Hammer, Globe, ChevronRight,
   BarChart3, DollarSign, Users, Layers, Download
 } from 'lucide-react';
 import { getCommodityColor } from '@/lib/subscription-tiers';
