@@ -272,7 +272,8 @@ function AustraliaMap({
             const { x, y } = toSvgCoords(hoveredFeature.lat, hoveredFeature.lng);
             const tooltipX = x > 750 ? x - 220 : x + 15;
             const tooltipY = y > 450 ? y - 90 : y;
-            const color = getCommodityColor(hoveredFeature.commodity);
+            const commodityValue = 'commodity' in hoveredFeature ? hoveredFeature.commodity : undefined;
+            const color = getCommodityColor(commodityValue);
             
             return (
               <g transform={`translate(${tooltipX}, ${tooltipY})`}>
@@ -304,7 +305,7 @@ function AustraliaMap({
                     : hoveredFeature.name}
                 </text>
                 <text x="12" y="58" fill="#aaa" fontSize="10">
-                  {hoveredFeature.commodity || 'Unknown commodity'}
+                  {commodityValue || 'Unknown commodity'}
                 </text>
                 <text x="12" y="74" fill="#888" fontSize="9">
                   {'state' in hoveredFeature && hoveredFeature.state 
