@@ -114,9 +114,10 @@ export function useGeoscienceData(): UseGeoscienceDataResult {
       ...data.mineral_deposits,
     ];
     
-    return allFeatures.filter(f => 
-      f.commodity?.toLowerCase().includes(commodity.toLowerCase())
-    );
+    return allFeatures.filter(f => {
+      const commodityValue = 'commodity' in f ? f.commodity : undefined;
+      return commodityValue?.toLowerCase().includes(commodity.toLowerCase());
+    });
   }, [data]);
   
   const getFeaturesByState = useCallback((state: string): MapFeature[] => {

@@ -1,7 +1,7 @@
 /**
  * React Hooks for Market Data
  * 
- * Provides easy access to Finnhub stock market data with
+ * Provides easy access to ASX market data with
  * loading states, error handling, and auto-refresh.
  */
 
@@ -10,25 +10,25 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import marketService from '@/services/marketService';
 import {
-  StockQuote,
-  CompanyOverview,
-  Financials,
-  Recommendations,
-  NewsArticle,
+  ASXStockQuote,
+  MiningOverview,
   TopMovers,
+  NewsArticle,
+  CommodityOverview,
+  CommodityPrice,
 } from '@/types/market';
 
 // ========== Single Quote Hook ==========
 
 interface UseQuoteResult {
-  quote: StockQuote | null;
+  quote: ASXStockQuote | null;
   isLoading: boolean;
   error: string | null;
   refresh: () => Promise<void>;
 }
 
 export function useQuote(symbol: string, autoRefresh = true, refreshInterval = 60000): UseQuoteResult {
-  const [quote, setQuote] = useState<StockQuote | null>(null);
+  const [quote, setQuote] = useState<ASXStockQuote | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -68,14 +68,14 @@ export function useQuote(symbol: string, autoRefresh = true, refreshInterval = 6
 // ========== Multiple Quotes Hook ==========
 
 interface UseMultipleQuotesResult {
-  quotes: Record<string, StockQuote>;
+  quotes: ASXStockQuote[];
   isLoading: boolean;
   error: string | null;
   refresh: () => Promise<void>;
 }
 
 export function useMultipleQuotes(symbols: string[], autoRefresh = true): UseMultipleQuotesResult {
-  const [quotes, setQuotes] = useState<Record<string, StockQuote>>({});
+  const [quotes, setQuotes] = useState<ASXStockQuote[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
@@ -104,104 +104,6 @@ export function useMultipleQuotes(symbols: string[], autoRefresh = true): UseMul
   }, [fetchQuotes, autoRefresh]);
   
   return { quotes, isLoading, error, refresh: fetchQuotes };
-}
-
-// ========== Company Overview Hook ==========
-
-interface UseCompanyOverviewResult {
-  overview: CompanyOverview | null;
-  isLoading: boolean;
-  error: string | null;
-  refresh: () => Promise<void>;
-}
-
-export function useCompanyOverview(symbol: string): UseCompanyOverviewResult {
-  const [overview, setOverview] = useState<CompanyOverview | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  
-  const fetchOverview = useCallback(async () => {
-    if (!symbol) return;
-    
-    setIsLoading(true);
-    try {
-      const data = await marketService.getOverview(symbol);
-      setOverview(data);
-      setError(null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load company overview');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [symbol]);
-  
-  useEffect(() => {
-    fetchOverview();
-  }, [fetchOverview]);
-  
-  return { overview, isLoading, error, refresh: fetchOverview };
-}
-
-// ========== Financials Hook ==========
-
-interface UseFinancialsResult {
-  financials: Financials | null;
-  isLoading: boolean;
-  error: string | null;
-}
-
-export function useFinancials(symbol: string): UseFinancialsResult {
-  const [financials, setFinancials] = useState<Financials | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  
-  useEffect(() => {
-    if (!symbol) return;
-    
-    setIsLoading(true);
-    marketService.getFinancials(symbol)
-      .then(data => {
-        setFinancials(data);
-        setError(null);
-      })
-      .catch(err => {
-        setError(err instanceof Error ? err.message : 'Failed to load financials');
-      })
-      .finally(() => setIsLoading(false));
-  }, [symbol]);
-  
-  return { financials, isLoading, error };
-}
-
-// ========== Recommendations Hook ==========
-
-interface UseRecommendationsResult {
-  recommendations: Recommendations | null;
-  isLoading: boolean;
-  error: string | null;
-}
-
-export function useRecommendations(symbol: string): UseRecommendationsResult {
-  const [recommendations, setRecommendations] = useState<Recommendations | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  
-  useEffect(() => {
-    if (!symbol) return;
-    
-    setIsLoading(true);
-    marketService.getRecommendations(symbol)
-      .then(data => {
-        setRecommendations(data);
-        setError(null);
-      })
-      .catch(err => {
-        setError(err instanceof Error ? err.message : 'Failed to load recommendations');
-      })
-      .finally(() => setIsLoading(false));
-  }, [symbol]);
-  
-  return { recommendations, isLoading, error };
 }
 
 // ========== Company News Hook ==========
@@ -240,34 +142,27 @@ export function useCompanyNews(symbol: string, days = 7): UseCompanyNewsResult {
   return { news, isLoading, error, refresh: fetchNews };
 }
 
-// ========== Mining Sector Hook ==========
+// ========== Mining Sector Overview Hook ==========
 
 interface UseMiningOverviewResult {
-  quotes: Record<string, StockQuote>;
-  topMovers: TopMovers | null;
+  overview: MiningOverview | null;
   isLoading: boolean;
   error: string | null;
   refresh: () => Promise<void>;
 }
 
 export function useMiningOverview(): UseMiningOverviewResult {
-  const [quotes, setQuotes] = useState<Record<string, StockQuote>>({});
-  const [topMovers, setTopMovers] = useState<TopMovers | null>(null);
+  const [overview, setOverview] = useState<MiningOverview | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
   const fetchData = useCallback(async () => {
     try {
-      const [overviewData, moversData] = await Promise.all([
-        marketService.getMiningOverview(),
-        marketService.getTopMovers(),
-      ]);
-      
-      setQuotes(overviewData.companies);
-      setTopMovers(moversData);
+      const data = await marketService.getMiningOverview();
+      setOverview(data);
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load mining data');
+      setError(err instanceof Error ? err.message : 'Failed to load mining overview');
     } finally {
       setIsLoading(false);
     }
@@ -282,5 +177,119 @@ export function useMiningOverview(): UseMiningOverviewResult {
     return () => clearInterval(interval);
   }, [fetchData]);
   
-  return { quotes, topMovers, isLoading, error, refresh: fetchData };
+  return { overview, isLoading, error, refresh: fetchData };
+}
+
+// ========== Top Movers Hook ==========
+
+interface UseTopMoversResult {
+  movers: TopMovers | null;
+  isLoading: boolean;
+  error: string | null;
+  refresh: () => Promise<void>;
+}
+
+export function useTopMovers(): UseTopMoversResult {
+  const [movers, setMovers] = useState<TopMovers | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
+  const fetchData = useCallback(async () => {
+    try {
+      const data = await marketService.getTopMovers();
+      setMovers(data);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load top movers');
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+  
+  useEffect(() => {
+    setIsLoading(true);
+    fetchData();
+    
+    const interval = setInterval(fetchData, 60000);
+    return () => clearInterval(interval);
+  }, [fetchData]);
+  
+  return { movers, isLoading, error, refresh: fetchData };
+}
+
+// ========== Commodities Hook ==========
+
+interface UseCommoditiesResult {
+  commodities: CommodityPrice[];
+  overview: CommodityOverview | null;
+  isLoading: boolean;
+  error: string | null;
+  refresh: () => Promise<void>;
+}
+
+export function useCommodities(): UseCommoditiesResult {
+  const [commodities, setCommodities] = useState<CommodityPrice[]>([]);
+  const [overview, setOverview] = useState<CommodityOverview | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
+  const fetchData = useCallback(async () => {
+    try {
+      const [commoditiesData, overviewData] = await Promise.all([
+        marketService.getAllCommodities(),
+        marketService.getCommodityOverview(),
+      ]);
+      setCommodities(commoditiesData.commodities);
+      setOverview(overviewData);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load commodities');
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+  
+  useEffect(() => {
+    setIsLoading(true);
+    fetchData();
+    
+    const interval = setInterval(fetchData, 300000); // 5 minutes
+    return () => clearInterval(interval);
+  }, [fetchData]);
+  
+  return { commodities, overview, isLoading, error, refresh: fetchData };
+}
+
+// ========== Market News Hook ==========
+
+interface UseMarketNewsResult {
+  news: NewsArticle[];
+  isLoading: boolean;
+  error: string | null;
+  refresh: () => Promise<void>;
+}
+
+export function useMarketNews(category = 'general'): UseMarketNewsResult {
+  const [news, setNews] = useState<NewsArticle[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
+  const fetchNews = useCallback(async () => {
+    try {
+      const data = await marketService.getMarketNews(category);
+      setNews(data.articles);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load market news');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [category]);
+  
+  useEffect(() => {
+    setIsLoading(true);
+    fetchNews();
+  }, [fetchNews]);
+  
+  return { news, isLoading, error, refresh: fetchNews };
 }

@@ -210,6 +210,44 @@ export interface NewsArticle {
   related?: string;
 }
 
+// Additional types for market data hooks
+export interface CompanyOverview {
+  symbol: string;
+  name: string;
+  description?: string;
+  exchange: string;
+  industry: string;
+  sector?: string;
+  country: string;
+  website?: string;
+  logo?: string;
+  marketCap?: number;
+  employees?: number;
+}
+
+export interface Financials {
+  symbol: string;
+  revenue?: number;
+  netIncome?: number;
+  eps?: number;
+  peRatio?: number;
+  dividendYield?: number;
+  bookValue?: number;
+  debtToEquity?: number;
+  currentRatio?: number;
+  period?: string;
+}
+
+export interface Recommendations {
+  symbol: string;
+  buy: number;
+  sell: number;
+  hold: number;
+  strongBuy: number;
+  strongSell: number;
+  period?: string;
+}
+
 // ========== Helper Functions ==========
 
 export function formatCurrency(value: number | undefined, currency = 'AUD'): string {
