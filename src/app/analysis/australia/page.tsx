@@ -384,7 +384,8 @@ function FeatureDetailPanel({
   feature: MapFeature;
   onClose: () => void;
 }) {
-  const color = getCommodityColor(feature.commodity);
+  const commodityValue = 'commodity' in feature ? feature.commodity : undefined;
+  const color = getCommodityColor(commodityValue);
   const layerInfo = gaDataLayers[feature.type as keyof typeof gaDataLayers];
 
   return (
@@ -433,7 +434,7 @@ function FeatureDetailPanel({
               style={{ backgroundColor: color }}
             />
             <p className="text-sm font-medium text-metallic-100">
-              {feature.commodity || 'Not specified'}
+              {commodityValue || 'Not specified'}
             </p>
           </div>
         </div>
