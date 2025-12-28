@@ -1,13 +1,15 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { 
   Search, Filter, ChevronDown, ArrowUpRight, ArrowDownRight,
   FileText, Calendar, Tag, Building2, Bell, ExternalLink,
-  TrendingUp, TrendingDown, Newspaper, AlertCircle
+  TrendingUp, TrendingDown, Newspaper, AlertCircle, Loader2, Sparkles
 } from 'lucide-react';
 import { getCommodityColor } from '@/lib/subscription-tiers';
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://web-production-4faa7.up.railway.app';
 
 // Announcement types with colors
 const announcementTypes = [
@@ -216,8 +218,14 @@ export default function AnnouncementsPage() {
   const [selectedType, setSelectedType] = useState('all');
   const [selectedCommodity, setSelectedCommodity] = useState('all');
   const [dateRange, setDateRange] = useState('7d');
+  const [selectedExchange, setSelectedExchange] = useState('ASX');
+  const [loading, setLoading] = useState(true);
+  const [apiAnnouncements, setApiAnnouncements] = useState<any[]>([]);
+  const [summary, setSummary] = useState<any>(null);
+  const [promisingStocks, setPromisingStocks] = useState<any[]>([]);
 
   const commodities = ['all', 'Au', 'Ag', 'Cu', 'Li', 'Ni', 'U', 'Zn', 'Fe'];
+  const exchanges = ['ASX', 'TSX', 'JSE', 'CSE', 'NYSE', 'LSE'];
   const dateRanges = [
     { value: '1d', label: 'Today' },
     { value: '7d', label: 'Last 7 Days' },
@@ -225,18 +233,78 @@ export default function AnnouncementsPage() {
     { value: '90d', label: 'Last 90 Days' },
   ];
 
-  const filteredAnnouncements = announcements.filter(a => {
+  // Convert date range to days
+  const getDaysBack = (range: string) => {
+    switch (range) {
+      case '1d': return 1;
+      case '7d': return 7;
+      case '30d': return 30;
+      case '90d': return 90;
+      default: return 7;
+    }
+  };
+
+  // Fetch data from API
+  useEffect(() => {
+    async function fetchData() {
+      setLoading(true);
+      const daysBack = getDaysBack(dateRange);
+      
+      try {
+        const [summaryRes, promisingRes] = await Promise.all([
+          fetch(`${API_BASE}/api/v1/announcements/summary?exchange=${selectedExchange}&days_back=${daysBack}`),
+          fetch(`${API_BASE}/api/v1/announcements/promising?exchange=${selectedExchange}&days_back=${daysBack}&limit=30`)
+        ]);
+
+        if (summaryRes.ok) {
+          const data = await summaryRes.json();
+          setSummary(data);
+        }
+
+        if (promisingRes.ok) {
+          const data = await promisingRes.json();
+          setPromisingStocks(data.promising_stocks || []);
+        }
+      } catch (err) {
+        console.error('Failed to fetch announcements:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchData();
+  }, [selectedExchange, dateRange]);
+
+  // Combine mock data with API data for display
+  const allAnnouncements = [...promisingStocks.map((p: any) => ({
+    id: p.symbol + p.date,
+    company: p.company_name,
+    ticker: p.symbol,
+    commodity: p.primary_commodity?.substring(0, 2) || 'Au',
+    type: p.announcement_type?.replace('_', '') || 'general',
+    title: p.title,
+    summary: '',
+    date: new Date(p.date).toLocaleDateString(),
+    time: new Date(p.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    priceChange: p.relevance_score * 100 - 50, // Mock price change based on relevance
+    source: selectedExchange,
+    isBreaking: p.is_price_sensitive,
+    sentiment: p.sentiment,
+    url: p.url
+  })), ...announcements];
+
+  const filteredAnnouncements = allAnnouncements.filter(a => {
     const matchesSearch = 
       a.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
       a.ticker.toLowerCase().includes(searchTerm.toLowerCase()) ||
       a.title.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesType = selectedType === 'all' || a.type === selectedType;
+    const matchesType = selectedType === 'all' || a.type === selectedType || a.type?.includes(selectedType);
     const matchesCommodity = selectedCommodity === 'all' || a.commodity === selectedCommodity;
     return matchesSearch && matchesType && matchesCommodity;
   });
 
-  const breakingNews = announcements.filter(a => a.isBreaking);
-  const todayCount = announcements.length; // In real app, filter by date
+  const breakingNews = allAnnouncements.filter(a => a.isBreaking);
+  const todayCount = summary?.total_announcements || allAnnouncements.length;
 
   return (
     <div className="min-h-screen bg-metallic-950">
@@ -259,39 +327,53 @@ export default function AnnouncementsPage() {
             </button>
           </div>
 
+          {/* Exchange Selector */}
+          <div className="flex gap-2 mb-4">
+            {exchanges.map((exchange) => (
+              <button
+                key={exchange}
+                onClick={() => setSelectedExchange(exchange)}
+                className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                  selectedExchange === exchange
+                    ? 'bg-primary-500 text-white'
+                    : 'bg-metallic-800/50 text-metallic-400 hover:bg-metallic-700'
+                }`}
+              >
+                {exchange}
+              </button>
+            ))}
+          </div>
+
           {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="bg-metallic-800/50 rounded-lg p-4">
               <div className="flex items-center gap-2 text-metallic-400 text-sm mb-1">
                 <Newspaper className="w-4 h-4" />
-                Today&apos;s News
+                {loading && <Loader2 className="w-3 h-3 animate-spin" />}
+                Announcements
               </div>
               <p className="text-2xl font-bold text-metallic-100">{todayCount}</p>
             </div>
             <div className="bg-metallic-800/50 rounded-lg p-4">
               <div className="flex items-center gap-2 text-amber-400 text-sm mb-1">
                 <AlertCircle className="w-4 h-4" />
-                Breaking
+                Price Sensitive
               </div>
-              <p className="text-2xl font-bold text-metallic-100">{breakingNews.length}</p>
+              <p className="text-2xl font-bold text-metallic-100">{summary?.price_sensitive_count || breakingNews.length}</p>
             </div>
             <div className="bg-metallic-800/50 rounded-lg p-4">
               <div className="flex items-center gap-2 text-green-400 text-sm mb-1">
-                <TrendingUp className="w-4 h-4" />
-                Positive Impact
+                <Sparkles className="w-4 h-4" />
+                Promising Stocks
               </div>
-              <p className="text-2xl font-bold text-metallic-100">
-                {announcements.filter(a => a.priceChange > 0).length}
-              </p>
+              <p className="text-2xl font-bold text-metallic-100">{summary?.promising_count || promisingStocks.length}</p>
             </div>
             <div className="bg-metallic-800/50 rounded-lg p-4">
-              <div className="flex items-center gap-2 text-red-400 text-sm mb-1">
-                <TrendingDown className="w-4 h-4" />
-                Negative Impact
+              <div className="flex items-center gap-2 text-blue-400 text-sm mb-1">
+                <TrendingUp className="w-4 h-4" />
+                Companies Tracked
               </div>
-              <p className="text-2xl font-bold text-metallic-100">
-                {announcements.filter(a => a.priceChange < 0).length}
-              </p>
+              <p className="text-2xl font-bold text-metallic-100">{summary?.companies_count || 0}</p>
             </div>
           </div>
         </div>
@@ -361,12 +443,19 @@ export default function AnnouncementsPage() {
 
         {/* Announcements List */}
         <div className="space-y-4">
-          {filteredAnnouncements.map((announcement) => (
-            <AnnouncementCard key={announcement.id} announcement={announcement} />
-          ))}
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-12">
+              <Loader2 className="w-8 h-8 text-primary-500 animate-spin mb-4" />
+              <p className="text-metallic-400">Loading announcements from {selectedExchange}...</p>
+            </div>
+          ) : (
+            filteredAnnouncements.map((announcement) => (
+              <AnnouncementCard key={announcement.id} announcement={announcement} />
+            ))
+          )}
         </div>
 
-        {filteredAnnouncements.length === 0 && (
+        {!loading && filteredAnnouncements.length === 0 && (
           <div className="text-center py-12">
             <FileText className="w-12 h-12 text-metallic-600 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-metallic-100 mb-2">No announcements found</h3>

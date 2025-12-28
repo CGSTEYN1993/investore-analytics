@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 import { 
   Globe, 
   Filter, 
@@ -19,6 +19,9 @@ import {
   Crown,
   Layers
 } from 'lucide-react';
+
+// Lazy load the map component to avoid SSR issues
+const GlobalMiningMap = lazy(() => import('@/components/maps/GlobalMiningMap'));
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://web-production-4faa7.up.railway.app';
 
@@ -533,43 +536,19 @@ export default function GlobalSpatialPage() {
             )}
           </div>
         ) : (
-          /* Map View - Grouped by Country */
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {Object.entries(companiesByCountry).map(([country, companies]) => (
-              <div key={country} className="bg-metallic-900/50 rounded-lg border border-metallic-800 overflow-hidden">
-                <div className="p-4 bg-metallic-800/50 border-b border-metallic-700 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <MapPin className="h-5 w-5 text-primary-400" />
-                    <h3 className="font-semibold text-metallic-100">{country}</h3>
-                  </div>
-                  <span className="px-2 py-1 bg-primary-500/20 text-primary-400 border border-primary-500/30 rounded text-sm font-medium">
-                    {companies.length}
-                  </span>
-                </div>
-                <div className="p-4 space-y-2 max-h-64 overflow-y-auto">
-                  {companies.map((company) => (
-                    <div 
-                      key={`${company.exchange}-${company.symbol}`}
-                      className="flex items-center justify-between p-2 hover:bg-metallic-800/50 rounded cursor-pointer transition-colors"
-                      onClick={() => setSelectedCompany(company)}
-                    >
-                      <div className="flex items-center gap-2">
-                        <CompanyTypeIcon type={company.company_type} />
-                        <div>
-                          <div className="font-medium text-sm text-metallic-100">{company.symbol}</div>
-                          <div className="text-xs text-metallic-400">{company.name}</div>
-                        </div>
-                      </div>
-                      <span className={`px-2 py-0.5 rounded text-xs ${
-                        exchangeColors[company.exchange] || 'bg-metallic-700 text-metallic-300'
-                      }`}>
-                        {company.exchange}
-                      </span>
-                    </div>
-                  ))}
-                </div>
+          /* Map View - Interactive Leaflet Map */
+          <div className="h-[700px]">
+            <Suspense fallback={
+              <div className="h-full flex items-center justify-center bg-metallic-900/50 rounded-lg border border-metallic-800">
+                <Loader2 className="h-8 w-8 animate-spin text-primary-500" />
               </div>
-            ))}
+            }>
+              <GlobalMiningMap 
+                geoData={geoData} 
+                onSelectCompany={setSelectedCompany}
+                selectedCompany={selectedCompany}
+              />
+            </Suspense>
           </div>
         )}
       </div>
