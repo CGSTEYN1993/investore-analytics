@@ -474,7 +474,7 @@ export default function AnalyticsDashboardPage() {
                 <div className="flex-1">
                   <h3 className="font-semibold text-metallic-100 mb-1">Data Source</h3>
                   <p className="text-sm text-metallic-400 mb-3">
-                    This dashboard displays live data from Geoscience Australia's open data portal. 
+                    This dashboard displays live data from Geoscience Australia&apos;s open data portal. 
                     Data includes the Australian Operating Mines Map, Critical Minerals database, 
                     and OZMIN mineral deposits database.
                   </p>
