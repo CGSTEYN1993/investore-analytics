@@ -15,7 +15,9 @@ import {
   Loader2,
   Factory,
   Compass,
-  Pickaxe
+  Hammer,
+  Crown,
+  Layers
 } from 'lucide-react';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://web-production-4faa7.up.railway.app';
@@ -77,29 +79,33 @@ interface ExchangeSummary {
 }
 
 // Company type icons
-const CompanyTypeIcon = ({ type }: { type: string }) => {
+const CompanyTypeIcon = ({ type }: { type: string }): JSX.Element => {
   switch (type) {
     case 'producer':
       return <Factory className="h-4 w-4 text-green-500" />;
     case 'explorer':
       return <Compass className="h-4 w-4 text-blue-500" />;
     case 'developer':
-      return <Pickaxe className="h-4 w-4 text-yellow-500" />;
+      return <Hammer className="h-4 w-4 text-yellow-500" />;
+    case 'royalty':
+      return <Crown className="h-4 w-4 text-purple-500" />;
+    case 'diversified':
+      return <Layers className="h-4 w-4 text-indigo-500" />;
     default:
       return <Building2 className="h-4 w-4 text-gray-500" />;
   }
 };
 
-// Exchange badge colors
+// Exchange badge colors - dark theme
 const exchangeColors: Record<string, string> = {
-  ASX: 'bg-blue-100 text-blue-800',
-  JSE: 'bg-green-100 text-green-800',
-  CSE: 'bg-red-100 text-red-800',
-  TSX: 'bg-purple-100 text-purple-800',
-  TSXV: 'bg-purple-50 text-purple-700',
-  NYSE: 'bg-yellow-100 text-yellow-800',
-  NASDAQ: 'bg-teal-100 text-teal-800',
-  LSE: 'bg-orange-100 text-orange-800',
+  ASX: 'bg-blue-500/20 text-blue-400 border border-blue-500/30',
+  JSE: 'bg-green-500/20 text-green-400 border border-green-500/30',
+  CSE: 'bg-red-500/20 text-red-400 border border-red-500/30',
+  TSX: 'bg-purple-500/20 text-purple-400 border border-purple-500/30',
+  TSXV: 'bg-purple-400/20 text-purple-300 border border-purple-400/30',
+  NYSE: 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30',
+  NASDAQ: 'bg-teal-500/20 text-teal-400 border border-teal-500/30',
+  LSE: 'bg-orange-500/20 text-orange-400 border border-orange-500/30',
 };
 
 // Commodity category colors
@@ -118,11 +124,15 @@ const commodityColors: Record<string, string> = {
 };
 
 export default function GlobalSpatialPage() {
+  const [companies, setCompanies] = useState<Company[]>([]);
   const [geoData, setGeoData] = useState<GeoJSONData | null>(null);
   const [filterOptions, setFilterOptions] = useState<FilterOptions | null>(null);
   const [exchangeSummary, setExchangeSummary] = useState<ExchangeSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [totalCompanies, setTotalCompanies] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   
   // Filter state
   const [selectedExchange, setSelectedExchange] = useState<string>('');
@@ -161,9 +171,9 @@ export default function GlobalSpatialPage() {
     fetchFilterOptions();
   }, []);
 
-  // Fetch GeoJSON data when filters change
+  // Fetch companies data when filters change - use /companies endpoint for ALL companies
   useEffect(() => {
-    async function fetchGeoData() {
+    async function fetchCompanies() {
       setLoading(true);
       setError(null);
       
@@ -173,16 +183,26 @@ export default function GlobalSpatialPage() {
         if (selectedCommodity) params.append('commodity', selectedCommodity);
         if (selectedCountry) params.append('country', selectedCountry);
         if (selectedType) params.append('company_type', selectedType);
+        params.append('page', currentPage.toString());
+        params.append('page_size', '100');
         
-        const url = `${API_BASE}/api/v1/spatial/geojson?${params.toString()}`;
-        const response = await fetch(url);
+        // Fetch both companies list (for list view) and GeoJSON (for map view)
+        const [companiesRes, geoRes] = await Promise.all([
+          fetch(`${API_BASE}/api/v1/spatial/companies?${params.toString()}`),
+          fetch(`${API_BASE}/api/v1/spatial/geojson?${params.toString()}`),
+        ]);
         
-        if (!response.ok) {
-          throw new Error('Failed to fetch spatial data');
+        if (companiesRes.ok) {
+          const data = await companiesRes.json();
+          setCompanies(data.companies || []);
+          setTotalCompanies(data.total || 0);
+          setTotalPages(data.total_pages || 1);
         }
         
-        const data = await response.json();
-        setGeoData(data);
+        if (geoRes.ok) {
+          const data = await geoRes.json();
+          setGeoData(data);
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Unknown error');
       } finally {
@@ -190,38 +210,39 @@ export default function GlobalSpatialPage() {
       }
     }
     
-    fetchGeoData();
+    fetchCompanies();
+  }, [selectedExchange, selectedCommodity, selectedCountry, selectedType, currentPage]);
+
+  // Reset page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
   }, [selectedExchange, selectedCommodity, selectedCountry, selectedType]);
 
-  // Filter companies by search query
+  // Filter companies by search query (client-side filtering)
   const filteredCompanies = useMemo(() => {
-    if (!geoData) return [];
+    if (!searchQuery) return companies;
     
-    let companies = geoData.features.map(f => f.properties);
-    
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      companies = companies.filter(c => 
-        c.symbol.toLowerCase().includes(query) ||
-        c.name.toLowerCase().includes(query) ||
-        c.country.toLowerCase().includes(query)
-      );
-    }
-    
-    return companies;
-  }, [geoData, searchQuery]);
+    const query = searchQuery.toLowerCase();
+    return companies.filter(c => 
+      c.symbol.toLowerCase().includes(query) ||
+      c.name.toLowerCase().includes(query) ||
+      c.country.toLowerCase().includes(query)
+    );
+  }, [companies, searchQuery]);
 
-  // Group companies by country for the map view
+  // Group companies by country for the map view (using GeoJSON data which has coordinates)
   const companiesByCountry = useMemo(() => {
+    if (!geoData) return {};
     const grouped: Record<string, Company[]> = {};
-    filteredCompanies.forEach(company => {
+    geoData.features.forEach(feature => {
+      const company = feature.properties;
       if (!grouped[company.country]) {
         grouped[company.country] = [];
       }
       grouped[company.country].push(company);
     });
     return grouped;
-  }, [filteredCompanies]);
+  }, [geoData]);
 
   // Clear all filters
   const clearFilters = () => {
@@ -235,31 +256,31 @@ export default function GlobalSpatialPage() {
   const hasActiveFilters = selectedExchange || selectedCommodity || selectedCountry || selectedType || searchQuery;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-metallic-950">
       {/* Header */}
-      <div className="bg-white border-b">
+      <div className="bg-metallic-900/50 border-b border-metallic-800">
         <div className="max-w-7xl mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Globe className="h-6 w-6 text-blue-600" />
+              <div className="p-2 bg-primary-500/20 rounded-lg border border-primary-500/30">
+                <Globe className="h-6 w-6 text-primary-400" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Global Spatial View</h1>
-                <p className="text-sm text-gray-500">
+                <h1 className="text-2xl font-bold text-metallic-100">Global Spatial View</h1>
+                <p className="text-sm text-metallic-400">
                   Mining & exploration companies across {filterOptions?.exchanges?.length || 0} exchanges
                 </p>
               </div>
             </div>
             
             {/* View toggle */}
-            <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
+            <div className="flex items-center gap-2 bg-metallic-800/50 rounded-lg p-1 border border-metallic-700">
               <button
                 onClick={() => setViewMode('list')}
                 className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                   viewMode === 'list' 
-                    ? 'bg-white text-gray-900 shadow-sm' 
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? 'bg-primary-500 text-white' 
+                    : 'text-metallic-400 hover:text-metallic-200'
                 }`}
               >
                 List View
@@ -268,8 +289,8 @@ export default function GlobalSpatialPage() {
                 onClick={() => setViewMode('map')}
                 className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                   viewMode === 'map' 
-                    ? 'bg-white text-gray-900 shadow-sm' 
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? 'bg-primary-500 text-white' 
+                    : 'text-metallic-400 hover:text-metallic-200'
                 }`}
               >
                 Map View
@@ -290,13 +311,13 @@ export default function GlobalSpatialPage() {
               )}
               className={`p-4 rounded-lg border transition-all ${
                 selectedExchange === exchange.exchange
-                  ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-200'
-                  : 'border-gray-200 bg-white hover:border-gray-300'
+                  ? 'border-primary-500 bg-primary-500/10 ring-2 ring-primary-500/30'
+                  : 'border-metallic-700 bg-metallic-900/50 hover:border-metallic-600 hover:bg-metallic-800/50'
               }`}
             >
-              <div className="text-lg font-bold text-gray-900">{exchange.exchange}</div>
-              <div className="text-2xl font-bold text-blue-600">{exchange.total_companies}</div>
-              <div className="text-xs text-gray-500 mt-1">
+              <div className="text-lg font-bold text-metallic-100">{exchange.exchange}</div>
+              <div className="text-2xl font-bold text-primary-400">{exchange.total_companies}</div>
+              <div className="text-xs text-metallic-400 mt-1">
                 {exchange.producers} producers · {exchange.explorers} explorers
               </div>
             </button>
@@ -306,14 +327,14 @@ export default function GlobalSpatialPage() {
 
       {/* Filters */}
       <div className="max-w-7xl mx-auto px-4 py-4">
-        <div className="bg-white rounded-lg border p-4">
+        <div className="bg-metallic-900/50 rounded-lg border border-metallic-800 p-4">
           <div className="flex items-center gap-2 mb-4">
-            <Filter className="h-5 w-5 text-gray-400" />
-            <h2 className="font-semibold text-gray-900">Filters</h2>
+            <Filter className="h-5 w-5 text-metallic-400" />
+            <h2 className="font-semibold text-metallic-100">Filters</h2>
             {hasActiveFilters && (
               <button
                 onClick={clearFilters}
-                className="ml-auto flex items-center gap-1 text-sm text-red-600 hover:text-red-700"
+                className="ml-auto flex items-center gap-1 text-sm text-red-400 hover:text-red-300"
               >
                 <X className="h-4 w-4" />
                 Clear all
@@ -324,13 +345,13 @@ export default function GlobalSpatialPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             {/* Search */}
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-metallic-500" />
               <input
                 type="text"
                 placeholder="Search companies..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full pl-10 pr-4 py-2 bg-metallic-800 border border-metallic-700 rounded-lg text-metallic-100 placeholder-metallic-500 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               />
             </div>
             
@@ -339,14 +360,14 @@ export default function GlobalSpatialPage() {
               <select
                 value={selectedExchange}
                 onChange={(e) => setSelectedExchange(e.target.value)}
-                className="w-full px-4 py-2 border rounded-lg appearance-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-4 py-2 bg-metallic-800 border border-metallic-700 rounded-lg text-metallic-100 appearance-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               >
                 <option value="">All Exchanges</option>
                 {filterOptions?.exchanges?.map((ex) => (
                   <option key={ex} value={ex}>{ex}</option>
                 ))}
               </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-metallic-500 pointer-events-none" />
             </div>
             
             {/* Commodity filter */}
@@ -354,14 +375,14 @@ export default function GlobalSpatialPage() {
               <select
                 value={selectedCommodity}
                 onChange={(e) => setSelectedCommodity(e.target.value)}
-                className="w-full px-4 py-2 border rounded-lg appearance-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-4 py-2 bg-metallic-800 border border-metallic-700 rounded-lg text-metallic-100 appearance-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               >
                 <option value="">All Commodities</option>
                 {filterOptions?.commodities?.map((c) => (
                   <option key={c} value={c}>{c}</option>
                 ))}
               </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-metallic-500 pointer-events-none" />
             </div>
             
             {/* Country filter */}
@@ -369,14 +390,14 @@ export default function GlobalSpatialPage() {
               <select
                 value={selectedCountry}
                 onChange={(e) => setSelectedCountry(e.target.value)}
-                className="w-full px-4 py-2 border rounded-lg appearance-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-4 py-2 bg-metallic-800 border border-metallic-700 rounded-lg text-metallic-100 appearance-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               >
                 <option value="">All Countries</option>
                 {filterOptions?.countries?.map((c) => (
                   <option key={c} value={c}>{c}</option>
                 ))}
               </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-metallic-500 pointer-events-none" />
             </div>
             
             {/* Company type filter */}
@@ -384,14 +405,14 @@ export default function GlobalSpatialPage() {
               <select
                 value={selectedType}
                 onChange={(e) => setSelectedType(e.target.value)}
-                className="w-full px-4 py-2 border rounded-lg appearance-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-4 py-2 bg-metallic-800 border border-metallic-700 rounded-lg text-metallic-100 appearance-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               >
                 <option value="">All Types</option>
                 {filterOptions?.company_types?.map((t) => (
                   <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>
                 ))}
               </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-metallic-500 pointer-events-none" />
             </div>
           </div>
         </div>
@@ -401,54 +422,54 @@ export default function GlobalSpatialPage() {
       <div className="max-w-7xl mx-auto px-4 py-4">
         {loading ? (
           <div className="flex items-center justify-center h-96">
-            <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+            <Loader2 className="h-8 w-8 animate-spin text-primary-500" />
           </div>
         ) : error ? (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-8 text-center">
-            <p className="text-red-600">{error}</p>
+          <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-8 text-center">
+            <p className="text-red-400">{error}</p>
           </div>
         ) : viewMode === 'list' ? (
           /* List View */
-          <div className="bg-white rounded-lg border overflow-hidden">
-            <div className="p-4 border-b bg-gray-50">
+          <div className="bg-metallic-900/50 rounded-lg border border-metallic-800 overflow-hidden">
+            <div className="p-4 border-b border-metallic-800 bg-metallic-800/50">
               <div className="flex items-center justify-between">
-                <h3 className="font-semibold text-gray-900">
-                  {filteredCompanies.length} Companies
+                <h3 className="font-semibold text-metallic-100">
+                  {filteredCompanies.length} Companies {searchQuery && `(filtered from ${companies.length})`}
                 </h3>
-                <span className="text-sm text-gray-500">
-                  {geoData?.metadata?.total_companies} total in database
+                <span className="text-sm text-metallic-400">
+                  {totalCompanies.toLocaleString()} total matching filters
                 </span>
               </div>
             </div>
             
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-50 border-b">
+                <thead className="bg-metallic-800/50 border-b border-metallic-700">
                   <tr>
-                    <th className="text-left px-4 py-3 text-sm font-semibold text-gray-600">Symbol</th>
-                    <th className="text-left px-4 py-3 text-sm font-semibold text-gray-600">Company</th>
-                    <th className="text-left px-4 py-3 text-sm font-semibold text-gray-600">Exchange</th>
-                    <th className="text-left px-4 py-3 text-sm font-semibold text-gray-600">Type</th>
-                    <th className="text-left px-4 py-3 text-sm font-semibold text-gray-600">Commodity</th>
-                    <th className="text-left px-4 py-3 text-sm font-semibold text-gray-600">Country</th>
+                    <th className="text-left px-4 py-3 text-sm font-semibold text-metallic-300">Symbol</th>
+                    <th className="text-left px-4 py-3 text-sm font-semibold text-metallic-300">Company</th>
+                    <th className="text-left px-4 py-3 text-sm font-semibold text-metallic-300">Exchange</th>
+                    <th className="text-left px-4 py-3 text-sm font-semibold text-metallic-300">Type</th>
+                    <th className="text-left px-4 py-3 text-sm font-semibold text-metallic-300">Commodity</th>
+                    <th className="text-left px-4 py-3 text-sm font-semibold text-metallic-300">Country</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y">
+                <tbody className="divide-y divide-metallic-800">
                   {filteredCompanies.map((company) => (
                     <tr 
                       key={`${company.exchange}-${company.symbol}`}
-                      className="hover:bg-gray-50 cursor-pointer"
+                      className="hover:bg-metallic-800/50 cursor-pointer transition-colors"
                       onClick={() => setSelectedCompany(company)}
                     >
                       <td className="px-4 py-3">
-                        <span className="font-mono font-semibold text-blue-600">
+                        <span className="font-mono font-semibold text-primary-400">
                           {company.symbol}
                         </span>
                       </td>
                       <td className="px-4 py-3">
-                        <div className="font-medium text-gray-900">{company.name}</div>
+                        <div className="font-medium text-metallic-100">{company.name}</div>
                         {company.description && (
-                          <div className="text-xs text-gray-500 truncate max-w-xs">
+                          <div className="text-xs text-metallic-500 truncate max-w-xs">
                             {company.description}
                           </div>
                         )}
@@ -463,21 +484,21 @@ export default function GlobalSpatialPage() {
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-1">
                           <CompanyTypeIcon type={company.company_type} />
-                          <span className="text-sm capitalize">{company.company_type}</span>
+                          <span className="text-sm text-metallic-200 capitalize">{company.company_type}</span>
                         </div>
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
                           <div className={`w-2 h-2 rounded-full ${
-                            commodityColors[company.primary_commodity.replace(' ', '_')] || 'bg-gray-400'
+                            commodityColors[company.primary_commodity.replace(' ', '_')] || 'bg-metallic-500'
                           }`} />
-                          <span className="text-sm">{company.primary_commodity}</span>
+                          <span className="text-sm text-metallic-200">{company.primary_commodity}</span>
                         </div>
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-1">
-                          <MapPin className="h-3 w-3 text-gray-400" />
-                          <span className="text-sm">{company.country}</span>
+                          <MapPin className="h-3 w-3 text-metallic-500" />
+                          <span className="text-sm text-metallic-200">{company.country}</span>
                         </div>
                       </td>
                     </tr>
@@ -485,18 +506,43 @@ export default function GlobalSpatialPage() {
                 </tbody>
               </table>
             </div>
+            
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="p-4 border-t border-metallic-800 flex items-center justify-between">
+                <span className="text-sm text-metallic-400">
+                  Page {currentPage} of {totalPages} ({totalCompanies.toLocaleString()} companies)
+                </span>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                    className="px-3 py-1 bg-metallic-800 border border-metallic-700 rounded text-sm text-metallic-300 hover:bg-metallic-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Previous
+                  </button>
+                  <button
+                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                    disabled={currentPage === totalPages}
+                    className="px-3 py-1 bg-metallic-800 border border-metallic-700 rounded text-sm text-metallic-300 hover:bg-metallic-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         ) : (
           /* Map View - Grouped by Country */
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {Object.entries(companiesByCountry).map(([country, companies]) => (
-              <div key={country} className="bg-white rounded-lg border overflow-hidden">
-                <div className="p-4 bg-gray-50 border-b flex items-center justify-between">
+              <div key={country} className="bg-metallic-900/50 rounded-lg border border-metallic-800 overflow-hidden">
+                <div className="p-4 bg-metallic-800/50 border-b border-metallic-700 flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <MapPin className="h-5 w-5 text-blue-500" />
-                    <h3 className="font-semibold text-gray-900">{country}</h3>
+                    <MapPin className="h-5 w-5 text-primary-400" />
+                    <h3 className="font-semibold text-metallic-100">{country}</h3>
                   </div>
-                  <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-sm font-medium">
+                  <span className="px-2 py-1 bg-primary-500/20 text-primary-400 border border-primary-500/30 rounded text-sm font-medium">
                     {companies.length}
                   </span>
                 </div>
@@ -504,18 +550,18 @@ export default function GlobalSpatialPage() {
                   {companies.map((company) => (
                     <div 
                       key={`${company.exchange}-${company.symbol}`}
-                      className="flex items-center justify-between p-2 hover:bg-gray-50 rounded cursor-pointer"
+                      className="flex items-center justify-between p-2 hover:bg-metallic-800/50 rounded cursor-pointer transition-colors"
                       onClick={() => setSelectedCompany(company)}
                     >
                       <div className="flex items-center gap-2">
                         <CompanyTypeIcon type={company.company_type} />
                         <div>
-                          <div className="font-medium text-sm">{company.symbol}</div>
-                          <div className="text-xs text-gray-500">{company.name}</div>
+                          <div className="font-medium text-sm text-metallic-100">{company.symbol}</div>
+                          <div className="text-xs text-metallic-400">{company.name}</div>
                         </div>
                       </div>
                       <span className={`px-2 py-0.5 rounded text-xs ${
-                        exchangeColors[company.exchange] || 'bg-gray-100 text-gray-800'
+                        exchangeColors[company.exchange] || 'bg-metallic-700 text-metallic-300'
                       }`}>
                         {company.exchange}
                       </span>
@@ -530,81 +576,81 @@ export default function GlobalSpatialPage() {
 
       {/* Company Detail Modal */}
       {selectedCompany && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-lg w-full max-h-[80vh] overflow-y-auto">
-            <div className="p-6 border-b flex items-start justify-between">
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+          <div className="bg-metallic-900 border border-metallic-700 rounded-lg max-w-lg w-full max-h-[80vh] overflow-y-auto">
+            <div className="p-6 border-b border-metallic-700 flex items-start justify-between">
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="font-mono text-xl font-bold text-blue-600">
+                  <span className="font-mono text-xl font-bold text-primary-400">
                     {selectedCompany.symbol}
                   </span>
                   <span className={`px-2 py-1 rounded text-xs font-medium ${
-                    exchangeColors[selectedCompany.exchange] || 'bg-gray-100 text-gray-800'
+                    exchangeColors[selectedCompany.exchange] || 'bg-metallic-700 text-metallic-300'
                   }`}>
                     {selectedCompany.exchange}
                   </span>
                 </div>
-                <h2 className="text-lg font-semibold text-gray-900 mt-1">
+                <h2 className="text-lg font-semibold text-metallic-100 mt-1">
                   {selectedCompany.name}
                 </h2>
               </div>
               <button
                 onClick={() => setSelectedCompany(null)}
-                className="p-2 hover:bg-gray-100 rounded-full"
+                className="p-2 hover:bg-metallic-800 rounded-full transition-colors"
               >
-                <X className="h-5 w-5 text-gray-500" />
+                <X className="h-5 w-5 text-metallic-400" />
               </button>
             </div>
             
             <div className="p-6 space-y-4">
               {selectedCompany.description && (
-                <p className="text-gray-600">{selectedCompany.description}</p>
+                <p className="text-metallic-300">{selectedCompany.description}</p>
               )}
               
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <div className="text-sm text-gray-500">Company Type</div>
+                  <div className="text-sm text-metallic-500">Company Type</div>
                   <div className="flex items-center gap-1 mt-1">
                     <CompanyTypeIcon type={selectedCompany.company_type} />
-                    <span className="font-medium capitalize">{selectedCompany.company_type}</span>
+                    <span className="font-medium text-metallic-100 capitalize">{selectedCompany.company_type}</span>
                   </div>
                 </div>
                 
                 <div>
-                  <div className="text-sm text-gray-500">Primary Commodity</div>
+                  <div className="text-sm text-metallic-500">Primary Commodity</div>
                   <div className="flex items-center gap-2 mt-1">
                     <div className={`w-3 h-3 rounded-full ${
-                      commodityColors[selectedCompany.primary_commodity.replace(' ', '_')] || 'bg-gray-400'
+                      commodityColors[selectedCompany.primary_commodity.replace(' ', '_')] || 'bg-metallic-500'
                     }`} />
-                    <span className="font-medium">{selectedCompany.primary_commodity}</span>
+                    <span className="font-medium text-metallic-100">{selectedCompany.primary_commodity}</span>
                   </div>
                 </div>
                 
                 <div>
-                  <div className="text-sm text-gray-500">Operations</div>
+                  <div className="text-sm text-metallic-500">Operations</div>
                   <div className="flex items-center gap-1 mt-1">
-                    <MapPin className="h-4 w-4 text-gray-400" />
-                    <span className="font-medium">{selectedCompany.country}</span>
+                    <MapPin className="h-4 w-4 text-metallic-500" />
+                    <span className="font-medium text-metallic-100">{selectedCompany.country}</span>
                   </div>
                 </div>
                 
                 <div>
-                  <div className="text-sm text-gray-500">Headquarters</div>
+                  <div className="text-sm text-metallic-500">Headquarters</div>
                   <div className="flex items-center gap-1 mt-1">
-                    <Building2 className="h-4 w-4 text-gray-400" />
-                    <span className="font-medium">{selectedCompany.headquarters}</span>
+                    <Building2 className="h-4 w-4 text-metallic-500" />
+                    <span className="font-medium text-metallic-100">{selectedCompany.headquarters}</span>
                   </div>
                 </div>
               </div>
               
               {selectedCompany.secondary_commodities?.length > 0 && (
                 <div>
-                  <div className="text-sm text-gray-500 mb-2">Secondary Commodities</div>
+                  <div className="text-sm text-metallic-500 mb-2">Secondary Commodities</div>
                   <div className="flex flex-wrap gap-2">
                     {selectedCompany.secondary_commodities.map((c) => (
                       <span 
                         key={c}
-                        className="px-2 py-1 bg-gray-100 rounded text-sm"
+                        className="px-2 py-1 bg-metallic-800 border border-metallic-700 rounded text-sm text-metallic-200"
                       >
                         {c}
                       </span>
@@ -615,8 +661,8 @@ export default function GlobalSpatialPage() {
               
               {selectedCompany.latitude && selectedCompany.longitude && (
                 <div>
-                  <div className="text-sm text-gray-500 mb-2">Location</div>
-                  <div className="text-sm font-mono text-gray-600">
+                  <div className="text-sm text-metallic-500 mb-2">Location</div>
+                  <div className="text-sm font-mono text-metallic-300">
                     {selectedCompany.latitude.toFixed(4)}°, {selectedCompany.longitude.toFixed(4)}°
                   </div>
                 </div>
