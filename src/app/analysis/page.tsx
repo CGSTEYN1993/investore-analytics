@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, Suspense } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { 
   BarChart3, Globe, Building2, MapPin, Hammer, TrendingUp, 
@@ -9,8 +9,21 @@ import {
 } from 'lucide-react';
 import ExcavatorLoader from '@/components/ui/ExcavatorLoader';
 
-// Analysis category cards
-const analysisCategories = [
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+
+// Analysis category cards - dynamic stats will be updated via API
+const baseCategories = [
+  {
+    id: 'global',
+    title: 'Global Spatial View',
+    description: 'Mining companies across global exchanges & countries',
+    icon: Globe,
+    href: '/analysis/global',
+    color: 'from-indigo-500 to-purple-600',
+    statsKey: 'totalCompanies', // Dynamic key
+    statsLabel: 'Companies',
+    featured: true,
+  },
   {
     id: 'australia',
     title: 'Australia Mining Map',
@@ -18,7 +31,8 @@ const analysisCategories = [
     icon: MapPin,
     href: '/analysis/australia',
     color: 'from-green-500 to-emerald-600',
-    stats: 'Live GA Data',
+    statsKey: 'asxCompanies',
+    statsLabel: 'ASX Companies',
     featured: true,
   },
   {
@@ -28,7 +42,8 @@ const analysisCategories = [
     icon: BarChart3,
     href: '/analysis/mining-analytics',
     color: 'from-cyan-500 to-blue-600',
-    stats: 'Real-time Insights',
+    statsKey: null,
+    statsLabel: 'Real-time Insights',
     featured: true,
   },
   {
@@ -38,7 +53,8 @@ const analysisCategories = [
     icon: Gem,
     href: '/analysis/commodities',
     color: 'from-amber-500 to-amber-600',
-    stats: '30+ Commodities',
+    statsKey: 'totalCommodities',
+    statsLabel: 'Commodities',
   },
   {
     id: 'exchanges',
@@ -47,7 +63,8 @@ const analysisCategories = [
     icon: Building2,
     href: '/analysis/exchanges',
     color: 'from-blue-500 to-blue-600',
-    stats: '50+ Exchanges',
+    statsKey: 'totalExchanges',
+    statsLabel: 'Exchanges',
   },
   {
     id: 'countries',
@@ -56,7 +73,8 @@ const analysisCategories = [
     icon: Globe,
     href: '/analysis/countries',
     color: 'from-green-500 to-green-600',
-    stats: '180+ Countries',
+    statsKey: 'totalCountries',
+    statsLabel: 'Countries',
   },
   {
     id: 'map',
@@ -65,7 +83,8 @@ const analysisCategories = [
     icon: MapPin,
     href: '/analysis/map',
     color: 'from-purple-500 to-purple-600',
-    stats: '50,000+ Projects',
+    statsKey: null,
+    statsLabel: 'Interactive Map',
     premium: true,
   },
   {
@@ -75,7 +94,8 @@ const analysisCategories = [
     icon: Hammer,
     href: '/analysis/stages',
     color: 'from-orange-500 to-orange-600',
-    stats: 'All Stages',
+    statsKey: null,
+    statsLabel: 'All Stages',
   },
   {
     id: 'exploration',
@@ -84,7 +104,8 @@ const analysisCategories = [
     icon: Factory,
     href: '/analysis/exploration',
     color: 'from-red-500 to-red-600',
-    stats: 'All Data Types',
+    statsKey: null,
+    statsLabel: 'All Data Types',
     premium: true,
   },
   {
@@ -94,7 +115,8 @@ const analysisCategories = [
     icon: TrendingUp,
     href: '/analysis/market',
     color: 'from-cyan-500 to-cyan-600',
-    stats: 'Real-time',
+    statsKey: null,
+    statsLabel: 'Real-time',
   },
   {
     id: 'announcements',
@@ -103,7 +125,8 @@ const analysisCategories = [
     icon: FileText,
     href: '/analysis/announcements',
     color: 'from-pink-500 to-pink-600',
-    stats: '24/7 Updates',
+    statsKey: null,
+    statsLabel: '24/7 Updates',
   },
   {
     id: 'constraints',
@@ -112,22 +135,48 @@ const analysisCategories = [
     icon: MapPin,
     href: '/analysis/constraints',
     color: 'from-amber-500 to-amber-600',
-    stats: 'Compliance',
+    statsKey: null,
+    statsLabel: 'Compliance',
     premium: true,
   },
 ];
 
-// Quick stats (would be fetched from API)
-const quickStats = [
-  { label: 'Companies Tracked', value: '4,500+' },
-  { label: 'Projects', value: '50,000+' },
-  { label: 'Countries', value: '180+' },
-  { label: 'Daily Updates', value: '10,000+' },
-];
+// Interface for dynamic stats from API
+interface SpatialSummary {
+  total_companies: number;
+  by_exchange: Record<string, number>;
+  by_commodity: [string, number][];
+  total_countries: number;
+}
 
-function CategoryCard({ category }: { category: typeof analysisCategories[0] }) {
+function CategoryCard({ category, dynamicStats }: { 
+  category: typeof baseCategories[0],
+  dynamicStats: SpatialSummary | null 
+}) {
   const Icon = category.icon;
   const isFeatured = 'featured' in category && category.featured;
+  
+  // Calculate dynamic stat value based on statsKey
+  const getStatValue = () => {
+    if (!dynamicStats || !category.statsKey) {
+      return category.statsLabel;
+    }
+    
+    switch (category.statsKey) {
+      case 'totalCompanies':
+        return `${dynamicStats.total_companies.toLocaleString()} ${category.statsLabel}`;
+      case 'asxCompanies':
+        return `${(dynamicStats.by_exchange?.ASX || 0).toLocaleString()} ${category.statsLabel}`;
+      case 'totalCommodities':
+        return `${dynamicStats.by_commodity?.length || 0}+ ${category.statsLabel}`;
+      case 'totalExchanges':
+        return `${Object.keys(dynamicStats.by_exchange || {}).length} ${category.statsLabel}`;
+      case 'totalCountries':
+        return `${dynamicStats.total_countries} ${category.statsLabel}`;
+      default:
+        return category.statsLabel;
+    }
+  };
   
   return (
     <Link
@@ -159,7 +208,7 @@ function CategoryCard({ category }: { category: typeof analysisCategories[0] }) 
         {category.description}
       </p>
       <div className="flex items-center justify-between">
-        <span className="text-xs text-metallic-500">{category.stats}</span>
+        <span className="text-xs text-metallic-500">{getStatValue()}</span>
         <ChevronRight className="w-4 h-4 text-metallic-600 group-hover:text-primary-400 group-hover:translate-x-1 transition-all" />
       </div>
     </Link>
@@ -168,6 +217,37 @@ function CategoryCard({ category }: { category: typeof analysisCategories[0] }) 
 
 export default function AnalysisDashboard() {
   const [isLoading, setIsLoading] = useState(false);
+  const [dynamicStats, setDynamicStats] = useState<SpatialSummary | null>(null);
+  
+  // Fetch dynamic stats from the API
+  useEffect(() => {
+    async function fetchStats() {
+      try {
+        const response = await fetch(`${API_BASE}/api/v1/spatial/summary`);
+        if (response.ok) {
+          const data = await response.json();
+          setDynamicStats(data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch spatial summary:', err);
+      }
+    }
+    fetchStats();
+  }, []);
+
+  // Quick stats derived from API data
+  const quickStats = [
+    { 
+      label: 'Companies Tracked', 
+      value: dynamicStats ? `${dynamicStats.total_companies.toLocaleString()}+` : '1,000+' 
+    },
+    { label: 'Projects', value: '50,000+' },
+    { 
+      label: 'Countries', 
+      value: dynamicStats ? `${dynamicStats.total_countries}+` : '40+' 
+    },
+    { label: 'Daily Updates', value: '10,000+' },
+  ];
 
   // Show excavator loader when loading
   if (isLoading) {
@@ -227,8 +307,8 @@ export default function AnalysisDashboard() {
         <section className="mb-12">
           <h2 className="text-xl font-semibold text-metallic-100 mb-6">Analysis Categories</h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {analysisCategories.map((category) => (
-              <CategoryCard key={category.id} category={category} />
+            {baseCategories.map((category) => (
+              <CategoryCard key={category.id} category={category} dynamicStats={dynamicStats} />
             ))}
           </div>
         </section>
