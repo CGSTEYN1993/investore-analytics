@@ -3,7 +3,7 @@
 import React, { useMemo } from 'react';
 import Link from 'next/link';
 import { 
-  Database, TrendingUp, MapPin, Pickaxe, Gem, Mountain, 
+  Database, TrendingUp, MapPin, Hammer, Gem, Mountain, 
   BarChart3, PieChart, Loader2, RefreshCw, ArrowUpRight,
   Building2, Globe, Zap, AlertCircle
 } from 'lucide-react';
@@ -403,7 +403,7 @@ export default function AnalyticsDashboardPage() {
                 title="Operating Mines"
                 value={data?.operating_mines.length || 0}
                 subtitle="Active mining operations across Australia"
-                icon={Pickaxe}
+                icon={Hammer}
                 color="#22c55e"
               />
               <StatCard
