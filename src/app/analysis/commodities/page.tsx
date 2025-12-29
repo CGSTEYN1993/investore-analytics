@@ -148,13 +148,14 @@ export default function CommoditiesAnalysis() {
       {/* Header */}
       <div className="bg-metallic-900/50 border-b border-metallic-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <Link
+            href="/analysis"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-metallic-800/80 hover:bg-metallic-700 border border-metallic-700 rounded-md text-sm text-metallic-300 hover:text-metallic-100 transition-colors mb-4"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>Dashboard</span>
+          </Link>
           <div className="flex items-center gap-4 mb-4">
-            <Link 
-              href="/analysis" 
-              className="p-2 rounded-lg hover:bg-metallic-800 transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5 text-metallic-400" />
-            </Link>
             <div>
               <h1 className="text-2xl font-bold text-metallic-100">Analysis by Commodity</h1>
               <p className="text-metallic-400 text-sm">Explore mining companies by commodity type</p>

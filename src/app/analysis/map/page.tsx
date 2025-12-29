@@ -6,7 +6,7 @@ import {
   Search, Filter, ChevronDown, MapPin, Layers, ZoomIn, ZoomOut,
   ArrowUpRight, ArrowDownRight, Building2, X, Maximize2, Drill,
   Mountain, Droplets, Waves, Shield, TreePine, Users, Landmark,
-  AlertTriangle
+  AlertTriangle, ArrowLeft
 } from 'lucide-react';
 import { getCommodityColor } from '@/lib/subscription-tiers';
 
@@ -664,6 +664,13 @@ export default function MapPage() {
       {/* Header */}
       <div className="bg-metallic-900/50 border-b border-metallic-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <Link
+            href="/analysis"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-metallic-800/80 hover:bg-metallic-700 border border-metallic-700 rounded-md text-sm text-metallic-300 hover:text-metallic-100 transition-colors mb-4 w-fit"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>Dashboard</span>
+          </Link>
           <div className="mb-6">
             <div className="flex items-center gap-2 text-sm text-metallic-400 mb-2">
               <Link href="/analysis" className="hover:text-primary-400">Analysis</Link>

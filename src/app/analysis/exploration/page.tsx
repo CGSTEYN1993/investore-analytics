@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import {
   Drill,
   Mountain,
@@ -14,6 +15,7 @@ import {
   Download,
   Eye,
   Plus,
+  ArrowLeft,
 } from "lucide-react";
 
 // Exploration data types
@@ -445,6 +447,13 @@ export default function ExplorationPage() {
       {/* Header */}
       <div className="border-b border-gray-800 bg-gray-900/95 backdrop-blur sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 py-4">
+          <Link
+            href="/analysis"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-800/80 hover:bg-gray-700 border border-gray-700 rounded-md text-sm text-gray-300 hover:text-gray-100 transition-colors mb-4 w-fit"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>Dashboard</span>
+          </Link>
           <div className="flex items-center justify-between mb-4">
             <div>
               <h1 className="text-2xl font-bold">Exploration Data</h1>

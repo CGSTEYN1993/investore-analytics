@@ -17,8 +17,10 @@ import {
   Compass,
   Hammer,
   Crown,
-  Layers
+  Layers,
+  ArrowLeft
 } from 'lucide-react';
+import Link from 'next/link';
 
 // Lazy load the map component to avoid SSR issues
 const GlobalMiningMap = lazy(() => import('@/components/maps/GlobalMiningMap'));
@@ -264,15 +266,24 @@ export default function GlobalSpatialPage() {
       <div className="bg-metallic-900/50 border-b border-metallic-800">
         <div className="max-w-7xl mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-primary-500/20 rounded-lg border border-primary-500/30">
-                <Globe className="h-6 w-6 text-primary-400" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-metallic-100">Global Spatial View</h1>
-                <p className="text-sm text-metallic-400">
-                  Mining & exploration companies across {filterOptions?.exchanges?.length || 0} exchanges
-                </p>
+            <div className="flex items-center gap-4">
+              <Link
+                href="/analysis"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-metallic-800/80 hover:bg-metallic-700 border border-metallic-700 rounded-md text-sm text-metallic-300 hover:text-metallic-100 transition-colors"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                <span>Dashboard</span>
+              </Link>
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-primary-500/20 rounded-lg border border-primary-500/30">
+                  <Globe className="h-6 w-6 text-primary-400" />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold text-metallic-100">Global Spatial View</h1>
+                  <p className="text-sm text-metallic-400">
+                    Mining & exploration companies across {filterOptions?.exchanges?.length || 0} exchanges
+                  </p>
+                </div>
               </div>
             </div>
             
