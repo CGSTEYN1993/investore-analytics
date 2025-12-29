@@ -20,113 +20,56 @@ const announcementTypes = [
   { id: 'corporate', name: 'Corporate News', color: '#8B5CF6' },
   { id: 'regulatory', name: 'Regulatory Filings', color: '#EF4444' },
   { id: 'operational', name: 'Operational Updates', color: '#06B6D4' },
+  { id: 'general', name: 'General', color: '#6B7280' },
 ];
 
-// Mock announcements
-const announcements = [
-  {
-    id: 1,
-    company: 'Goldstrike Resources',
-    ticker: 'GSR',
-    commodity: 'Au',
-    type: 'drilling',
-    title: 'High-Grade Gold Intersected at Red Lake Extension - 12.3 g/t Au over 8.5m',
-    summary: 'Goldstrike Resources reports exceptional drill results from its ongoing drilling program at Red Lake Extension, intersecting 12.3 g/t Au over 8.5 meters in hole GS-042.',
-    date: '2024-12-05',
-    time: '08:30 AM',
-    priceChange: 15.8,
-    source: 'PR Newswire',
-    isBreaking: true,
-  },
-  {
-    id: 2,
-    company: 'Lithium Americas',
-    ticker: 'LAC',
-    commodity: 'Li',
-    type: 'resource',
-    title: 'Updated NI 43-101 Resource Estimate Increases Measured & Indicated Resources by 45%',
-    summary: 'Lithium Americas announces a significant increase in lithium carbonate equivalent resources at its Thacker Pass project following completion of infill drilling program.',
-    date: '2024-12-05',
-    time: '07:00 AM',
-    priceChange: 8.2,
-    source: 'Company Website',
-    isBreaking: false,
-  },
-  {
-    id: 3,
-    company: 'Barrick Gold',
-    ticker: 'ABX',
-    commodity: 'Au',
-    type: 'financial',
-    title: 'Q3 2024 Financial Results - Production Guidance Maintained',
-    summary: 'Barrick Gold Corporation reports Q3 2024 results with gold production of 1.04Moz and copper production of 48Kt, maintaining full-year guidance.',
-    date: '2024-12-04',
-    time: '04:30 PM',
-    priceChange: 2.3,
-    source: 'SEDAR+',
-    isBreaking: false,
-  },
-  {
-    id: 4,
-    company: 'Uranium Energy Corp',
-    ticker: 'UEC',
-    commodity: 'U',
-    type: 'corporate',
-    title: 'Uranium Energy Completes Acquisition of Uranium One Americas',
-    summary: 'Uranium Energy Corp announces successful completion of its strategic acquisition, adding significant uranium resources and permitted ISR operations.',
-    date: '2024-12-04',
-    time: '09:15 AM',
-    priceChange: 12.5,
-    source: 'Business Wire',
-    isBreaking: false,
-  },
-  {
-    id: 5,
-    company: 'Copper Mountain Mining',
-    ticker: 'CMMC',
-    commodity: 'Cu',
-    type: 'operational',
-    title: 'Record Mill Throughput Achieved at Copper Mountain Mine',
-    summary: 'Copper Mountain Mining reports record daily mill throughput of 48,000 tonnes, exceeding nameplate capacity by 20% following optimization program.',
-    date: '2024-12-03',
-    time: '11:00 AM',
-    priceChange: 5.4,
-    source: 'Company Website',
-    isBreaking: false,
-  },
-  {
-    id: 6,
-    company: 'Silver Wheaton',
-    ticker: 'SLW',
-    commodity: 'Ag',
-    type: 'regulatory',
-    title: 'Form 40-F Annual Information Form Filed',
-    summary: 'Silver Wheaton Corp. has filed its Annual Information Form for the fiscal year ended December 31, 2023 with the SEC.',
-    date: '2024-12-03',
-    time: '03:45 PM',
-    priceChange: -0.8,
-    source: 'EDGAR',
-    isBreaking: false,
-  },
-  {
-    id: 7,
-    company: 'Nickel North',
-    ticker: 'NNI',
-    commodity: 'Ni',
-    type: 'drilling',
-    title: 'Massive Sulfide Intersection Confirms New Discovery Zone',
-    summary: 'Nickel North reports discovery of a new massive sulfide zone at Sudbury Extension, with hole NNI-015 intersecting 4.2% Ni over 12.8m.',
-    date: '2024-12-02',
-    time: '08:00 AM',
-    priceChange: 18.3,
-    source: 'PR Newswire',
-    isBreaking: false,
-  },
-];
+// Map commodity names to short codes
+const commodityToCode = (commodity: string): string => {
+  const map: Record<string, string> = {
+    'gold': 'Au', 'Gold': 'Au',
+    'silver': 'Ag', 'Silver': 'Ag',
+    'copper': 'Cu', 'Copper': 'Cu',
+    'lithium': 'Li', 'Lithium': 'Li',
+    'nickel': 'Ni', 'Nickel': 'Ni',
+    'uranium': 'U', 'Uranium': 'U',
+    'zinc': 'Zn', 'Zinc': 'Zn',
+    'iron': 'Fe', 'Iron': 'Fe', 'Iron Ore': 'Fe',
+    'coal': 'C', 'Coal': 'C',
+    'rare earths': 'REE', 'Rare Earths': 'REE',
+    'cobalt': 'Co', 'Cobalt': 'Co',
+    'platinum': 'Pt', 'Platinum': 'Pt',
+    'palladium': 'Pd', 'Palladium': 'Pd',
+  };
+  return map[commodity] || commodity?.substring(0, 2) || 'Au';
+};
+
+// Announcement type interface
+interface Announcement {
+  id: string | number;
+  company: string;
+  ticker: string;
+  commodity: string;
+  type: string;
+  title: string;
+  summary: string;
+  date: string;
+  time: string;
+  priceChange: number;
+  source: string;
+  isBreaking: boolean;
+  url?: string;
+}
 
 function TypeBadge({ type }: { type: string }) {
   const typeConfig = announcementTypes.find(t => t.id === type);
-  if (!typeConfig) return null;
+  if (!typeConfig) {
+    // Fallback for unmapped types
+    return (
+      <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-gray-500/20 text-gray-400">
+        {type}
+      </span>
+    );
+  }
 
   return (
     <span 
@@ -138,7 +81,7 @@ function TypeBadge({ type }: { type: string }) {
   );
 }
 
-function AnnouncementCard({ announcement }: { announcement: typeof announcements[0] }) {
+function AnnouncementCard({ announcement }: { announcement: Announcement }) {
   const isPositive = announcement.priceChange >= 0;
   const commodityColor = getCommodityColor(announcement.commodity);
 
@@ -301,11 +244,11 @@ export default function AnnouncementsPage() {
   }, [selectedExchange, dateRange]);
 
   // Transform API announcements to display format
-  const transformedAnnouncements = feedAnnouncements.map((ann: any) => ({
+  const transformedAnnouncements: Announcement[] = feedAnnouncements.map((ann: any) => ({
     id: ann.id || ann.symbol + ann.date,
     company: ann.company_name,
     ticker: ann.symbol,
-    commodity: ann.commodity?.substring(0, 2) || 'Au',
+    commodity: commodityToCode(ann.commodity),
     type: mapTypeForFilter(ann.announcement_type),
     title: ann.title,
     summary: '',
@@ -317,28 +260,11 @@ export default function AnnouncementsPage() {
                  ann.sentiment === 'very_negative' ? -15 : 0,
     source: selectedExchange,
     isBreaking: ann.is_price_sensitive,
-    sentiment: ann.sentiment,
     url: ann.url,
-    relevanceScore: ann.relevance_score
   }));
 
-  // Combine API data with mock data as fallback
-  const allAnnouncements = transformedAnnouncements.length > 0 ? transformedAnnouncements : [...promisingStocks.map((p: any) => ({
-    id: p.symbol + p.date,
-    company: p.company_name,
-    ticker: p.symbol,
-    commodity: p.primary_commodity?.substring(0, 2) || 'Au',
-    type: mapTypeForFilter(p.announcement_type) || 'general',
-    title: p.title,
-    summary: '',
-    date: new Date(p.date).toLocaleDateString(),
-    time: new Date(p.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-    priceChange: p.relevance_score * 100 - 50, // Mock price change based on relevance
-    source: selectedExchange,
-    isBreaking: p.is_price_sensitive,
-    sentiment: p.sentiment,
-    url: p.url
-  }))];
+  // Use transformed API data (no fallback to mock data)
+  const allAnnouncements: Announcement[] = transformedAnnouncements;
 
   const filteredAnnouncements = allAnnouncements.filter(a => {
     const matchesSearch = 
