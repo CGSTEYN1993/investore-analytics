@@ -174,6 +174,34 @@ export const marketService = {
     return fetchMarket<MarketDashboard>('/dashboard');
   },
   
+  // ========== Exchange-Specific ==========
+  
+  /**
+   * Get list of all supported exchanges with company counts
+   */
+  async getExchanges(): Promise<ExchangeListResponse> {
+    return fetchMarket<ExchangeListResponse>('/exchanges');
+  },
+  
+  /**
+   * Get mining overview for a specific exchange
+   */
+  async getExchangeOverview(exchange: string): Promise<ExchangeOverview> {
+    return fetchMarket<ExchangeOverview>(`/exchange/${exchange}/overview`);
+  },
+  
+  /**
+   * Get companies for a specific exchange
+   */
+  async getExchangeCompanies(
+    exchange: string, 
+    limit = 100, 
+    offset = 0, 
+    commodity?: string
+  ): Promise<ExchangeCompaniesResponse> {
+    return fetchMarket(`/exchange/${exchange}/companies`, { limit, offset, commodity });
+  },
+  
   // ========== Finnhub Fallback ==========
   
   /**
@@ -230,5 +258,64 @@ export const marketService = {
     return fetchMarket('/news', { category });
   },
 };
+
+// ========== Exchange Types ==========
+
+export interface ExchangeInfo {
+  code: string;
+  name: string;
+  count: number;
+  currency: string;
+  country: string;
+}
+
+export interface ExchangeListResponse {
+  exchanges: ExchangeInfo[];
+  totalCompanies: number;
+  timestamp: string;
+}
+
+export interface ExchangeOverview {
+  exchange: string;
+  exchangeName: string;
+  currency: string;
+  summary: {
+    totalStocks: number;
+    totalMarketCap: number;
+    totalVolume: number;
+    averageChange: number;
+    gainers: number;
+    losers: number;
+    unchanged: number;
+  };
+  byMarketCap: {
+    large_cap: { count: number; stocks: ASXStockQuote[]; totalMarketCap: number };
+    mid_cap: { count: number; stocks: ASXStockQuote[]; totalMarketCap: number };
+    small_cap: { count: number; stocks: ASXStockQuote[]; totalMarketCap: number };
+  };
+  topMovers: {
+    gainers: ASXStockQuote[];
+    losers: ASXStockQuote[];
+    mostActive: ASXStockQuote[];
+  };
+  stocks: { symbol: string; name: string; commodity: string; marketCap: number }[];
+  timestamp: string;
+}
+
+export interface ExchangeCompaniesResponse {
+  exchange: string;
+  companies: {
+    ticker: string;
+    name: string;
+    commodity: string;
+    marketCap: number;
+    website?: string;
+    description?: string;
+  }[];
+  count: number;
+  offset: number;
+  limit: number;
+  timestamp: string;
+}
 
 export default marketService;

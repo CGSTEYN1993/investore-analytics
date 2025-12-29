@@ -7,9 +7,9 @@ import {
   TrendingUp, TrendingDown, RefreshCw, Loader2, Search, 
   ArrowUpRight, ArrowDownRight, Building2, DollarSign,
   BarChart3, Activity, Gem, Fuel, Zap, Factory, ChevronDown,
-  Filter, Clock, AlertCircle, Globe, ArrowLeft
+  Filter, Clock, AlertCircle, Globe, ArrowLeft, MapPin
 } from 'lucide-react';
-import marketService from '@/services/marketService';
+import marketService, { ExchangeOverview } from '@/services/marketService';
 import { 
   ASXStockQuote,
   CommodityPrice,
@@ -24,6 +24,47 @@ import {
   getMarketCapColor,
   getCommodityCategoryColor,
 } from '@/types/market';
+
+// ========== Exchange Configuration ==========
+const EXCHANGES = [
+  { code: 'ASX', name: 'Australian Securities Exchange', flag: '🇦🇺', currency: 'AUD' },
+  { code: 'TSX', name: 'Toronto Stock Exchange', flag: '🇨🇦', currency: 'CAD' },
+  { code: 'TSXV', name: 'TSX Venture Exchange', flag: '🇨🇦', currency: 'CAD' },
+  { code: 'CSE', name: 'Canadian Securities Exchange', flag: '🇨🇦', currency: 'CAD' },
+  { code: 'JSE', name: 'Johannesburg Stock Exchange', flag: '🇿🇦', currency: 'ZAR' },
+  { code: 'NYSE', name: 'New York Stock Exchange', flag: '🇺🇸', currency: 'USD' },
+  { code: 'LSE', name: 'London Stock Exchange', flag: '🇬🇧', currency: 'GBP' },
+];
+
+// ========== Exchange Tab Button ==========
+function ExchangeTab({ 
+  exchange, 
+  isActive, 
+  onClick, 
+  count 
+}: { 
+  exchange: typeof EXCHANGES[0]; 
+  isActive: boolean; 
+  onClick: () => void;
+  count?: number;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`px-3 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${
+        isActive 
+          ? 'bg-primary-500/20 text-primary-400 border border-primary-500/30' 
+          : 'bg-metallic-800/50 text-metallic-400 hover:text-metallic-200 hover:bg-metallic-800 border border-transparent'
+      }`}
+    >
+      <span className="text-base">{exchange.flag}</span>
+      <span>{exchange.code}</span>
+      {count !== undefined && count > 0 && (
+        <span className="text-xs text-metallic-500">({count})</span>
+      )}
+    </button>
+  );
+}
 
 // ========== Stock Card Component ==========
 function StockCard({ stock, onClick, isSelected }: { 
@@ -188,22 +229,53 @@ function MarketCapTab({
 
 // ========== Main Page Component ==========
 export default function MarketPage() {
+  const [selectedExchange, setSelectedExchange] = useState<string>('ASX');
   const [selectedCapCategory, setSelectedCapCategory] = useState<MarketCapCategory | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStock, setSelectedStock] = useState<string | null>(null);
 
-  // Fetch dashboard data
-  const { data: dashboard, isLoading, error, refetch, isFetching } = useQuery({
-    queryKey: ['market-dashboard'],
-    queryFn: () => marketService.getDashboard(),
-    refetchInterval: 60000, // Refresh every minute
-    staleTime: 30000,
+  // Fetch exchanges with counts
+  const { data: exchangesData } = useQuery({
+    queryKey: ['exchanges'],
+    queryFn: () => marketService.getExchanges(),
+    staleTime: 300000, // 5 min cache
   });
 
-  // Extract data from dashboard
-  const miningData = dashboard?.mining;
-  const topMovers = dashboard?.topMovers;
+  // Fetch ASX dashboard for real-time data when ASX is selected
+  const { data: dashboard, isLoading: isLoadingASX, error: asxError, refetch: refetchASX, isFetching: isFetchingASX } = useQuery({
+    queryKey: ['market-dashboard'],
+    queryFn: () => marketService.getDashboard(),
+    refetchInterval: 60000,
+    staleTime: 30000,
+    enabled: selectedExchange === 'ASX',
+  });
+
+  // Fetch exchange-specific data for non-ASX exchanges
+  const { data: exchangeData, isLoading: isLoadingExchange, error: exchangeError, refetch: refetchExchange, isFetching: isFetchingExchange } = useQuery({
+    queryKey: ['exchange-overview', selectedExchange],
+    queryFn: () => marketService.getExchangeOverview(selectedExchange),
+    refetchInterval: 120000,
+    staleTime: 60000,
+    enabled: selectedExchange !== 'ASX',
+  });
+
+  // Determine which data to use based on selected exchange
+  const isASX = selectedExchange === 'ASX';
+  const isLoading = isASX ? isLoadingASX : isLoadingExchange;
+  const isFetching = isASX ? isFetchingASX : isFetchingExchange;
+  const error = isASX ? asxError : exchangeError;
+  const refetch = isASX ? refetchASX : refetchExchange;
+
+  // Extract data from dashboard or exchange data
+  const miningData = isASX ? dashboard?.mining : exchangeData;
+  const topMovers = isASX ? dashboard?.topMovers : exchangeData?.topMovers;
   const commodityData = dashboard?.commodities;
+
+  const currentExchange = EXCHANGES.find(e => e.code === selectedExchange) || EXCHANGES[0];
+  const exchangeCounts = exchangesData?.exchanges?.reduce((acc, ex) => {
+    acc[ex.code] = ex.count;
+    return acc;
+  }, {} as Record<string, number>) || {};
 
   // Filter stocks by market cap and search
   const filteredStocks = useMemo(() => {
@@ -237,10 +309,18 @@ export default function MarketPage() {
   const categoryMovers = useMemo(() => {
     if (!topMovers) return null;
     
-    if (selectedCapCategory === 'all') {
-      return topMovers.overall;
+    // For non-ASX exchanges, topMovers has a different structure
+    if ('gainers' in topMovers && !('overall' in topMovers)) {
+      return topMovers as { gainers: ASXStockQuote[]; losers: ASXStockQuote[]; mostActive: ASXStockQuote[] };
     }
-    return topMovers.byMarketCap?.[selectedCapCategory];
+    
+    // For ASX dashboard format
+    const asxMovers = topMovers as { overall?: { gainers: ASXStockQuote[]; losers: ASXStockQuote[]; mostActive: ASXStockQuote[] }; byMarketCap?: Record<string, { gainers: ASXStockQuote[]; losers: ASXStockQuote[]; mostActive: ASXStockQuote[] }> };
+    
+    if (selectedCapCategory === 'all') {
+      return asxMovers.overall;
+    }
+    return asxMovers.byMarketCap?.[selectedCapCategory];
   }, [topMovers, selectedCapCategory]);
 
   if (error) {
@@ -275,11 +355,15 @@ export default function MarketPage() {
             <ArrowLeft className="w-4 h-4" />
             <span>Dashboard</span>
           </Link>
-          <div className="flex items-center justify-between">
+          
+          <div className="flex items-center justify-between mb-4">
             <div>
-              <h1 className="text-2xl font-bold text-metallic-100">ASX Mining Market</h1>
+              <h1 className="text-2xl font-bold text-metallic-100 flex items-center gap-2">
+                <span className="text-2xl">{currentExchange.flag}</span>
+                {currentExchange.name}
+              </h1>
               <p className="text-sm text-metallic-500">
-                Real-time data from ASX via Markit Digital
+                {isASX ? 'Real-time data from ASX via Markit Digital' : `Mining companies on ${currentExchange.code}`}
                 {miningData?.timestamp && (
                   <span className="ml-2">
                     • Updated {new Date(miningData.timestamp).toLocaleTimeString()}
@@ -304,6 +388,23 @@ export default function MarketPage() {
                 Refresh
               </button>
             </div>
+          </div>
+
+          {/* Exchange Selector Tabs */}
+          <div className="flex flex-wrap gap-2 pb-2">
+            {EXCHANGES.map((exchange) => (
+              <ExchangeTab
+                key={exchange.code}
+                exchange={exchange}
+                isActive={selectedExchange === exchange.code}
+                onClick={() => {
+                  setSelectedExchange(exchange.code);
+                  setSelectedCapCategory('all');
+                  setSearchQuery('');
+                }}
+                count={exchangeCounts[exchange.code]}
+              />
+            ))}
           </div>
         </div>
       </div>
@@ -434,7 +535,7 @@ export default function MarketPage() {
                 <div>
                   <h3 className="font-semibold text-metallic-100 mb-4 flex items-center gap-2">
                     <Building2 className="w-5 h-5 text-primary-500" />
-                    {selectedCapCategory === 'all' ? 'All Mining Stocks' : MARKET_CAP_LABELS[selectedCapCategory]}
+                    {selectedCapCategory === 'all' ? `${selectedExchange} Mining Stocks` : MARKET_CAP_LABELS[selectedCapCategory]}
                     <span className="text-sm font-normal text-metallic-500">({filteredStocks.length})</span>
                   </h3>
                   <div className="grid md:grid-cols-2 gap-4">
