@@ -25,17 +25,6 @@ const baseCategories = [
     featured: true,
   },
   {
-    id: 'australia',
-    title: 'Australia Mining Map',
-    description: 'Interactive map with real data from Geoscience Australia',
-    icon: MapPin,
-    href: '/analysis/australia',
-    color: 'from-green-500 to-emerald-600',
-    statsKey: 'asxCompanies',
-    statsLabel: 'ASX Companies',
-    featured: true,
-  },
-  {
     id: 'mining-analytics',
     title: 'Mining Analytics',
     description: 'Comprehensive analytics from government databases',

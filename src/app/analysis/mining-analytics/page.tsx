@@ -266,7 +266,7 @@ function StateDistribution({ mines }: { mines: any[] }) {
 
       <div className="flex items-center justify-between text-xs text-metallic-500">
         <span>Western Australia leads with {stateCounts.WA} operations</span>
-        <Link href="/analysis/australia" className="text-primary-400 hover:text-primary-300">
+        <Link href="/analysis/global?country=Australia" className="text-primary-400 hover:text-primary-300">
           View Map →
         </Link>
       </div>
@@ -510,7 +510,7 @@ export default function AnalyticsDashboardPage() {
             {/* Quick Links */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Link 
-                href="/analysis/australia"
+                href="/analysis/global?country=Australia"
                 className="bg-metallic-900 border border-metallic-800 rounded-xl p-6 hover:bg-metallic-800/50 transition-colors group"
               >
                 <MapPin className="w-8 h-8 text-green-400 mb-3" />

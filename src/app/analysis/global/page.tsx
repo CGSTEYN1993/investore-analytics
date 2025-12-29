@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect, useMemo, lazy, Suspense } from 'react';
+import { useState, useEffect, useMemo, lazy, Suspense, useCallback } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { 
   Globe, 
   Filter, 
@@ -18,14 +19,19 @@ import {
   Hammer,
   Crown,
   Layers,
-  ArrowLeft
+  ArrowLeft,
+  Database
 } from 'lucide-react';
 import Link from 'next/link';
+import { useGeoscienceData } from '@/hooks/useGeoscienceData';
 
 // Lazy load the map component to avoid SSR issues
 const GlobalMiningMap = lazy(() => import('@/components/maps/GlobalMiningMap'));
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://web-production-4faa7.up.railway.app';
+
+// Countries with geoscience data available
+const COUNTRIES_WITH_GEOSCIENCE_DATA = ['Australia'];
 
 interface Company {
   symbol: string;
@@ -129,6 +135,8 @@ const commodityColors: Record<string, string> = {
 };
 
 export default function GlobalSpatialPage() {
+  const searchParams = useSearchParams();
+  
   const [companies, setCompanies] = useState<Company[]>([]);
   const [geoData, setGeoData] = useState<GeoJSONData | null>(null);
   const [filterOptions, setFilterOptions] = useState<FilterOptions | null>(null);
@@ -149,6 +157,68 @@ export default function GlobalSpatialPage() {
   // View state
   const [viewMode, setViewMode] = useState<'map' | 'list'>('list');
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
+  
+  // Geoscience data state
+  const [showGeoscienceData, setShowGeoscienceData] = useState(false);
+  const { data: geoscienceData, isLoading: geoscienceLoading } = useGeoscienceData();
+  
+  // Initialize filters from URL params
+  useEffect(() => {
+    const country = searchParams.get('country');
+    const exchange = searchParams.get('exchange');
+    const commodity = searchParams.get('commodity');
+    
+    if (country) {
+      setSelectedCountry(country);
+      setViewMode('map'); // Switch to map view when country is specified
+    }
+    if (exchange) setSelectedExchange(exchange);
+    if (commodity) setSelectedCommodity(commodity);
+  }, [searchParams]);
+  
+  // Check if current country has geoscience data
+  const countryHasGeoscienceData = COUNTRIES_WITH_GEOSCIENCE_DATA.includes(selectedCountry);
+  
+  // Toggle geoscience data
+  const handleToggleGeoscience = useCallback(() => {
+    setShowGeoscienceData(prev => !prev);
+  }, []);
+  
+  // Convert geoscience data to map format
+  const mapGeoscienceData = useMemo(() => {
+    if (!geoscienceData || !showGeoscienceData || selectedCountry !== 'Australia') return null;
+    
+    return {
+      operatingMines: geoscienceData.operating_mines?.map(m => ({
+        id: m.id,
+        name: m.name,
+        type: 'operating_mine',
+        commodity: m.commodity,
+        lat: m.lat,
+        lng: m.lng,
+        status: m.status,
+        state: m.state,
+      })) || [],
+      criticalMinerals: geoscienceData.critical_minerals?.map(m => ({
+        id: m.id,
+        name: m.name,
+        type: 'critical_mineral',
+        commodity: m.commodity,
+        lat: m.lat,
+        lng: m.lng,
+        state: m.state,
+      })) || [],
+      deposits: geoscienceData.mineral_deposits?.map(d => ({
+        id: d.id,
+        name: d.name,
+        type: 'deposit',
+        commodity: d.commodity,
+        lat: d.lat,
+        lng: d.lng,
+        state: d.state,
+      })) || [],
+    };
+  }, [geoscienceData, showGeoscienceData, selectedCountry]);
 
   // Fetch filter options and exchange summary on mount
   useEffect(() => {
@@ -558,8 +628,62 @@ export default function GlobalSpatialPage() {
                 geoData={geoData} 
                 onSelectCompany={setSelectedCompany}
                 selectedCompany={selectedCompany}
+                selectedCountry={selectedCountry}
+                geoscienceData={mapGeoscienceData}
+                showGeoscienceData={showGeoscienceData && countryHasGeoscienceData}
+                onToggleGeoscience={countryHasGeoscienceData ? handleToggleGeoscience : undefined}
               />
             </Suspense>
+            
+            {/* Geoscience Data Info Banner */}
+            {selectedCountry && countryHasGeoscienceData && (
+              <div className="mt-4 p-4 bg-cyan-500/10 border border-cyan-500/30 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <Database className="w-5 h-5 text-cyan-400" />
+                  <div className="flex-1">
+                    <h4 className="font-medium text-cyan-100">
+                      {selectedCountry} Geoscience Data Available
+                    </h4>
+                    <p className="text-sm text-cyan-300/70">
+                      Toggle the geoscience layer in the map legend to view official mining data including operating mines, 
+                      critical mineral deposits, and OZMIN database entries.
+                    </p>
+                  </div>
+                  <button
+                    onClick={handleToggleGeoscience}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      showGeoscienceData
+                        ? 'bg-cyan-500 text-white'
+                        : 'bg-metallic-700 text-metallic-200 hover:bg-metallic-600'
+                    }`}
+                  >
+                    {showGeoscienceData ? 'Hide Data' : 'Show Data'}
+                  </button>
+                </div>
+                {showGeoscienceData && geoscienceData && (
+                  <div className="mt-3 grid grid-cols-3 gap-4 pt-3 border-t border-cyan-500/20">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-green-400">
+                        {geoscienceData.operating_mines?.length || 0}
+                      </div>
+                      <div className="text-xs text-metallic-400">Operating Mines</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-cyan-400">
+                        {geoscienceData.critical_minerals?.length || 0}
+                      </div>
+                      <div className="text-xs text-metallic-400">Critical Minerals</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-amber-400">
+                        {geoscienceData.mineral_deposits?.length || 0}
+                      </div>
+                      <div className="text-xs text-metallic-400">Deposits</div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
       </div>

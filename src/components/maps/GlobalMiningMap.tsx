@@ -1,9 +1,9 @@
 'use client';
 
 import { useMemo, useState, useRef, useEffect, useCallback } from 'react';
-import { ZoomIn, ZoomOut, Maximize2, Minimize2, Layers, Map as MapIcon, X } from 'lucide-react';
+import { ZoomIn, ZoomOut, Maximize2, Minimize2, Layers, Map as MapIcon, X, Database, Mountain, Gem, Hammer } from 'lucide-react';
 
-// Company interface matching the API response
+// Country interface matching the API response
 interface Company {
   symbol: string;
   name: string;
@@ -36,11 +36,65 @@ interface GeoJSONData {
   };
 }
 
+// Geoscience data types
+interface GeoscienceFeature {
+  id: string;
+  name: string;
+  type: string;
+  commodity?: string;
+  lat: number;
+  lng: number;
+  status?: string;
+  state?: string;
+}
+
+interface CountryZoomTarget {
+  lat: number;
+  lng: number;
+  zoom: number;
+  name: string;
+}
+
 interface GlobalMiningMapProps {
   geoData: GeoJSONData | null;
   onSelectCompany?: (company: Company) => void;
   selectedCompany?: Company | null;
+  selectedCountry?: string;
+  geoscienceData?: {
+    operatingMines: GeoscienceFeature[];
+    criticalMinerals: GeoscienceFeature[];
+    deposits: GeoscienceFeature[];
+  } | null;
+  showGeoscienceData?: boolean;
+  onToggleGeoscience?: () => void;
 }
+
+// Country zoom targets - center coordinates and appropriate zoom levels
+const countryZoomTargets: Record<string, CountryZoomTarget> = {
+  'Australia': { lat: -25.2744, lng: 133.7751, zoom: 4, name: 'Australia' },
+  'Canada': { lat: 56.1304, lng: -106.3468, zoom: 3.5, name: 'Canada' },
+  'USA': { lat: 37.0902, lng: -95.7129, zoom: 4, name: 'United States' },
+  'South Africa': { lat: -30.5595, lng: 22.9375, zoom: 5, name: 'South Africa' },
+  'Brazil': { lat: -14.2350, lng: -51.9253, zoom: 4, name: 'Brazil' },
+  'Chile': { lat: -35.6751, lng: -71.5430, zoom: 4, name: 'Chile' },
+  'Peru': { lat: -9.1900, lng: -75.0152, zoom: 5, name: 'Peru' },
+  'Mexico': { lat: 23.6345, lng: -102.5528, zoom: 5, name: 'Mexico' },
+  'Argentina': { lat: -38.4161, lng: -63.6167, zoom: 4, name: 'Argentina' },
+  'DRC': { lat: -4.0383, lng: 21.7587, zoom: 5, name: 'DRC' },
+  'Zambia': { lat: -13.1339, lng: 27.8493, zoom: 5, name: 'Zambia' },
+  'Botswana': { lat: -22.3285, lng: 24.6849, zoom: 5, name: 'Botswana' },
+  'Mali': { lat: 17.5707, lng: -3.9962, zoom: 5, name: 'Mali' },
+  'Ghana': { lat: 7.9465, lng: -1.0232, zoom: 6, name: 'Ghana' },
+  'Burkina Faso': { lat: 12.2383, lng: -1.5616, zoom: 6, name: 'Burkina Faso' },
+  'Tanzania': { lat: -6.3690, lng: 34.8888, zoom: 5, name: 'Tanzania' },
+  'Indonesia': { lat: -0.7893, lng: 113.9213, zoom: 4, name: 'Indonesia' },
+  'Philippines': { lat: 12.8797, lng: 121.7740, zoom: 5, name: 'Philippines' },
+  'China': { lat: 35.8617, lng: 104.1954, zoom: 4, name: 'China' },
+  'Mongolia': { lat: 46.8625, lng: 103.8467, zoom: 5, name: 'Mongolia' },
+  'Finland': { lat: 61.9241, lng: 25.7482, zoom: 5, name: 'Finland' },
+  'Sweden': { lat: 60.1282, lng: 18.6435, zoom: 5, name: 'Sweden' },
+  'Global': { lat: 20, lng: 0, zoom: 2, name: 'Global' },
+};
 
 // Map tile providers
 type TileProvider = 'cartodb-dark' | 'cartodb-light' | 'osm' | 'satellite';
@@ -112,7 +166,14 @@ function latLngToPixel(lat: number, lng: number, zoom: number, tileSize: number 
   return { x, y };
 }
 
-export default function GlobalMiningMap({ geoData, onSelectCompany }: GlobalMiningMapProps) {
+export default function GlobalMiningMap({ 
+  geoData, 
+  onSelectCompany, 
+  selectedCountry,
+  geoscienceData,
+  showGeoscienceData,
+  onToggleGeoscience,
+}: GlobalMiningMapProps) {
   const [hoveredCluster, setHoveredCluster] = useState<{ features: GeoJSONFeature[], x: number, y: number } | null>(null);
   const [zoom, setZoom] = useState(2);
   const [center, setCenter] = useState({ lat: 20, lng: 0 });
@@ -121,9 +182,27 @@ export default function GlobalMiningMap({ geoData, onSelectCompany }: GlobalMini
   const [tileProvider, setTileProvider] = useState<TileProvider>('cartodb-dark');
   const [showLayerMenu, setShowLayerMenu] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [geoscienceLayers, setGeoscienceLayers] = useState({
+    operatingMines: true,
+    criticalMinerals: true,
+    deposits: false, // Off by default (can be many)
+  });
   const containerRef = useRef<HTMLDivElement>(null);
   const fullscreenRef = useRef<HTMLDivElement>(null);
   const [containerSize, setContainerSize] = useState({ width: 800, height: 600 });
+
+  // Zoom to country when selectedCountry changes
+  useEffect(() => {
+    if (selectedCountry && countryZoomTargets[selectedCountry]) {
+      const target = countryZoomTargets[selectedCountry];
+      setCenter({ lat: target.lat, lng: target.lng });
+      setZoom(target.zoom);
+    } else if (!selectedCountry) {
+      // Reset to global view when country filter is cleared
+      setCenter({ lat: 20, lng: 0 });
+      setZoom(2);
+    }
+  }, [selectedCountry]);
 
   // Fullscreen toggle
   const toggleFullscreen = useCallback(() => {
@@ -422,12 +501,84 @@ export default function GlobalMiningMap({ geoData, onSelectCompany }: GlobalMini
               </div>
             );
           })}
+          
+          {/* Geoscience Data Markers */}
+          {showGeoscienceData && geoscienceData && (
+            <>
+              {/* Operating Mines */}
+              {geoscienceLayers.operatingMines && geoscienceData.operatingMines?.map((mine, i) => {
+                const pixel = latLngToPixel(mine.lat, mine.lng, zoom, tileSize);
+                const centerPixel = latLngToPixel(center.lat, center.lng, zoom, tileSize);
+                const screenX = containerSize.width / 2 + (pixel.x - centerPixel.x);
+                const screenY = containerSize.height / 2 + (pixel.y - centerPixel.y);
+                
+                if (screenX < -50 || screenX > containerSize.width + 50 ||
+                    screenY < -50 || screenY > containerSize.height + 50) return null;
+                
+                return (
+                  <div
+                    key={`mine-${i}`}
+                    className="absolute pointer-events-auto cursor-pointer transform -translate-x-1/2 -translate-y-1/2"
+                    style={{ left: screenX, top: screenY }}
+                    title={`${mine.name} - Operating Mine`}
+                  >
+                    <div className="w-4 h-4 bg-green-500 border border-white rounded-sm rotate-45 shadow-lg" />
+                  </div>
+                );
+              })}
+              
+              {/* Critical Minerals */}
+              {geoscienceLayers.criticalMinerals && geoscienceData.criticalMinerals?.map((mineral, i) => {
+                const pixel = latLngToPixel(mineral.lat, mineral.lng, zoom, tileSize);
+                const centerPixel = latLngToPixel(center.lat, center.lng, zoom, tileSize);
+                const screenX = containerSize.width / 2 + (pixel.x - centerPixel.x);
+                const screenY = containerSize.height / 2 + (pixel.y - centerPixel.y);
+                
+                if (screenX < -50 || screenX > containerSize.width + 50 ||
+                    screenY < -50 || screenY > containerSize.height + 50) return null;
+                
+                return (
+                  <div
+                    key={`critical-${i}`}
+                    className="absolute pointer-events-auto cursor-pointer transform -translate-x-1/2 -translate-y-1/2"
+                    style={{ left: screenX, top: screenY }}
+                    title={`${mineral.name} - Critical Mineral (${mineral.commodity})`}
+                  >
+                    <div className="w-3 h-3 bg-cyan-400 border border-white shadow-lg" 
+                         style={{ clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)' }} />
+                  </div>
+                );
+              })}
+              
+              {/* Deposits */}
+              {geoscienceLayers.deposits && geoscienceData.deposits?.slice(0, 500).map((deposit, i) => {
+                const pixel = latLngToPixel(deposit.lat, deposit.lng, zoom, tileSize);
+                const centerPixel = latLngToPixel(center.lat, center.lng, zoom, tileSize);
+                const screenX = containerSize.width / 2 + (pixel.x - centerPixel.x);
+                const screenY = containerSize.height / 2 + (pixel.y - centerPixel.y);
+                
+                if (screenX < -50 || screenX > containerSize.width + 50 ||
+                    screenY < -50 || screenY > containerSize.height + 50) return null;
+                
+                return (
+                  <div
+                    key={`deposit-${i}`}
+                    className="absolute pointer-events-auto cursor-pointer transform -translate-x-1/2 -translate-y-1/2"
+                    style={{ left: screenX, top: screenY }}
+                    title={`${deposit.name} - Deposit (${deposit.commodity})`}
+                  >
+                    <div className="w-2 h-2 bg-amber-500 border border-white rounded-full opacity-70" />
+                  </div>
+                );
+              })}
+            </>
+          )}
         </div>
       </div>
 
       {/* Legend */}
-      <div className="absolute top-4 left-4 bg-metallic-900/95 backdrop-blur-sm rounded-lg p-3 border border-metallic-700 shadow-xl">
-        <h3 className="text-sm font-semibold text-metallic-100 mb-2">Commodities</h3>
+      <div className="absolute top-4 left-4 bg-metallic-900/95 backdrop-blur-sm rounded-lg p-3 border border-metallic-700 shadow-xl max-w-xs">
+        <h3 className="text-sm font-semibold text-metallic-100 mb-2">Mining Companies</h3>
         <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
           {['Gold', 'Silver', 'Copper', 'Lithium', 'Iron Ore', 'Uranium', 'Platinum', 'Nickel', 'Rare Earths', 'Coal'].map(commodity => (
             <div key={commodity} className="flex items-center gap-2">
@@ -439,6 +590,59 @@ export default function GlobalMiningMap({ geoData, onSelectCompany }: GlobalMini
             </div>
           ))}
         </div>
+        
+        {/* Geoscience Data Toggle */}
+        {selectedCountry && onToggleGeoscience && (
+          <div className="mt-3 pt-3 border-t border-metallic-700">
+            <button
+              onClick={onToggleGeoscience}
+              className={`w-full flex items-center justify-between px-2 py-1.5 rounded text-sm transition-colors ${
+                showGeoscienceData 
+                  ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30' 
+                  : 'bg-metallic-800 text-metallic-300 hover:bg-metallic-700'
+              }`}
+            >
+              <span className="flex items-center gap-2">
+                <Database className="w-4 h-4" />
+                {selectedCountry} Geoscience
+              </span>
+              <span className="text-xs">{showGeoscienceData ? 'ON' : 'OFF'}</span>
+            </button>
+            
+            {showGeoscienceData && geoscienceData && (
+              <div className="mt-2 space-y-1">
+                <button
+                  onClick={() => setGeoscienceLayers(l => ({ ...l, operatingMines: !l.operatingMines }))}
+                  className={`w-full flex items-center gap-2 px-2 py-1 rounded text-xs transition-colors ${
+                    geoscienceLayers.operatingMines ? 'text-green-400' : 'text-metallic-500'
+                  }`}
+                >
+                  <div className={`w-3 h-3 rounded-sm rotate-45 ${geoscienceLayers.operatingMines ? 'bg-green-500' : 'bg-metallic-600'}`} />
+                  <span>Operating Mines ({geoscienceData.operatingMines?.length || 0})</span>
+                </button>
+                <button
+                  onClick={() => setGeoscienceLayers(l => ({ ...l, criticalMinerals: !l.criticalMinerals }))}
+                  className={`w-full flex items-center gap-2 px-2 py-1 rounded text-xs transition-colors ${
+                    geoscienceLayers.criticalMinerals ? 'text-cyan-400' : 'text-metallic-500'
+                  }`}
+                >
+                  <div className={`w-3 h-3 ${geoscienceLayers.criticalMinerals ? 'bg-cyan-400' : 'bg-metallic-600'}`} 
+                       style={{ clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)' }} />
+                  <span>Critical Minerals ({geoscienceData.criticalMinerals?.length || 0})</span>
+                </button>
+                <button
+                  onClick={() => setGeoscienceLayers(l => ({ ...l, deposits: !l.deposits }))}
+                  className={`w-full flex items-center gap-2 px-2 py-1 rounded text-xs transition-colors ${
+                    geoscienceLayers.deposits ? 'text-amber-400' : 'text-metallic-500'
+                  }`}
+                >
+                  <div className={`w-2 h-2 rounded-full ${geoscienceLayers.deposits ? 'bg-amber-500' : 'bg-metallic-600'}`} />
+                  <span>Deposits ({geoscienceData.deposits?.length || 0})</span>
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Map Stats */}
