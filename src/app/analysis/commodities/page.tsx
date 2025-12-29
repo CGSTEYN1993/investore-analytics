@@ -156,7 +156,7 @@ export default function CommoditiesAnalysis() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`${API_URL}/spatial/commodities/analysis`);
+      const response = await fetch(`${API_URL}/api/v1/spatial/commodities/analysis`);
       if (!response.ok) throw new Error('Failed to fetch commodity data');
       
       const data = await response.json();

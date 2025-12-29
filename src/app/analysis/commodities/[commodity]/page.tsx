@@ -171,7 +171,7 @@ export default function CommodityDetailPage() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`${API_URL}/spatial/commodities/${commodity}/companies?limit=500`);
+      const response = await fetch(`${API_URL}/api/v1/spatial/commodities/${commodity}/companies?limit=500`);
       if (!response.ok) throw new Error('Failed to fetch companies');
       
       const result = await response.json();
