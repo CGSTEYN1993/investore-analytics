@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
+import { usePathname } from 'next/navigation';
 import { useAuthStore } from '@/lib/store';
 import { Menu, X, User, LogOut, Settings, ChevronDown } from 'lucide-react';
 import { useState } from 'react';
@@ -10,6 +11,8 @@ export function Header() {
   const { isAuthenticated, user, logout } = useAuthStore();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const pathname = usePathname();
+  const isHomePage = pathname === '/';
 
   return (
     <header className="bg-metallic-900/95 backdrop-blur-sm border-b border-metallic-700/50 sticky top-0 z-50">
@@ -128,7 +131,7 @@ export function Header() {
                   </div>
                 )}
               </div>
-            ) : (
+            ) : isHomePage ? (
               <>
                 <Link
                   href="/login"
@@ -143,7 +146,7 @@ export function Header() {
                   Get Started
                 </Link>
               </>
-            )}
+            ) : null}
           </div>
 
           {/* Mobile menu button */}
@@ -230,7 +233,7 @@ export function Header() {
                 >
                   Sign Out
                 </button>
-              ) : (
+              ) : isHomePage ? (
                 <>
                   <Link
                     href="/login"
@@ -247,7 +250,7 @@ export function Header() {
                     Get Started
                   </Link>
                 </>
-              )}
+              ) : null}
             </div>
           </div>
         )}
