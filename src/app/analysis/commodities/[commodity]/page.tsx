@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState, useEffect, use } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useParams } from 'next/navigation';
 import { ArrowLeft, Building2, Globe, ExternalLink, Search, Filter, Loader2, RefreshCw, ChevronDown, MapPin, Gem } from 'lucide-react';
 import { getCommodityColor } from '@/lib/subscription-tiers';
 
@@ -149,8 +150,9 @@ function CompanyCard({ company, commoditySymbol }: { company: Company; commodity
   );
 }
 
-export default function CommodityDetailPage({ params }: { params: Promise<{ commodity: string }> }) {
-  const { commodity } = use(params);
+export default function CommodityDetailPage() {
+  const params = useParams();
+  const commodity = params.commodity as string;
   const [data, setData] = useState<CommodityData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -159,12 +161,13 @@ export default function CommodityDetailPage({ params }: { params: Promise<{ comm
   const [filterExchange, setFilterExchange] = useState<string>('all');
   
   const commodityInfo = commodityDisplayNames[commodity] || { 
-    name: commodity.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()), 
-    symbol: commodity.slice(0, 2).toUpperCase() 
+    name: commodity?.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) || 'Unknown', 
+    symbol: commodity?.slice(0, 2).toUpperCase() || '??' 
   };
   const color = getCommodityColor(commodityInfo.symbol);
 
   const fetchCompanies = async () => {
+    if (!commodity) return;
     setLoading(true);
     setError(null);
     try {
