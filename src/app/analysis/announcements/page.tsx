@@ -220,9 +220,9 @@ export default function AnnouncementsPage() {
   const [dateRange, setDateRange] = useState('7d');
   const [selectedExchange, setSelectedExchange] = useState('ASX');
   const [loading, setLoading] = useState(true);
-  const [apiAnnouncements, setApiAnnouncements] = useState<any[]>([]);
   const [summary, setSummary] = useState<any>(null);
   const [promisingStocks, setPromisingStocks] = useState<any[]>([]);
+  const [feedAnnouncements, setFeedAnnouncements] = useState<any[]>([]);
 
   const commodities = ['all', 'Au', 'Ag', 'Cu', 'Li', 'Ni', 'U', 'Zn', 'Fe'];
   const exchanges = ['ASX', 'TSX', 'JSE', 'CSE', 'NYSE', 'LSE'];
@@ -244,6 +244,24 @@ export default function AnnouncementsPage() {
     }
   };
 
+  // Map announcement types for filtering
+  const mapTypeForFilter = (type: string): string => {
+    const typeMap: Record<string, string> = {
+      'drilling_results': 'drilling',
+      'resource_estimate': 'resource',
+      'quarterly_report': 'financial',
+      'capital_raise': 'financial',
+      'acquisition': 'corporate',
+      'joint_venture': 'corporate',
+      'permit_approval': 'regulatory',
+      'trading_halt': 'regulatory',
+      'production_report': 'operational',
+      'feasibility_study': 'operational',
+      'general': 'corporate'
+    };
+    return typeMap[type] || type;
+  };
+
   // Fetch data from API
   useEffect(() => {
     async function fetchData() {
@@ -251,14 +269,21 @@ export default function AnnouncementsPage() {
       const daysBack = getDaysBack(dateRange);
       
       try {
-        const [summaryRes, promisingRes] = await Promise.all([
+        // Use the new feed endpoint for real ASX data
+        const [summaryRes, feedRes, promisingRes] = await Promise.all([
           fetch(`${API_BASE}/api/v1/announcements/summary?exchange=${selectedExchange}&days_back=${daysBack}`),
+          fetch(`${API_BASE}/api/v1/announcements/feed?exchange=${selectedExchange}&days_back=${daysBack}&limit=50`),
           fetch(`${API_BASE}/api/v1/announcements/promising?exchange=${selectedExchange}&days_back=${daysBack}&limit=30`)
         ]);
 
         if (summaryRes.ok) {
           const data = await summaryRes.json();
           setSummary(data);
+        }
+
+        if (feedRes.ok) {
+          const data = await feedRes.json();
+          setFeedAnnouncements(data.announcements || []);
         }
 
         if (promisingRes.ok) {
@@ -275,13 +300,35 @@ export default function AnnouncementsPage() {
     fetchData();
   }, [selectedExchange, dateRange]);
 
-  // Combine mock data with API data for display
-  const allAnnouncements = [...promisingStocks.map((p: any) => ({
+  // Transform API announcements to display format
+  const transformedAnnouncements = feedAnnouncements.map((ann: any) => ({
+    id: ann.id || ann.symbol + ann.date,
+    company: ann.company_name,
+    ticker: ann.symbol,
+    commodity: ann.commodity?.substring(0, 2) || 'Au',
+    type: mapTypeForFilter(ann.announcement_type),
+    title: ann.title,
+    summary: '',
+    date: new Date(ann.date).toLocaleDateString(),
+    time: new Date(ann.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    priceChange: ann.sentiment === 'very_positive' ? 15 : 
+                 ann.sentiment === 'positive' ? 5 : 
+                 ann.sentiment === 'negative' ? -5 : 
+                 ann.sentiment === 'very_negative' ? -15 : 0,
+    source: selectedExchange,
+    isBreaking: ann.is_price_sensitive,
+    sentiment: ann.sentiment,
+    url: ann.url,
+    relevanceScore: ann.relevance_score
+  }));
+
+  // Combine API data with mock data as fallback
+  const allAnnouncements = transformedAnnouncements.length > 0 ? transformedAnnouncements : [...promisingStocks.map((p: any) => ({
     id: p.symbol + p.date,
     company: p.company_name,
     ticker: p.symbol,
     commodity: p.primary_commodity?.substring(0, 2) || 'Au',
-    type: p.announcement_type?.replace('_', '') || 'general',
+    type: mapTypeForFilter(p.announcement_type) || 'general',
     title: p.title,
     summary: '',
     date: new Date(p.date).toLocaleDateString(),
@@ -291,7 +338,7 @@ export default function AnnouncementsPage() {
     isBreaking: p.is_price_sensitive,
     sentiment: p.sentiment,
     url: p.url
-  })), ...announcements];
+  }))];
 
   const filteredAnnouncements = allAnnouncements.filter(a => {
     const matchesSearch = 
@@ -304,7 +351,7 @@ export default function AnnouncementsPage() {
   });
 
   const breakingNews = allAnnouncements.filter(a => a.isBreaking);
-  const todayCount = summary?.total_announcements || allAnnouncements.length;
+  const todayCount = summary?.total_announcements || feedAnnouncements.length;
 
   return (
     <div className="min-h-screen bg-metallic-950">
