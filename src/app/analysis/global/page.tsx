@@ -48,6 +48,18 @@ interface Company {
   description: string;
 }
 
+// Loading component for Suspense fallback
+function GlobalSpatialLoading() {
+  return (
+    <div className="min-h-screen bg-metallic-950 flex items-center justify-center">
+      <div className="text-center">
+        <Loader2 className="h-12 w-12 animate-spin text-primary-500 mx-auto mb-4" />
+        <p className="text-metallic-400">Loading Global Spatial View...</p>
+      </div>
+    </div>
+  );
+}
+
 interface GeoJSONFeature {
   type: string;
   geometry: {
@@ -134,7 +146,16 @@ const commodityColors: Record<string, string> = {
   Diversified: 'bg-indigo-500',
 };
 
+// Main page wrapper with Suspense for useSearchParams
 export default function GlobalSpatialPage() {
+  return (
+    <Suspense fallback={<GlobalSpatialLoading />}>
+      <GlobalSpatialContent />
+    </Suspense>
+  );
+}
+
+function GlobalSpatialContent() {
   const searchParams = useSearchParams();
   
   const [companies, setCompanies] = useState<Company[]>([]);
