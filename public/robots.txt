@@ -1,0 +1,12 @@
+# InvestOre Analytics - Mining Investment Research Platform
+# https://www.investoreanalytics.com
+# Category: Financial Services / Investment Research
+
+User-agent: *
+Allow: /
+
+# Sitemaps
+Sitemap: https://www.investoreanalytics.com/sitemap.xml
+
+# Crawl-delay for respectful crawling
+Crawl-delay: 1

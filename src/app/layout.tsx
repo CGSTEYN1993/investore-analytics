@@ -22,25 +22,32 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.investoreanalytics.com'),
-  title: 'InvestOre Analytics - Mining & Exploration Valuation Platform',
-  description: 'Compare mining and exploration companies with peer group analytics, resource normalization, and interactive visualizations. Build custom peer sets, normalize to AuEq/CuEq, and make data-driven decisions.',
-  keywords: ['mining', 'exploration', 'valuation', 'analytics', 'peer comparison', 'gold', 'copper', 'lithium', 'AuEq', 'enterprise value', 'mining stocks'],
+  title: 'InvestOre Analytics - Mining & Exploration Investment Research Platform',
+  description: 'Professional investment research platform for mining and exploration stocks. Compare ASX, JSE, TSX mining companies with peer analytics, financial data, and market insights. Trusted by investment professionals.',
+  keywords: ['mining stocks', 'exploration companies', 'investment research', 'financial analysis', 'ASX mining', 'JSE mining', 'TSX mining', 'stock market', 'equity research', 'mining valuation', 'gold stocks', 'copper stocks', 'lithium stocks', 'commodity prices', 'market data'],
   authors: [{ name: 'InvestOre Analytics' }],
+  category: 'Finance',
+  classification: 'Financial Services',
   icons: {
     icon: '/favicon.ico',
     apple: '/apple-touch-icon.png',
   },
+  robots: {
+    index: true,
+    follow: true,
+  },
   openGraph: {
-    title: 'InvestOre Analytics',
-    description: 'Mining & Exploration Valuation Platform - Peer analytics, resource normalization, and data visualization',
+    title: 'InvestOre Analytics - Mining Investment Research',
+    description: 'Professional investment research platform for mining and exploration stocks. Financial data, peer analytics, and market insights.',
     url: 'https://www.investoreanalytics.com',
     siteName: 'InvestOre Analytics',
+    locale: 'en_US',
     images: [
       {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'InvestOre Analytics - Mining Valuations Simplified',
+        alt: 'InvestOre Analytics - Mining Investment Research Platform',
       },
     ],
     type: 'website',
