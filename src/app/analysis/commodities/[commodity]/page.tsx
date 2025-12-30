@@ -15,6 +15,7 @@ interface Company {
   primary_commodity: string | null;
   secondary_commodities: string | null;
   market_cap: number | null;
+  market_cap_category: string | null;
   company_type: string | null;
   country: string | null;
   website: string | null;
@@ -70,12 +71,24 @@ const exchangeFlags: { [key: string]: string } = {
   'NASDAQ': '🇺🇸',
 };
 
-function formatMarketCap(value: number | null): string {
-  if (!value) return '-';
-  if (value >= 1e12) return `$${(value / 1e12).toFixed(2)}T`;
-  if (value >= 1e9) return `$${(value / 1e9).toFixed(2)}B`;
-  if (value >= 1e6) return `$${(value / 1e6).toFixed(2)}M`;
-  return `$${value.toLocaleString()}`;
+function formatMarketCap(value: number | null, category: string | null): string {
+  if (value) {
+    if (value >= 1e12) return `$${(value / 1e12).toFixed(2)}T`;
+    if (value >= 1e9) return `$${(value / 1e9).toFixed(2)}B`;
+    if (value >= 1e6) return `$${(value / 1e6).toFixed(2)}M`;
+    return `$${value.toLocaleString()}`;
+  }
+  // Show category label if no numeric value
+  if (category) {
+    const labels: Record<string, string> = {
+      'large_cap': 'Large Cap',
+      'mid_cap': 'Mid Cap',
+      'small_cap': 'Small Cap',
+      'micro_cap': 'Micro Cap',
+    };
+    return labels[category] || category;
+  }
+  return '-';
 }
 
 function CompanyCard({ company, commoditySymbol, isDiversified }: { company: Company; commoditySymbol: string; isDiversified?: boolean }) {
@@ -151,7 +164,7 @@ function CompanyCard({ company, commoditySymbol, isDiversified }: { company: Com
       <div className="grid grid-cols-2 gap-3 text-sm">
         <div>
           <p className="text-metallic-500">Market Cap</p>
-          <p className="text-metallic-100 font-medium">{formatMarketCap(company.market_cap)}</p>
+          <p className="text-metallic-100 font-medium">{formatMarketCap(company.market_cap, company.market_cap_category)}</p>
         </div>
         <div>
           <p className="text-metallic-500">Type</p>
