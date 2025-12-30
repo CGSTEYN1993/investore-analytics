@@ -215,7 +215,7 @@ export default function CompanyProfile() {
           <div className="flex items-center gap-2 text-sm text-metallic-500 mb-4">
             <Link href="/analysis" className="hover:text-primary-400">Analysis</Link>
             <ChevronRight className="w-4 h-4" />
-            <Link href="/analysis/commodities" className="hover:text-primary-400">Commodities</Link>
+            <Link href="/analysis/commodities" className="hover:text-primary-400">{commodity}</Link>
             <ChevronRight className="w-4 h-4" />
             <span className="text-metallic-300">{ticker}</span>
           </div>
