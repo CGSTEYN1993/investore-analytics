@@ -375,99 +375,6 @@ export default function AnnouncementsPage() {
             ))}
           </div>
 
-          {/* Company Search Results */}
-          {searchedCompany && (
-            <div className="bg-metallic-800/50 border border-metallic-700 rounded-xl p-4 mb-4">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-primary-500 flex items-center justify-center text-white font-bold">
-                    {searchedCompany.substring(0, 2)}
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-metallic-100">
-                      {searchedCompany} Announcements
-                    </h3>
-                    <p className="text-sm text-metallic-400">
-                      {companyAnnouncements.length} announcements found
-                    </p>
-                  </div>
-                </div>
-                <button
-                  onClick={clearCompanySearch}
-                  className="px-3 py-1.5 text-sm bg-metallic-700 text-metallic-300 rounded-lg hover:bg-metallic-600 transition-colors"
-                >
-                  Clear Search
-                </button>
-              </div>
-              
-              {searchingCompany ? (
-                <div className="flex items-center justify-center py-8">
-                  <Loader2 className="w-6 h-6 text-primary-500 animate-spin" />
-                </div>
-              ) : companyAnnouncements.length === 0 ? (
-                <div className="text-center py-8">
-                  <FileText className="w-10 h-10 text-metallic-600 mx-auto mb-2" />
-                  <p className="text-metallic-400">No announcements found for {searchedCompany}</p>
-                  <p className="text-xs text-metallic-500 mt-1">Try a different ticker or date range</p>
-                </div>
-              ) : (
-                <div className="space-y-3 max-h-[500px] overflow-y-auto">
-                  {companyAnnouncements.map((ann, i) => (
-                    <a
-                      key={ann.id || i}
-                      href={ann.url || '#'}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block p-4 bg-metallic-900 rounded-lg hover:bg-metallic-800 transition-colors border border-metallic-700/50"
-                    >
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            {ann.is_price_sensitive && (
-                              <span className="px-2 py-0.5 text-xs bg-amber-500/20 text-amber-400 rounded font-medium">
-                                ⚠ PRICE SENSITIVE
-                              </span>
-                            )}
-                            <span className={`px-2 py-0.5 text-xs rounded ${
-                              ann.sentiment === 'very_positive' ? 'bg-green-500/20 text-green-400' :
-                              ann.sentiment === 'positive' ? 'bg-green-500/10 text-green-400' :
-                              ann.sentiment === 'negative' ? 'bg-red-500/10 text-red-400' :
-                              ann.sentiment === 'very_negative' ? 'bg-red-500/20 text-red-400' :
-                              'bg-metallic-700 text-metallic-400'
-                            }`}>
-                              {ann.sentiment?.replace(/_/g, ' ') || 'neutral'}
-                            </span>
-                          </div>
-                          <h4 className="font-medium text-metallic-100 mb-1">{ann.title}</h4>
-                          <div className="flex items-center gap-3 text-xs text-metallic-500">
-                            <span className="flex items-center gap-1">
-                              <Calendar className="w-3 h-3" />
-                              {new Date(ann.date).toLocaleDateString()}
-                            </span>
-                            <span className="px-2 py-0.5 bg-metallic-700 rounded">
-                              {ann.announcement_type?.replace(/_/g, ' ') || 'general'}
-                            </span>
-                          </div>
-                        </div>
-                        <ExternalLink className="w-4 h-4 text-metallic-500 flex-shrink-0" />
-                      </div>
-                    </a>
-                  ))}
-                </div>
-              )}
-              
-              <div className="mt-3 pt-3 border-t border-metallic-700">
-                <Link 
-                  href={`/company/${searchedCompany}`}
-                  className="text-sm text-primary-400 hover:text-primary-300 flex items-center gap-1"
-                >
-                  View full company profile for {searchedCompany}
-                  <ChevronDown className="w-4 h-4 rotate-[-90deg]" />
-                </Link>
-              </div>
-            </div>
-          )}
-
           {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="bg-metallic-800/50 rounded-lg p-4">
@@ -505,6 +412,115 @@ export default function AnnouncementsPage() {
 
       {/* Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Company Search Results - Show when a company is searched */}
+        {searchedCompany && (
+          <div className="bg-gradient-to-r from-primary-500/10 to-cyan-500/10 border border-primary-500/30 rounded-xl p-6 mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-primary-500 flex items-center justify-center text-white font-bold text-lg">
+                  {searchedCompany.substring(0, 2)}
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-metallic-100">
+                    {searchedCompany} Announcements
+                  </h2>
+                  <p className="text-sm text-metallic-400">
+                    {searchingCompany ? 'Searching...' : `${companyAnnouncements.length} announcements found`}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={clearCompanySearch}
+                className="px-4 py-2 text-sm bg-metallic-700 text-metallic-300 rounded-lg hover:bg-metallic-600 transition-colors"
+              >
+                ✕ Clear Search
+              </button>
+            </div>
+            
+            {searchingCompany ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="w-8 h-8 text-primary-500 animate-spin" />
+              </div>
+            ) : companyAnnouncements.length === 0 ? (
+              <div className="text-center py-12 bg-metallic-900/50 rounded-lg">
+                <FileText className="w-12 h-12 text-metallic-600 mx-auto mb-3" />
+                <p className="text-metallic-300 font-medium">No announcements found for {searchedCompany}</p>
+                <p className="text-xs text-metallic-500 mt-1">Try a different ticker or extend the date range</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {companyAnnouncements.map((ann, i) => (
+                  <div
+                    key={ann.id || i}
+                    className="p-4 bg-metallic-900 rounded-lg border border-metallic-700/50 hover:border-primary-500/30 transition-colors"
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1">
+                        <div className="flex items-center flex-wrap gap-2 mb-2">
+                          {ann.is_price_sensitive && (
+                            <span className="px-2 py-1 text-xs bg-amber-500/20 text-amber-400 rounded font-semibold">
+                              ⚠ PRICE SENSITIVE
+                            </span>
+                          )}
+                          <span className={`px-2 py-1 text-xs rounded ${
+                            ann.sentiment === 'very_positive' ? 'bg-green-500/20 text-green-400' :
+                            ann.sentiment === 'positive' ? 'bg-green-500/10 text-green-400' :
+                            ann.sentiment === 'negative' ? 'bg-red-500/10 text-red-400' :
+                            ann.sentiment === 'very_negative' ? 'bg-red-500/20 text-red-400' :
+                            'bg-metallic-700 text-metallic-400'
+                          }`}>
+                            {ann.sentiment?.replace(/_/g, ' ') || 'neutral'}
+                          </span>
+                          <span className="px-2 py-1 text-xs bg-metallic-700 rounded text-metallic-400">
+                            {ann.announcement_type?.replace(/_/g, ' ') || ann.announcement_type_raw || 'general'}
+                          </span>
+                        </div>
+                        <h4 className="font-medium text-metallic-100 mb-2 text-lg">{ann.title}</h4>
+                        <div className="flex items-center gap-4 text-sm text-metallic-500">
+                          <span className="flex items-center gap-1">
+                            <Calendar className="w-4 h-4" />
+                            {new Date(ann.date).toLocaleDateString('en-AU', { 
+                              day: 'numeric', 
+                              month: 'short', 
+                              year: 'numeric' 
+                            })}
+                          </span>
+                          {ann.size && (
+                            <span className="text-metallic-600">
+                              {ann.size}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <a
+                        href={ann.url || '#'}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-4 py-2 bg-primary-500 text-white text-sm font-medium rounded-lg hover:bg-primary-600 transition-colors flex items-center gap-2 whitespace-nowrap"
+                      >
+                        <FileText className="w-4 h-4" />
+                        View PDF
+                      </a>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            
+            <div className="mt-4 pt-4 border-t border-metallic-700 flex items-center justify-between">
+              <Link 
+                href={`/company/${searchedCompany}`}
+                className="text-sm text-primary-400 hover:text-primary-300 flex items-center gap-1"
+              >
+                View full company profile for {searchedCompany} →
+              </Link>
+              <span className="text-xs text-metallic-500">
+                Data from ASX
+              </span>
+            </div>
+          </div>
+        )}
+
         {/* Type Filter Tabs */}
         <div className="flex gap-2 overflow-x-auto pb-4 mb-6 scrollbar-hide">
           {announcementTypes.map((type) => (
