@@ -209,100 +209,260 @@ function CountryCard({ country }: { country: typeof countries[0] }) {
   );
 }
 
-// Simple SVG World Map Component
+// Simple SVG World Map Component with Country Outlines
 function WorldMapSimple({ countries: countryData }: { countries: typeof countries }) {
   const [hoveredCountry, setHoveredCountry] = useState<string | null>(null);
+  const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
 
-  // Simplified coordinates for country markers on a basic world map
-  const countryPositions: Record<string, { x: number; y: number }> = {
-    'CA': { x: 20, y: 25 },
-    'US': { x: 22, y: 35 },
-    'MX': { x: 18, y: 43 },
-    'PE': { x: 28, y: 60 },
-    'CL': { x: 28, y: 70 },
-    'ZA': { x: 58, y: 70 },
-    'CD': { x: 56, y: 52 },
-    'AU': { x: 85, y: 65 },
+  // Country path data (simplified SVG paths for major mining countries)
+  const countryPaths: Record<string, { d: string; viewBox: { x: number; y: number } }> = {
+    // Canada
+    'CA': { 
+      d: 'M52,65 L58,60 L70,58 L85,55 L95,48 L105,45 L115,43 L130,42 L145,45 L155,52 L160,58 L165,55 L175,52 L180,48 L190,52 L195,60 L190,68 L180,72 L170,75 L160,78 L150,82 L140,80 L130,78 L115,75 L100,72 L85,70 L70,68 L60,68 Z',
+      viewBox: { x: 52, y: 42 }
+    },
+    // USA
+    'US': { 
+      d: 'M55,95 L70,92 L85,90 L100,88 L115,90 L130,92 L145,95 L155,98 L160,102 L155,108 L145,112 L130,115 L115,112 L100,108 L85,105 L70,102 L60,100 Z',
+      viewBox: { x: 55, y: 88 }
+    },
+    // Mexico
+    'MX': { 
+      d: 'M60,115 L72,118 L80,122 L85,128 L82,135 L75,140 L68,138 L62,132 L58,125 L58,118 Z',
+      viewBox: { x: 58, y: 115 }
+    },
+    // Peru
+    'PE': { 
+      d: 'M95,165 L102,162 L108,168 L105,178 L100,185 L92,182 L88,175 L90,168 Z',
+      viewBox: { x: 88, y: 162 }
+    },
+    // Chile (long narrow shape)
+    'CL': { 
+      d: 'M98,188 L102,185 L105,195 L103,210 L100,225 L95,238 L90,245 L88,235 L92,220 L95,205 L97,195 Z',
+      viewBox: { x: 88, y: 185 }
+    },
+    // South Africa
+    'ZA': { 
+      d: 'M280,195 L295,192 L305,198 L308,210 L302,218 L290,222 L278,218 L275,208 L278,198 Z',
+      viewBox: { x: 275, y: 192 }
+    },
+    // DR Congo
+    'CD': { 
+      d: 'M268,155 L282,152 L292,158 L295,168 L290,178 L278,180 L268,175 L265,165 Z',
+      viewBox: { x: 265, y: 152 }
+    },
+    // Australia
+    'AU': { 
+      d: 'M355,175 L380,172 L400,178 L415,188 L418,200 L410,212 L395,218 L375,215 L360,208 L352,195 L350,185 Z',
+      viewBox: { x: 350, y: 172 }
+    },
   };
+
+  // Get country data by code
+  const getCountryInfo = (code: string) => countryData.find(c => c.code === code);
 
   return (
     <div className="bg-metallic-900 border border-metallic-800 rounded-xl p-6">
       <h3 className="font-semibold text-metallic-100 mb-4 flex items-center gap-2">
-        <Map className="w-5 h-5" />
-        Global Mining Activity
+        <Map className="w-5 h-5 text-primary-400" />
+        Global Mining Activity by Country
       </h3>
-      <div className="relative bg-metallic-800/50 rounded-lg p-4 aspect-[2/1]">
-        {/* Simple map background */}
-        <svg viewBox="0 0 100 60" className="w-full h-full opacity-20">
-          <path
-            d="M10,30 Q20,20 30,25 Q35,20 40,30 Q50,35 60,30 Q70,25 80,30 Q90,35 95,28"
-            stroke="currentColor"
-            strokeWidth="0.5"
-            fill="none"
-            className="text-metallic-500"
-          />
-          <path
-            d="M5,45 Q15,50 25,48 Q35,55 45,50 Q55,45 65,52 Q75,48 85,50"
-            stroke="currentColor"
-            strokeWidth="0.5"
-            fill="none"
-            className="text-metallic-500"
-          />
-        </svg>
-
-        {/* Country markers */}
-        {countryData.map((country) => {
-          const pos = countryPositions[country.code];
-          if (!pos) return null;
-
-          const isHovered = hoveredCountry === country.code;
-          const size = Math.min(Math.max(country.companies / 500, 2), 6);
-
-          return (
-            <div
-              key={country.code}
-              className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer group"
-              style={{ left: `${pos.x}%`, top: `${pos.y}%` }}
-              onMouseEnter={() => setHoveredCountry(country.code)}
-              onMouseLeave={() => setHoveredCountry(null)}
-            >
-              <div
-                className={`rounded-full transition-all duration-200 ${
-                  isHovered ? 'bg-primary-400 scale-150' : 'bg-primary-500/70'
-                }`}
-                style={{ width: `${size * 4}px`, height: `${size * 4}px` }}
-              />
-              {/* Pulse animation */}
-              <div
-                className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary-500/30 animate-ping`}
-                style={{ width: `${size * 6}px`, height: `${size * 6}px` }}
-              />
-
-              {/* Tooltip */}
-              {isHovered && (
-                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-metallic-800 border border-metallic-700 rounded-lg px-3 py-2 whitespace-nowrap z-10">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span>{country.flag}</span>
-                    <span className="font-medium text-metallic-100">{country.name}</span>
-                  </div>
-                  <div className="text-xs text-metallic-400">
-                    {country.companies.toLocaleString()} companies
-                  </div>
-                  <div className={`text-xs ${country.change >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                    {country.change >= 0 ? '+' : ''}{country.change}% today
-                  </div>
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
-      <div className="mt-4 text-center">
-        <Link 
-          href="/analysis/map" 
-          className="text-sm text-primary-400 hover:text-primary-300 transition-colors"
+      
+      {/* Interactive Map */}
+      <div className="relative bg-gradient-to-b from-metallic-800/30 to-metallic-800/50 rounded-lg overflow-hidden" style={{ aspectRatio: '2/1' }}>
+        <svg 
+          viewBox="0 0 500 280" 
+          className="w-full h-full"
+          preserveAspectRatio="xMidYMid meet"
         >
-          Open Interactive Map →
+          {/* Grid lines for reference */}
+          <defs>
+            <pattern id="grid" width="25" height="25" patternUnits="userSpaceOnUse">
+              <path d="M 25 0 L 0 0 0 25" fill="none" stroke="currentColor" strokeWidth="0.3" className="text-metallic-700/30" />
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#grid)" />
+          
+          {/* Equator and major latitude lines */}
+          <line x1="0" y1="140" x2="500" y2="140" stroke="currentColor" strokeWidth="0.5" strokeDasharray="4,4" className="text-metallic-600/40" />
+          <line x1="0" y1="70" x2="500" y2="70" stroke="currentColor" strokeWidth="0.3" strokeDasharray="2,4" className="text-metallic-700/30" />
+          <line x1="0" y1="210" x2="500" y2="210" stroke="currentColor" strokeWidth="0.3" strokeDasharray="2,4" className="text-metallic-700/30" />
+          
+          {/* Simplified continent outlines */}
+          {/* North America outline */}
+          <path 
+            d="M40,35 Q60,30 80,32 Q100,28 120,30 Q140,25 160,28 Q180,25 195,35 Q200,50 195,65 Q185,80 175,85 Q165,75 155,78 Q145,85 130,90 Q115,95 100,92 Q85,88 70,90 Q55,95 45,88 Q35,80 38,65 Q40,50 40,35 Z"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1"
+            className="text-metallic-600/50"
+          />
+          
+          {/* South America outline */}
+          <path 
+            d="M85,130 Q100,125 110,135 Q115,150 112,170 Q108,190 100,210 Q95,230 88,245 Q82,250 80,240 Q85,220 88,200 Q90,180 88,160 Q85,145 85,130 Z"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1"
+            className="text-metallic-600/50"
+          />
+          
+          {/* Africa outline */}
+          <path 
+            d="M240,95 Q260,90 280,95 Q295,100 305,115 Q310,135 308,155 Q305,175 298,195 Q290,215 275,225 Q260,230 250,220 Q245,200 248,180 Q250,160 248,140 Q245,120 240,95 Z"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1"
+            className="text-metallic-600/50"
+          />
+          
+          {/* Europe outline */}
+          <path 
+            d="M240,40 Q260,35 280,40 Q295,45 300,55 Q295,65 285,70 Q270,75 255,72 Q245,68 240,58 Q238,48 240,40 Z"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1"
+            className="text-metallic-600/50"
+          />
+          
+          {/* Asia outline */}
+          <path 
+            d="M300,30 Q330,25 360,30 Q390,35 420,45 Q440,55 450,70 Q445,90 435,100 Q420,105 400,100 Q380,95 360,90 Q340,85 320,80 Q305,75 300,60 Q298,45 300,30 Z"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1"
+            className="text-metallic-600/50"
+          />
+          
+          {/* Australia outline */}
+          <path 
+            d="M380,155 Q410,150 435,160 Q450,175 448,195 Q440,215 420,225 Q395,230 375,220 Q360,205 365,185 Q370,165 380,155 Z"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1"
+            className="text-metallic-600/50"
+          />
+          
+          {/* Country highlights with data */}
+          {countryData.map((country) => {
+            const pathData = countryPaths[country.code];
+            if (!pathData) return null;
+            
+            const isHovered = hoveredCountry === country.code;
+            const isSelected = selectedCountry === country.code;
+            const intensity = Math.min(country.companies / 3000, 1);
+            
+            return (
+              <g key={country.code}>
+                <path
+                  d={pathData.d}
+                  fill={isHovered || isSelected ? 'rgba(168, 85, 247, 0.4)' : `rgba(168, 85, 247, ${0.15 + intensity * 0.35})`}
+                  stroke={isHovered || isSelected ? '#a855f7' : 'rgba(168, 85, 247, 0.5)'}
+                  strokeWidth={isHovered || isSelected ? 2 : 1}
+                  className="cursor-pointer transition-all duration-200"
+                  onMouseEnter={() => setHoveredCountry(country.code)}
+                  onMouseLeave={() => setHoveredCountry(null)}
+                  onClick={() => setSelectedCountry(selectedCountry === country.code ? null : country.code)}
+                />
+                {/* Country label */}
+                <text
+                  x={pathData.viewBox.x + 20}
+                  y={pathData.viewBox.y + 15}
+                  className="text-[8px] fill-metallic-300 pointer-events-none font-medium"
+                  style={{ display: isHovered || isSelected ? 'block' : 'none' }}
+                >
+                  {country.name}
+                </text>
+              </g>
+            );
+          })}
+          
+          {/* Pulsing markers for each country */}
+          {countryData.map((country) => {
+            const pathData = countryPaths[country.code];
+            if (!pathData) return null;
+            
+            const cx = pathData.viewBox.x + 25;
+            const cy = pathData.viewBox.y + 20;
+            const isHovered = hoveredCountry === country.code;
+            
+            return (
+              <g key={`marker-${country.code}`}>
+                <circle
+                  cx={cx}
+                  cy={cy}
+                  r={isHovered ? 6 : 4}
+                  fill="#a855f7"
+                  className="transition-all duration-200"
+                />
+                <circle
+                  cx={cx}
+                  cy={cy}
+                  r={isHovered ? 10 : 6}
+                  fill="none"
+                  stroke="#a855f7"
+                  strokeWidth="1"
+                  opacity="0.5"
+                  className="animate-ping"
+                />
+              </g>
+            );
+          })}
+        </svg>
+        
+        {/* Hover tooltip */}
+        {hoveredCountry && (
+          <div className="absolute top-4 right-4 bg-metallic-800/95 backdrop-blur border border-metallic-700 rounded-lg px-4 py-3 shadow-xl z-10">
+            {(() => {
+              const country = getCountryInfo(hoveredCountry);
+              if (!country) return null;
+              return (
+                <>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-2xl">{country.flag}</span>
+                    <span className="font-semibold text-metallic-100">{country.name}</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+                    <span className="text-metallic-500">Companies:</span>
+                    <span className="text-metallic-200 font-medium">{country.companies.toLocaleString()}</span>
+                    <span className="text-metallic-500">Projects:</span>
+                    <span className="text-metallic-200 font-medium">{country.projects.toLocaleString()}</span>
+                    <span className="text-metallic-500">Market Cap:</span>
+                    <span className="text-metallic-200 font-medium">{country.marketCap}</span>
+                    <span className="text-metallic-500">Today:</span>
+                    <span className={country.change >= 0 ? 'text-green-400 font-medium' : 'text-red-400 font-medium'}>
+                      {country.change >= 0 ? '+' : ''}{country.change}%
+                    </span>
+                  </div>
+                  <div className="mt-2 pt-2 border-t border-metallic-700">
+                    <span className="text-xs text-metallic-500">Top: </span>
+                    <span className="text-xs text-metallic-300">{country.topCommodities.join(', ')}</span>
+                  </div>
+                </>
+              );
+            })()}
+          </div>
+        )}
+      </div>
+      
+      {/* Legend */}
+      <div className="mt-4 flex items-center justify-between">
+        <div className="flex items-center gap-4 text-xs text-metallic-500">
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-primary-500/30" />
+            <span>Fewer companies</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-primary-500/70" />
+            <span>More companies</span>
+          </div>
+        </div>
+        <Link 
+          href="/analysis/global" 
+          className="text-sm text-primary-400 hover:text-primary-300 transition-colors flex items-center gap-1"
+        >
+          Open Full Interactive Map
+          <ChevronDown className="w-4 h-4 rotate-[-90deg]" />
         </Link>
       </div>
     </div>
