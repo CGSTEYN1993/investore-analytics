@@ -561,9 +561,20 @@ export default function AnnouncementsPage() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-metallic-500" />
             <input
               type="text"
-              placeholder="Search news, companies..."
+              placeholder="Filter feed or type ticker (e.g. BHP) and press Enter..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyDown={(e) => {
+                // If user presses Enter and the search looks like a ticker, search for company announcements
+                if (e.key === 'Enter' && searchTerm.trim()) {
+                  const term = searchTerm.trim().toUpperCase();
+                  // If it looks like a ticker (2-5 uppercase letters), do company search
+                  if (/^[A-Z]{2,5}$/.test(term)) {
+                    setCompanySearch(term);
+                    searchCompanyAnnouncements(term);
+                  }
+                }
+              }}
               className="w-full pl-9 pr-4 py-2.5 bg-metallic-900 border border-metallic-800 rounded-lg text-metallic-100 placeholder-metallic-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
             />
           </div>
