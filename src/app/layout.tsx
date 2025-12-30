@@ -29,8 +29,12 @@ export const metadata: Metadata = {
   category: 'Finance',
   classification: 'Financial Services',
   icons: {
-    icon: '/favicon.ico',
+    icon: [
+      { url: '/favicon.png', type: 'image/png' },
+      { url: '/logo.svg', type: 'image/svg+xml' },
+    ],
     apple: '/apple-touch-icon.png',
+    shortcut: '/favicon.png',
   },
   robots: {
     index: true,
