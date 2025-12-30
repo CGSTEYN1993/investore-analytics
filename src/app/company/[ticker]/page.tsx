@@ -10,6 +10,7 @@ import {
   BarChart3, DollarSign, Users, Layers, Download, Loader2, RefreshCw, AlertCircle
 } from 'lucide-react';
 import { getCommodityColor } from '@/lib/subscription-tiers';
+import CompanyGeoscienceWidget from '@/components/dashboard/CompanyGeoscienceWidget';
 
 // Dynamic import for Plotly to avoid SSR issues
 const Plot = dynamic(() => import('react-plotly.js'), { ssr: false });
@@ -579,6 +580,9 @@ export default function CompanyProfile() {
                 </div>
               )}
             </section>
+
+            {/* Geoscience Australia Intelligence Section */}
+            <CompanyGeoscienceWidget symbol={ticker} showFullDetails={false} />
           </div>
 
           {/* Sidebar */}
@@ -673,6 +677,13 @@ export default function CompanyProfile() {
                 >
                   <MapPin className="w-5 h-5 text-primary-400" />
                   <span className="text-sm text-metallic-300">View on map</span>
+                </Link>
+                <Link
+                  href="/analysis/geoscience"
+                  className="flex items-center gap-3 p-3 rounded-lg bg-metallic-800/50 hover:bg-metallic-800 transition-colors"
+                >
+                  <Layers className="w-5 h-5 text-primary-400" />
+                  <span className="text-sm text-metallic-300">Geoscience Australia data</span>
                 </Link>
                 <Link
                   href={`/analysis/announcements?company=${ticker}`}
