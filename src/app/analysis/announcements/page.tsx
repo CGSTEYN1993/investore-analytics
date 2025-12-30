@@ -375,38 +375,6 @@ export default function AnnouncementsPage() {
             ))}
           </div>
 
-          {/* Company Search Box */}
-          <div className="bg-gradient-to-r from-primary-500/10 to-cyan-500/10 border border-primary-500/30 rounded-xl p-4 mb-4">
-            <div className="flex flex-col sm:flex-row gap-3">
-              <div className="flex-1 relative">
-                <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary-400" />
-                <input
-                  type="text"
-                  placeholder="Enter ticker to search (e.g., BHP, RIO, FMG)..."
-                  value={companySearch}
-                  onChange={(e) => setCompanySearch(e.target.value.toUpperCase())}
-                  onKeyDown={handleSearchKeyDown}
-                  className="w-full pl-10 pr-4 py-3 bg-metallic-900 border border-metallic-700 rounded-lg text-metallic-100 placeholder-metallic-500 focus:outline-none focus:ring-2 focus:ring-primary-500 font-mono"
-                />
-              </div>
-              <button
-                onClick={() => searchCompanyAnnouncements(companySearch)}
-                disabled={!companySearch.trim() || searchingCompany}
-                className="px-6 py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 font-medium"
-              >
-                {searchingCompany ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Search className="w-4 h-4" />
-                )}
-                Search Company
-              </button>
-            </div>
-            <p className="text-xs text-metallic-500 mt-2">
-              Search any ASX company ticker to see their latest announcements
-            </p>
-          </div>
-
           {/* Company Search Results */}
           {searchedCompany && (
             <div className="bg-metallic-800/50 border border-metallic-700 rounded-xl p-4 mb-4">
@@ -557,26 +525,46 @@ export default function AnnouncementsPage() {
 
         {/* Search and Filters */}
         <div className="flex flex-col md:flex-row gap-4 mb-6">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-metallic-500" />
-            <input
-              type="text"
-              placeholder="Filter feed or type ticker (e.g. BHP) and press Enter..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              onKeyDown={(e) => {
-                // If user presses Enter and the search looks like a ticker, search for company announcements
-                if (e.key === 'Enter' && searchTerm.trim()) {
-                  const term = searchTerm.trim().toUpperCase();
-                  // If it looks like a ticker (2-5 uppercase letters), do company search
-                  if (/^[A-Z]{2,5}$/.test(term)) {
-                    setCompanySearch(term);
-                    searchCompanyAnnouncements(term);
+          <div className="relative flex-1 flex gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-metallic-500" />
+              <input
+                type="text"
+                placeholder="Search ticker (e.g. BHP, IVR) or filter by keyword..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyDown={(e) => {
+                  // If user presses Enter and the search looks like a ticker, search for company announcements
+                  if (e.key === 'Enter' && searchTerm.trim()) {
+                    const term = searchTerm.trim().toUpperCase();
+                    // If it looks like a ticker (2-5 uppercase letters), do company search
+                    if (/^[A-Z]{2,5}$/.test(term)) {
+                      setCompanySearch(term);
+                      searchCompanyAnnouncements(term);
+                    }
                   }
+                }}
+                className="w-full pl-9 pr-4 py-2.5 bg-metallic-900 border border-metallic-800 rounded-lg text-metallic-100 placeholder-metallic-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              />
+            </div>
+            <button
+              onClick={() => {
+                const term = searchTerm.trim().toUpperCase();
+                if (term && /^[A-Z]{2,5}$/.test(term)) {
+                  setCompanySearch(term);
+                  searchCompanyAnnouncements(term);
                 }
               }}
-              className="w-full pl-9 pr-4 py-2.5 bg-metallic-900 border border-metallic-800 rounded-lg text-metallic-100 placeholder-metallic-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
-            />
+              disabled={!searchTerm.trim() || searchingCompany}
+              className="px-4 py-2.5 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 font-medium whitespace-nowrap"
+            >
+              {searchingCompany ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Building2 className="w-4 h-4" />
+              )}
+              <span className="hidden sm:inline">Search Ticker</span>
+            </button>
           </div>
           
           <div className="flex gap-3">
