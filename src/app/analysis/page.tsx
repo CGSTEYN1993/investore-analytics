@@ -6,7 +6,7 @@ import {
   Globe, Building2, MapPin, TrendingUp, 
   Search, ChevronRight, Gem, FileText, Clock,
   Sparkles, MessageSquare, Target, AlertTriangle, Bell, Activity,
-  BarChart3, Briefcase, Bookmark, Database, Layers, Factory, Hammer
+  BarChart3, Briefcase, Bookmark, Database, Layers, Factory, Hammer, Map
 } from 'lucide-react';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://web-production-4faa7.up.railway.app';
@@ -72,8 +72,15 @@ const aiFeatures = [
   },
 ];
 
-// Global Spatial View sub-categories
+// Spatial Explorer sub-categories (renamed from Global Spatial View)
 const spatialCategories = [
+  {
+    id: 'global-map',
+    title: 'Global Map View',
+    description: 'Interactive world map of all projects',
+    href: '/analysis/global',
+    icon: Globe,
+  },
   {
     id: 'by-exchange',
     title: 'By Exchange',
@@ -91,16 +98,45 @@ const spatialCategories = [
   {
     id: 'by-country',
     title: 'By Country',
-    description: 'Global coverage',
+    description: 'Filter by jurisdiction',
     href: '/analysis/countries',
-    icon: Globe,
+    icon: MapPin,
+  },
+];
+
+// GeoScience sub-categories (NEW - promoted to main modal)
+const geoscienceCategories = [
+  {
+    id: 'australia',
+    title: 'Australia',
+    description: 'Geoscience Australia data',
+    href: '/analysis/australia',
+    icon: Map,
+    flag: '🇦🇺',
   },
   {
-    id: 'geoscience',
-    title: 'Geoscience Data',
-    description: 'Government mining databases',
-    href: '/analysis/global?country=Australia',
-    icon: Database,
+    id: 'canada',
+    title: 'Canada',
+    description: 'NRCan geological surveys',
+    href: '/analysis/geoscience/canada',
+    icon: Map,
+    flag: '🇨🇦',
+  },
+  {
+    id: 'usa',
+    title: 'United States',
+    description: 'USGS mineral resources',
+    href: '/analysis/geoscience/usa',
+    icon: Map,
+    flag: '🇺🇸',
+  },
+  {
+    id: 'south-africa',
+    title: 'South Africa',
+    description: 'CGS mining data',
+    href: '/analysis/geoscience/south-africa',
+    icon: Map,
+    flag: '🇿🇦',
   },
 ];
 
@@ -225,11 +261,11 @@ export default function AnalysisDashboard() {
         </div>
       </div>
 
-      {/* Main Content - Three Main Modals */}
+      {/* Main Content - Four Main Modals */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid lg:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-2 gap-8">
           
-          {/* Modal 1: Global Spatial View */}
+          {/* Modal 1: Spatial Explorer (renamed from Global Spatial View) */}
           <div className="bg-metallic-900 border border-metallic-800 rounded-2xl overflow-hidden hover:border-primary-500/50 transition-colors group">
             <Link href="/analysis/global" className="block">
               <div className="p-6 border-b border-metallic-800 bg-gradient-to-br from-indigo-500/10 to-purple-600/10">
@@ -243,10 +279,10 @@ export default function AnalysisDashboard() {
                   </span>
                 </div>
                 <h2 className="text-xl font-bold text-metallic-100 group-hover:text-primary-400 transition-colors">
-                  Global Spatial View
+                  Spatial Explorer
                 </h2>
                 <p className="text-metallic-400 mt-2 text-sm">
-                  Interactive map with {dynamicStats ? dynamicStats.total_companies.toLocaleString() : '2,100'}+ mining companies across all major exchanges. Filter by country, commodity, or exchange with real-time zoom and geoscience data overlays.
+                  Interactive maps with {dynamicStats ? dynamicStats.total_companies.toLocaleString() : '2,100'}+ mining projects. View companies by location, exchange, commodity, or country with real-time filtering.
                 </p>
               </div>
             </Link>
@@ -283,9 +319,62 @@ export default function AnalysisDashboard() {
             </div>
           </div>
 
-          {/* Modal 2: Mining Analytics */}
+          {/* Modal 2: GeoScience Data (NEW - promoted to main modal) */}
+          <div className="bg-metallic-900 border border-metallic-800 rounded-2xl overflow-hidden hover:border-amber-500/50 transition-colors group">
+            <Link href="/analysis/australia" className="block">
+              <div className="p-6 border-b border-metallic-800 bg-gradient-to-br from-amber-500/10 to-orange-600/10">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center">
+                    <Database className="w-7 h-7 text-white" />
+                  </div>
+                  <span className="px-3 py-1 bg-amber-500/20 text-amber-400 text-xs font-medium rounded-full">
+                    GOVERNMENT DATA
+                  </span>
+                </div>
+                <h2 className="text-xl font-bold text-metallic-100 group-hover:text-amber-400 transition-colors">
+                  GeoScience Data
+                </h2>
+                <p className="text-metallic-400 mt-2 text-sm">
+                  Access official government geological surveys, mineral occurrence databases, and mining tenement data from major mining jurisdictions worldwide.
+                </p>
+              </div>
+            </Link>
+            
+            <div className="p-4 space-y-2">
+              {geoscienceCategories.map((cat) => (
+                <Link
+                  key={cat.id}
+                  href={cat.href}
+                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-metallic-800/70 transition-colors group/item"
+                >
+                  <div className="w-9 h-9 rounded-lg bg-metallic-800 flex items-center justify-center text-lg">
+                    {cat.flag}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-medium text-metallic-200 group-hover/item:text-amber-400 transition-colors">
+                      {cat.title}
+                    </div>
+                    <div className="text-xs text-metallic-500">{cat.description}</div>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-metallic-600 group-hover/item:text-amber-400 group-hover/item:translate-x-1 transition-all" />
+                </Link>
+              ))}
+            </div>
+            
+            <div className="p-4 pt-0">
+              <Link
+                href="/analysis/australia"
+                className="flex items-center justify-center gap-2 w-full py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white font-medium rounded-lg hover:from-amber-600 hover:to-orange-700 transition-all"
+              >
+                <Database className="w-4 h-4" />
+                Explore GeoScience Data
+              </Link>
+            </div>
+          </div>
+
+          {/* Modal 3: Mining Analytics */}
           <div className="bg-metallic-900 border border-metallic-800 rounded-2xl overflow-hidden hover:border-cyan-500/50 transition-colors group">
-            <Link href="/analysis/mining-analytics" className="block">
+            <Link href="/analysis/market" className="block">
               <div className="p-6 border-b border-metallic-800 bg-gradient-to-br from-cyan-500/10 to-blue-600/10">
                 <div className="flex items-center justify-between mb-4">
                   <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
@@ -299,7 +388,7 @@ export default function AnalysisDashboard() {
                   Mining Analytics
                 </h2>
                 <p className="text-metallic-400 mt-2 text-sm">
-                  Comprehensive analysis tools including market data, announcements, peer comparison, exploration data, and project stage filtering.
+                  Comprehensive analysis tools including real-time market data, company announcements, peer comparison, and project stage filtering.
                 </p>
               </div>
             </Link>
@@ -327,7 +416,7 @@ export default function AnalysisDashboard() {
             
             <div className="p-4 pt-0">
               <Link
-                href="/analysis/mining-analytics"
+                href="/analysis/market"
                 className="flex items-center justify-center gap-2 w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-medium rounded-lg hover:from-cyan-600 hover:to-blue-700 transition-all"
               >
                 <BarChart3 className="w-4 h-4" />
@@ -336,7 +425,7 @@ export default function AnalysisDashboard() {
             </div>
           </div>
 
-          {/* Modal 3: AI Research Analyst */}
+          {/* Modal 4: AI Research Analyst */}
           <div className="bg-metallic-900 border border-metallic-800 rounded-2xl overflow-hidden hover:border-emerald-500/50 transition-colors">
             <div className="p-6 border-b border-metallic-800 bg-gradient-to-br from-emerald-500/10 to-teal-600/10">
               <div className="flex items-center justify-between mb-4">
@@ -349,46 +438,26 @@ export default function AnalysisDashboard() {
                 </span>
               </div>
               <h2 className="text-xl font-bold text-metallic-100">
-                Your AI Research Analyst
+                AI Research Analyst
               </h2>
               <p className="text-metallic-400 mt-2 text-sm">
-                While competitors give you raw data, InvestOre interprets it for you. Our AI reads every announcement, flags opportunities, and explains why stocks are mispriced.
+                While competitors give you raw data, InvestOre interprets it. Our AI reads announcements, flags opportunities, and explains mispriced stocks.
               </p>
             </div>
             
-            <div className="p-4 space-y-3">
-              {aiFeatures.slice(0, 3).map((feature) => (
+            <div className="p-4 space-y-2">
+              {aiFeatures.slice(0, 4).map((feature) => (
                 <div
                   key={feature.id}
-                  className="p-3 rounded-lg bg-metallic-800/30 border border-metallic-700/50 hover:border-emerald-500/30 transition-colors"
+                  className="flex items-center gap-3 p-3 rounded-lg bg-metallic-800/30 border border-metallic-700/50 hover:border-emerald-500/30 transition-colors"
                 >
-                  <div className="flex items-start gap-3">
-                    <div className="w-9 h-9 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center flex-shrink-0">
-                      <feature.icon className={`w-4 h-4 ${feature.iconColor || 'text-emerald-400'}`} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-sm font-medium text-metallic-100">{feature.title}</span>
-                        <span className={`px-2 py-0.5 text-[10px] font-medium rounded-full ${feature.badgeColor}`}>
-                          {feature.badge}
-                        </span>
-                      </div>
-                      <p className="text-xs text-metallic-400 line-clamp-2">{feature.description}</p>
-                    </div>
+                  <div className="w-9 h-9 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center flex-shrink-0">
+                    <feature.icon className={`w-4 h-4 ${feature.iconColor || 'text-emerald-400'}`} />
                   </div>
-                </div>
-              ))}
-            </div>
-            
-            {/* Second row of AI features */}
-            <div className="px-4 pb-4 grid grid-cols-3 gap-2">
-              {aiFeatures.slice(3).map((feature) => (
-                <div
-                  key={feature.id}
-                  className="p-2.5 rounded-lg bg-metallic-800/30 border border-metallic-700/50 hover:border-emerald-500/30 transition-colors text-center"
-                >
-                  <feature.icon className={`w-5 h-5 mx-auto mb-1.5 ${feature.iconColor || 'text-emerald-400'}`} />
-                  <div className="text-[10px] font-medium text-metallic-200 leading-tight">{feature.title}</div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-medium text-metallic-200">{feature.title}</div>
+                    <div className="text-xs text-metallic-500">{feature.badge}</div>
+                  </div>
                 </div>
               ))}
             </div>
@@ -399,11 +468,8 @@ export default function AnalysisDashboard() {
                 className="flex items-center justify-center gap-2 w-full py-3 bg-gradient-to-r from-emerald-500/50 to-teal-600/50 text-white/70 font-medium rounded-lg cursor-not-allowed"
               >
                 <Sparkles className="w-4 h-4" />
-                Coming Soon
+                Coming Q1 2026
               </button>
-              <p className="text-xs text-metallic-500 text-center mt-2">
-                AI features launching Q1 2026
-              </p>
             </div>
           </div>
         </div>
