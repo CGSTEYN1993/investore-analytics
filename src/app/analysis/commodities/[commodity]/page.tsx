@@ -55,6 +55,7 @@ const commodityDisplayNames: { [key: string]: { name: string; symbol: string } }
   'titanium': { name: 'Titanium', symbol: 'Ti' },
   'chromium': { name: 'Chromium', symbol: 'Cr' },
   'lead': { name: 'Lead', symbol: 'Pb' },
+  'diversified': { name: 'Diversified Miners', symbol: 'Di' },
 };
 
 // Exchange flags
@@ -77,11 +78,17 @@ function formatMarketCap(value: number | null): string {
   return `$${value.toLocaleString()}`;
 }
 
-function CompanyCard({ company, commoditySymbol }: { company: Company; commoditySymbol: string }) {
-  const color = getCommodityColor(commoditySymbol);
+function CompanyCard({ company, commoditySymbol, isDiversified }: { company: Company; commoditySymbol: string; isDiversified?: boolean }) {
+  const color = getCommodityColor(company.primary_commodity || commoditySymbol);
+  
+  // For diversified companies, show their actual commodities prominently
+  const showCommoditiesProminently = isDiversified || commoditySymbol === 'Di' || !company.is_primary;
   
   return (
-    <div className="bg-metallic-900 border border-metallic-800 rounded-xl p-4 hover:border-metallic-700 transition-all">
+    <Link 
+      href={`/company/${company.ticker}`}
+      className="block bg-metallic-900 border border-metallic-800 rounded-xl p-4 hover:border-primary-500/50 hover:bg-metallic-900/80 transition-all"
+    >
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-3">
           <div 
@@ -96,7 +103,7 @@ function CompanyCard({ company, commoditySymbol }: { company: Company; commodity
               <span className="text-xs px-1.5 py-0.5 bg-metallic-800 rounded text-metallic-400">
                 {exchangeFlags[company.exchange] || ''} {company.exchange}
               </span>
-              {company.is_primary && (
+              {company.is_primary && !isDiversified && (
                 <span className="text-xs px-1.5 py-0.5 bg-primary-500/20 text-primary-400 rounded">
                   Primary
                 </span>
@@ -106,16 +113,40 @@ function CompanyCard({ company, commoditySymbol }: { company: Company; commodity
           </div>
         </div>
         {company.website && (
-          <a
-            href={company.website}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-metallic-500 hover:text-primary-400 transition-colors"
+          <span
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              window.open(company.website!, '_blank');
+            }}
+            className="text-metallic-500 hover:text-primary-400 transition-colors cursor-pointer"
           >
             <ExternalLink className="w-4 h-4" />
-          </a>
+          </span>
         )}
       </div>
+      
+      {/* Commodities section - more prominent for diversified */}
+      {showCommoditiesProminently && (company.primary_commodity || company.secondary_commodities) && (
+        <div className="flex flex-wrap gap-1.5 mb-3">
+          {company.primary_commodity && (
+            <span 
+              className="px-2 py-1 text-xs font-medium rounded-md text-white"
+              style={{ backgroundColor: getCommodityColor(company.primary_commodity) }}
+            >
+              {company.primary_commodity}
+            </span>
+          )}
+          {company.secondary_commodities?.split(',').map((comm, i) => (
+            <span 
+              key={i}
+              className="px-2 py-1 text-xs rounded-md bg-metallic-700 text-metallic-300"
+            >
+              {comm.trim()}
+            </span>
+          ))}
+        </div>
+      )}
       
       <div className="grid grid-cols-2 gap-3 text-sm">
         <div>
@@ -126,13 +157,13 @@ function CompanyCard({ company, commoditySymbol }: { company: Company; commodity
           <p className="text-metallic-500">Type</p>
           <p className="text-metallic-100 font-medium capitalize">{company.company_type || '-'}</p>
         </div>
-        {company.primary_commodity && (
+        {!showCommoditiesProminently && company.primary_commodity && (
           <div>
             <p className="text-metallic-500">Primary</p>
             <p className="text-metallic-100 font-medium">{company.primary_commodity}</p>
           </div>
         )}
-        {company.secondary_commodities && (
+        {!showCommoditiesProminently && company.secondary_commodities && (
           <div>
             <p className="text-metallic-500">Also mines</p>
             <p className="text-metallic-300 text-xs line-clamp-1">{company.secondary_commodities}</p>
@@ -146,7 +177,7 @@ function CompanyCard({ company, commoditySymbol }: { company: Company; commodity
           {company.country}
         </div>
       )}
-    </div>
+    </Link>
   );
 }
 
@@ -354,6 +385,7 @@ export default function CommodityDetailPage() {
                   key={`${company.exchange}-${company.ticker}`} 
                   company={company} 
                   commoditySymbol={commodityInfo.symbol}
+                  isDiversified={commodity === 'diversified' || commodityInfo.symbol === 'Di'}
                 />
               ))}
             </div>
