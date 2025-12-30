@@ -181,6 +181,15 @@ function GlobalSpatialContent() {
   const [viewMode, setViewMode] = useState<'map' | 'list'>('list');
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
   
+  // Market data state for selected company
+  const [selectedCompanyMarketData, setSelectedCompanyMarketData] = useState<{
+    marketCap: number | null;
+    price: number | null;
+    change: number | null;
+    changePercent: number | null;
+    loading: boolean;
+  }>({ marketCap: null, price: null, change: null, changePercent: null, loading: false });
+  
   // Geoscience data state
   const [showGeoscienceData, setShowGeoscienceData] = useState(false);
   const { data: geoscienceData, isLoading: geoscienceLoading } = useGeoscienceData();
@@ -322,6 +331,39 @@ function GlobalSpatialContent() {
     
     fetchCompanies();
   }, [selectedExchange, selectedCommodity, selectedCountry, selectedType, debouncedSearch, currentPage]);
+
+  // Fetch market data when a company is selected
+  useEffect(() => {
+    if (!selectedCompany) {
+      setSelectedCompanyMarketData({ marketCap: null, price: null, change: null, changePercent: null, loading: false });
+      return;
+    }
+    
+    const fetchMarketData = async () => {
+      setSelectedCompanyMarketData(prev => ({ ...prev, loading: true }));
+      try {
+        // Try to get quote data for market cap
+        const response = await fetch(`${API_BASE}/market/quote/${selectedCompany.symbol}`);
+        if (response.ok) {
+          const data = await response.json();
+          setSelectedCompanyMarketData({
+            marketCap: data.marketCap || null,
+            price: data.price || null,
+            change: data.change || null,
+            changePercent: data.changePercent || null,
+            loading: false,
+          });
+        } else {
+          setSelectedCompanyMarketData({ marketCap: null, price: null, change: null, changePercent: null, loading: false });
+        }
+      } catch (err) {
+        console.error('Failed to fetch market data:', err);
+        setSelectedCompanyMarketData({ marketCap: null, price: null, change: null, changePercent: null, loading: false });
+      }
+    };
+    
+    fetchMarketData();
+  }, [selectedCompany]);
 
   // Reset page when filters change
   useEffect(() => {
@@ -781,6 +823,65 @@ function GlobalSpatialContent() {
                     <span className="font-medium text-metallic-100">{selectedCompany.headquarters}</span>
                   </div>
                 </div>
+              </div>
+              
+              {/* Market Data Section */}
+              <div className="bg-metallic-800/50 rounded-lg p-4 border border-metallic-700">
+                <div className="text-sm text-metallic-500 mb-3 flex items-center gap-2">
+                  <TrendingUp className="h-4 w-4" />
+                  Market Data
+                </div>
+                {selectedCompanyMarketData.loading ? (
+                  <div className="flex items-center gap-2 text-metallic-400">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span className="text-sm">Loading market data...</span>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <div className="text-xs text-metallic-500">Market Cap</div>
+                      <div className="font-semibold text-metallic-100 mt-0.5">
+                        {selectedCompanyMarketData.marketCap 
+                          ? `$${(selectedCompanyMarketData.marketCap / 1e9).toFixed(2)}B`
+                          : selectedCompany.market_cap_category 
+                            ? selectedCompany.market_cap_category.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())
+                            : '-'}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-metallic-500">Price</div>
+                      <div className="font-semibold text-metallic-100 mt-0.5">
+                        {selectedCompanyMarketData.price 
+                          ? `$${selectedCompanyMarketData.price.toFixed(2)}`
+                          : '-'}
+                      </div>
+                    </div>
+                    <div className="col-span-2">
+                      <div className="text-xs text-metallic-500">Change</div>
+                      <div className={`font-semibold mt-0.5 flex items-center gap-1 ${
+                        selectedCompanyMarketData.change && selectedCompanyMarketData.change > 0 
+                          ? 'text-green-400' 
+                          : selectedCompanyMarketData.change && selectedCompanyMarketData.change < 0 
+                            ? 'text-red-400' 
+                            : 'text-metallic-100'
+                      }`}>
+                        {selectedCompanyMarketData.change !== null && selectedCompanyMarketData.changePercent !== null ? (
+                          <>
+                            {selectedCompanyMarketData.change > 0 ? (
+                              <TrendingUp className="h-4 w-4" />
+                            ) : selectedCompanyMarketData.change < 0 ? (
+                              <TrendingDown className="h-4 w-4" />
+                            ) : null}
+                            <span>
+                              {selectedCompanyMarketData.change > 0 ? '+' : ''}
+                              {selectedCompanyMarketData.change.toFixed(2)} ({selectedCompanyMarketData.changePercent > 0 ? '+' : ''}{selectedCompanyMarketData.changePercent.toFixed(2)}%)
+                            </span>
+                          </>
+                        ) : '-'}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
               
               {selectedCompany.secondary_commodities?.length > 0 && (
