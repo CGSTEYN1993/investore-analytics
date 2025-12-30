@@ -91,6 +91,67 @@ const tileProviders: Record<TileProvider, { url: string; attribution: string; na
   },
 };
 
+// Geoscience Australia WMS Overlay Layers
+type WMSOverlayId = 'surfaceGeology' | 'geologicalProvinces' | 'faults' | 'magneticAnomalies' | 'gravityAnomalies' | 'radiometrics';
+
+const wmsOverlays: Record<WMSOverlayId, { 
+  url: string; 
+  layers: string; 
+  name: string; 
+  description: string;
+  opacity: number;
+  enabled: boolean;
+}> = {
+  surfaceGeology: {
+    url: 'https://services.ga.gov.au/gis/services/Surface_Geology_of_Australia_2012/MapServer/WMSServer',
+    layers: '0', // Main geology layer
+    name: 'Surface Geology',
+    description: 'Lithological units and rock types',
+    opacity: 0.6,
+    enabled: false,
+  },
+  geologicalProvinces: {
+    url: 'https://services.ga.gov.au/gis/services/Australian_Geological_Provinces/MapServer/WMSServer',
+    layers: '0',
+    name: 'Geological Provinces',
+    description: 'Major tectonic provinces and domains',
+    opacity: 0.5,
+    enabled: false,
+  },
+  faults: {
+    url: 'https://services.ga.gov.au/gis/services/Australian_Geological_Features/MapServer/WMSServer',
+    layers: '0',
+    name: 'Faults & Structures',
+    description: 'Major faults and structural features',
+    opacity: 0.7,
+    enabled: false,
+  },
+  magneticAnomalies: {
+    url: 'https://services.ga.gov.au/gis/services/Total_Magnetic_Intensity_Grid_2019/MapServer/WMSServer',
+    layers: '0',
+    name: 'Magnetic Anomalies',
+    description: 'Total magnetic intensity (TMI)',
+    opacity: 0.5,
+    enabled: false,
+  },
+  gravityAnomalies: {
+    url: 'https://services.ga.gov.au/gis/services/Gravity_Anomaly_Grid_2019/MapServer/WMSServer',
+    layers: '0',
+    name: 'Gravity Anomalies',
+    description: 'Bouguer gravity anomaly',
+    opacity: 0.5,
+    enabled: false,
+  },
+  radiometrics: {
+    url: 'https://services.ga.gov.au/gis/services/Radiometric_Grid_2019/MapServer/WMSServer',
+    layers: '0',
+    name: 'Radiometrics',
+    description: 'Radiometric ternary image (K-Th-U)',
+    opacity: 0.5,
+    enabled: false,
+  },
+};
+
 // Commodity colors
 const commodityColors: Record<string, string> = {
   'Gold': '#fbbf24',
@@ -189,6 +250,16 @@ export default function AustraliaGeoscienceMap({
     provinces: false, // Background context
     boreholes: false, // Can be many
     geochemistry: false, // Can be many
+  });
+  
+  // WMS overlay visibility
+  const [wmsLayers, setWmsLayers] = useState<Record<WMSOverlayId, boolean>>({
+    surfaceGeology: false,
+    geologicalProvinces: false,
+    faults: false,
+    magneticAnomalies: false,
+    gravityAnomalies: false,
+    radiometrics: false,
   });
   
   const containerRef = useRef<HTMLDivElement>(null);
@@ -343,6 +414,22 @@ export default function AustraliaGeoscienceMap({
       .replace('{r}', '');
   };
 
+  // Generate WMS tile URL for overlay layers
+  const getWmsTileUrl = (x: number, y: number, z: number, overlayId: WMSOverlayId) => {
+    const overlay = wmsOverlays[overlayId];
+    
+    // Calculate tile bounds in EPSG:4326
+    const n = Math.pow(2, z);
+    const lng1 = (x / n) * 360 - 180;
+    const lng2 = ((x + 1) / n) * 360 - 180;
+    const lat1 = Math.atan(Math.sinh(Math.PI * (1 - 2 * (y + 1) / n))) * 180 / Math.PI;
+    const lat2 = Math.atan(Math.sinh(Math.PI * (1 - 2 * y / n))) * 180 / Math.PI;
+    
+    const bbox = `${lng1},${lat1},${lng2},${lat2}`;
+    
+    return `${overlay.url}?service=WMS&request=GetMap&version=1.1.1&layers=${overlay.layers}&styles=&format=image/png&transparent=true&srs=EPSG:4326&width=${tileSize}&height=${tileSize}&bbox=${bbox}`;
+  };
+
   const getMarkerStyle = (feature: GeoscienceMapFeature) => {
     const color = featureTypeColors[feature.type] || commodityColors[feature.commodity || ''] || commodityColors.default;
     
@@ -483,6 +570,30 @@ export default function AustraliaGeoscienceMap({
           />
         ))}
 
+        {/* WMS Overlay Layers */}
+        {(Object.keys(wmsLayers) as WMSOverlayId[]).map(overlayId => 
+          wmsLayers[overlayId] && tiles.map((tile, i) => (
+            <img
+              key={`wms-${overlayId}-${tile.x}-${tile.y}-${zoom}-${i}`}
+              src={getWmsTileUrl(tile.x, tile.y, zoom, overlayId)}
+              alt=""
+              className="absolute pointer-events-none select-none"
+              style={{
+                width: tileSize,
+                height: tileSize,
+                left: tile.screenX,
+                top: tile.screenY,
+                opacity: wmsOverlays[overlayId].opacity,
+              }}
+              draggable={false}
+              onError={(e) => {
+                // Hide broken WMS tiles silently
+                (e.target as HTMLImageElement).style.display = 'none';
+              }}
+            />
+          ))
+        )}
+
         {/* Markers Layer */}
         <div className="absolute inset-0 pointer-events-none">
           {markers.map((marker, i) => renderMarker(marker, i))}
@@ -594,6 +705,100 @@ export default function AustraliaGeoscienceMap({
                 <span>Geochemistry Samples</span>
               </span>
               <span className="text-xs text-metallic-500">{layerCounts.geochemistry}</span>
+            </button>
+            
+            {/* Separator */}
+            <div className="border-t border-metallic-700 my-2 pt-2">
+              <span className="text-xs text-metallic-500 uppercase tracking-wide">Geological Overlays</span>
+            </div>
+            
+            {/* Surface Geology */}
+            <button
+              onClick={() => setWmsLayers(l => ({ ...l, surfaceGeology: !l.surfaceGeology }))}
+              className={`w-full flex items-center justify-between px-2 py-1.5 rounded text-sm transition-colors ${
+                wmsLayers.surfaceGeology ? 'text-purple-400 bg-purple-500/10' : 'text-metallic-500 hover:bg-metallic-800'
+              }`}
+            >
+              <span className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-sm" style={{ background: 'linear-gradient(135deg, #8b5cf6, #3b82f6, #22c55e, #eab308)' }} />
+                <span>Surface Geology</span>
+              </span>
+              {wmsLayers.surfaceGeology && <Eye className="w-3 h-3 text-purple-400" />}
+            </button>
+            
+            {/* Geological Provinces */}
+            <button
+              onClick={() => setWmsLayers(l => ({ ...l, geologicalProvinces: !l.geologicalProvinces }))}
+              className={`w-full flex items-center justify-between px-2 py-1.5 rounded text-sm transition-colors ${
+                wmsLayers.geologicalProvinces ? 'text-indigo-400 bg-indigo-500/10' : 'text-metallic-500 hover:bg-metallic-800'
+              }`}
+            >
+              <span className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-sm border-2 border-indigo-500" />
+                <span>Geological Provinces</span>
+              </span>
+              {wmsLayers.geologicalProvinces && <Eye className="w-3 h-3 text-indigo-400" />}
+            </button>
+            
+            {/* Faults & Structures */}
+            <button
+              onClick={() => setWmsLayers(l => ({ ...l, faults: !l.faults }))}
+              className={`w-full flex items-center justify-between px-2 py-1.5 rounded text-sm transition-colors ${
+                wmsLayers.faults ? 'text-red-400 bg-red-500/10' : 'text-metallic-500 hover:bg-metallic-800'
+              }`}
+            >
+              <span className="flex items-center gap-2">
+                <div className="w-3 h-0.5 bg-red-500" style={{ borderTop: '1px dashed' }} />
+                <span>Faults & Structures</span>
+              </span>
+              {wmsLayers.faults && <Eye className="w-3 h-3 text-red-400" />}
+            </button>
+            
+            {/* Separator */}
+            <div className="border-t border-metallic-700 my-2 pt-2">
+              <span className="text-xs text-metallic-500 uppercase tracking-wide">Geophysics</span>
+            </div>
+            
+            {/* Magnetic Anomalies */}
+            <button
+              onClick={() => setWmsLayers(l => ({ ...l, magneticAnomalies: !l.magneticAnomalies }))}
+              className={`w-full flex items-center justify-between px-2 py-1.5 rounded text-sm transition-colors ${
+                wmsLayers.magneticAnomalies ? 'text-rose-400 bg-rose-500/10' : 'text-metallic-500 hover:bg-metallic-800'
+              }`}
+            >
+              <span className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-sm" style={{ background: 'linear-gradient(135deg, #3b82f6, #ffffff, #ef4444)' }} />
+                <span>Magnetic (TMI)</span>
+              </span>
+              {wmsLayers.magneticAnomalies && <Eye className="w-3 h-3 text-rose-400" />}
+            </button>
+            
+            {/* Gravity Anomalies */}
+            <button
+              onClick={() => setWmsLayers(l => ({ ...l, gravityAnomalies: !l.gravityAnomalies }))}
+              className={`w-full flex items-center justify-between px-2 py-1.5 rounded text-sm transition-colors ${
+                wmsLayers.gravityAnomalies ? 'text-amber-400 bg-amber-500/10' : 'text-metallic-500 hover:bg-metallic-800'
+              }`}
+            >
+              <span className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-sm" style={{ background: 'linear-gradient(135deg, #dc2626, #fbbf24, #22c55e, #3b82f6)' }} />
+                <span>Gravity Anomaly</span>
+              </span>
+              {wmsLayers.gravityAnomalies && <Eye className="w-3 h-3 text-amber-400" />}
+            </button>
+            
+            {/* Radiometrics */}
+            <button
+              onClick={() => setWmsLayers(l => ({ ...l, radiometrics: !l.radiometrics }))}
+              className={`w-full flex items-center justify-between px-2 py-1.5 rounded text-sm transition-colors ${
+                wmsLayers.radiometrics ? 'text-fuchsia-400 bg-fuchsia-500/10' : 'text-metallic-500 hover:bg-metallic-800'
+              }`}
+            >
+              <span className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-sm" style={{ background: 'linear-gradient(135deg, #ef4444, #22c55e, #3b82f6)' }} />
+                <span>Radiometrics (K-Th-U)</span>
+              </span>
+              {wmsLayers.radiometrics && <Eye className="w-3 h-3 text-fuchsia-400" />}
             </button>
           </div>
         )}
