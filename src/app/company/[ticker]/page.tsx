@@ -136,7 +136,10 @@ export default function CompanyProfile() {
       const res = await fetch(`${API_URL}/api/v1/market/chart/${ticker}?period=${period}`);
       if (res.ok) {
         const data = await res.json();
+        console.log(`Chart data for ${ticker}:`, data.source, data.count || data.candles?.length, 'candles');
         setChartData(data);
+      } else {
+        console.error('Chart API error:', res.status);
       }
     } catch (err) {
       console.error('Error fetching chart data:', err);
@@ -507,17 +510,28 @@ export default function CompanyProfile() {
                   />
                 ) : (
                   <div 
-                    className="h-full rounded-lg flex items-center justify-center"
+                    className="h-full rounded-lg flex flex-col items-center justify-center gap-2"
                     style={{ backgroundColor: `${commodityColor}10` }}
                   >
-                    <span className="text-metallic-500">No chart data available</span>
+                    <span className="text-metallic-500">
+                      {chartData?.source === 'none' 
+                        ? 'Chart data temporarily unavailable' 
+                        : 'Loading chart data...'}
+                    </span>
+                    <button
+                      onClick={() => fetchChartData(chartPeriod)}
+                      className="text-sm text-primary-400 hover:text-primary-300"
+                    >
+                      Retry
+                    </button>
                   </div>
                 )}
               </div>
               
               {chartData?.source && chartData.candles.length > 0 && (
-                <div className="mt-2 text-xs text-metallic-600 text-right">
-                  Data source: {chartData.source}
+                <div className="mt-2 flex items-center justify-between text-xs text-metallic-600">
+                  <span>{chartData.candles.length} data points</span>
+                  <span>Source: {chartData.source}</span>
                 </div>
               )}
             </section>
