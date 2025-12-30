@@ -308,10 +308,6 @@ export default function AustraliaGeosciencePage() {
             </span>
           </button>
         </div>
-          >
-            Resource Announcements
-          </button>
-        </div>
 
         {/* GA-Company Links Tab */}
         {activeTab === 'links' && (
