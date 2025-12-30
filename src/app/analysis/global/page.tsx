@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, lazy, Suspense, useCallback } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { 
   Globe, 
   Filter, 
@@ -20,7 +20,8 @@ import {
   Crown,
   Layers,
   ArrowLeft,
-  Database
+  Database,
+  ExternalLink
 } from 'lucide-react';
 import Link from 'next/link';
 import { useGeoscienceData } from '@/hooks/useGeoscienceData';
@@ -157,6 +158,7 @@ export default function GlobalSpatialPage() {
 
 function GlobalSpatialContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   
   const [companies, setCompanies] = useState<Company[]>([]);
   const [geoData, setGeoData] = useState<GeoJSONData | null>(null);
@@ -567,7 +569,7 @@ function GlobalSpatialContent() {
                     <tr 
                       key={`${company.exchange}-${company.symbol}`}
                       className="hover:bg-metallic-800/50 cursor-pointer transition-colors"
-                      onClick={() => setSelectedCompany(company)}
+                      onClick={() => router.push(`/company/${company.symbol}`)}
                     >
                       <td className="px-4 py-3">
                         <span className="font-mono font-semibold text-primary-400">
@@ -805,6 +807,17 @@ function GlobalSpatialContent() {
                   </div>
                 </div>
               )}
+              
+              {/* View Full Profile Button */}
+              <div className="pt-4 border-t border-metallic-700">
+                <Link 
+                  href={`/company/${selectedCompany.symbol}`}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-primary-600 hover:bg-primary-500 text-white rounded-lg font-medium transition-colors"
+                >
+                  <span>View Full Profile</span>
+                  <ExternalLink className="h-4 w-4" />
+                </Link>
+              </div>
             </div>
           </div>
         </div>
