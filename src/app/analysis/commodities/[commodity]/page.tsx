@@ -233,7 +233,7 @@ export default function CommodityDetailPage() {
         for (let i = 0; i < symbols.length; i += batchSize) {
           const batch = symbols.slice(i, i + batchSize);
           const response = await fetch(
-            `${API_URL}/market/market-caps/bulk?symbols=${batch.join(',')}&exchange=${exchange}`
+            `${API_URL}/api/v1/market/market-caps/bulk?symbols=${batch.join(',')}&exchange=${exchange}`
           );
           if (response.ok) {
             const result = await response.json();

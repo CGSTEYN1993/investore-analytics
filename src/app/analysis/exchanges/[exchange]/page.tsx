@@ -163,7 +163,7 @@ export default function ExchangeDetailPage() {
       for (let i = 0; i < symbols.length; i += batchSize) {
         const batch = symbols.slice(i, i + batchSize);
         const response = await fetch(
-          `${API_URL}/market/market-caps/bulk?symbols=${batch.join(',')}&exchange=${exchange.toUpperCase()}`
+          `${API_URL}/api/v1/market/market-caps/bulk?symbols=${batch.join(',')}&exchange=${exchange.toUpperCase()}`
         );
         if (response.ok) {
           const data = await response.json();
