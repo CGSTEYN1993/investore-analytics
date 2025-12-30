@@ -1,12 +1,13 @@
 'use client';
 
-import React, { useState, useMemo, lazy, Suspense } from 'react';
+import React, { useState, useMemo, lazy, Suspense, useEffect } from 'react';
 import Link from 'next/link';
 import { 
   ArrowLeft, Building2, MapPin, Mountain, TrendingUp, FileText,
   Search, Filter, ChevronDown, ExternalLink, Drill, Gem, 
   AlertCircle, Loader2, RefreshCw, Database, BarChart3,
-  Globe, Layers, FileSearch, Sparkles, Play, Map
+  Globe, Layers, FileSearch, Sparkles, Play, Map, X, Info,
+  Target, Users, MapPinned, Crosshair
 } from 'lucide-react';
 import { getCommodityColor } from '@/lib/subscription-tiers';
 import { 
@@ -21,8 +22,12 @@ import {
   useDrillingParser,
   useResourceParser,
   useGeoscienceMapData,
+  useSiteDetails,
+  useMapCompanies,
+  useSitesByCompany,
   GeologicalProvince,
-  MapFeature
+  MapFeature,
+  SiteDetails
 } from '@/hooks/useGeologicalData';
 
 // Lazy load the map component to avoid SSR issues
@@ -112,8 +117,10 @@ export default function AustraliaGeosciencePage() {
   // Map data state
   const [mapCommodityFilter, setMapCommodityFilter] = useState('');
   const [mapStateFilter, setMapStateFilter] = useState('');
+  const [mapCompanyFilter, setMapCompanyFilter] = useState('');
   const [includeBoreholes, setIncludeBoreholes] = useState(false);
   const [includeGeochemistry, setIncludeGeochemistry] = useState(false);
+  const [showSiteDetailsPanel, setShowSiteDetailsPanel] = useState(false);
   
   // Map data hook
   const {
@@ -131,6 +138,60 @@ export default function AustraliaGeosciencePage() {
   
   // Selected map feature
   const [selectedMapFeature, setSelectedMapFeature] = useState<MapFeature | null>(null);
+  
+  // Company list for filtering
+  const { companies: mapCompanies, isLoading: companiesLoading } = useMapCompanies();
+  
+  // Site details when a feature is selected
+  const { 
+    details: siteDetails, 
+    isLoading: siteDetailsLoading, 
+    error: siteDetailsError 
+  } = useSiteDetails(
+    selectedMapFeature?.name || null,
+    selectedMapFeature?.type
+  );
+  
+  // Sites filtered by company
+  const { 
+    data: companySites, 
+    isLoading: companySitesLoading 
+  } = useSitesByCompany(mapCompanyFilter || null);
+  
+  // When a feature is selected, show the details panel
+  useEffect(() => {
+    if (selectedMapFeature) {
+      setShowSiteDetailsPanel(true);
+    }
+  }, [selectedMapFeature]);
+  
+  // Combine map data with company filter
+  const filteredMapData = useMemo(() => {
+    if (!mapData) return null;
+    if (!mapCompanyFilter) return mapData;
+    
+    // If company filter is set, use companySites data
+    if (companySites) {
+      return {
+        operatingMines: companySites.operating_mines || [],
+        developingMines: companySites.developing_mines || [],
+        criticalMinerals: companySites.critical_minerals || [],
+        deposits: companySites.deposits || [],
+        boreholes: [],
+        geochemistry: [],
+        totals: {
+          operatingMines: companySites.operating_mines?.length || 0,
+          developingMines: companySites.developing_mines?.length || 0,
+          criticalMinerals: companySites.critical_minerals?.length || 0,
+          deposits: companySites.deposits?.length || 0,
+          boreholes: 0,
+          geochemistry: 0,
+        }
+      };
+    }
+    
+    return mapData;
+  }, [mapData, mapCompanyFilter, companySites]);
   
   // Filter links by search query
   const filteredLinks = useMemo(() => {
@@ -386,6 +447,17 @@ export default function AustraliaGeosciencePage() {
                 <option value="TAS">Tasmania</option>
               </select>
               
+              <select
+                value={mapCompanyFilter}
+                onChange={(e) => setMapCompanyFilter(e.target.value)}
+                className="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 min-w-[180px]"
+              >
+                <option value="">All Companies</option>
+                {mapCompanies.map((company) => (
+                  <option key={company} value={company}>{company}</option>
+                ))}
+              </select>
+              
               <label className="flex items-center gap-2 text-slate-300 text-sm">
                 <input
                   type="checkbox"
@@ -414,23 +486,23 @@ export default function AustraliaGeosciencePage() {
                 Refresh
               </button>
               
-              {mapData && (
+              {filteredMapData && (
                 <div className="ml-auto flex items-center gap-4 text-sm text-slate-400">
                   <span className="flex items-center gap-1">
                     <div className="w-3 h-3 bg-green-500 rotate-45" />
-                    Operating: {mapData.totals.operatingMines}
+                    Operating: {filteredMapData.totals.operatingMines}
                   </span>
                   <span className="flex items-center gap-1">
                     <div className="w-3 h-3 bg-blue-500 rotate-45" />
-                    Developing: {mapData.totals.developingMines}
+                    Developing: {filteredMapData.totals.developingMines}
                   </span>
                   <span className="flex items-center gap-1">
                     <div className="w-3 h-3 bg-cyan-400" style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }} />
-                    Critical: {mapData.totals.criticalMinerals}
+                    Critical: {filteredMapData.totals.criticalMinerals}
                   </span>
                   <span className="flex items-center gap-1">
                     <div className="w-3 h-3 bg-amber-500 rounded-full" />
-                    Deposits: {mapData.totals.deposits}
+                    Deposits: {filteredMapData.totals.deposits}
                   </span>
                 </div>
               )}
@@ -456,12 +528,12 @@ export default function AustraliaGeosciencePage() {
                   </div>
                 }>
                   <AustraliaGeoscienceMap
-                    operatingMines={mapData?.operatingMines || []}
-                    developingMines={mapData?.developingMines || []}
-                    criticalMinerals={mapData?.criticalMinerals || []}
-                    deposits={mapData?.deposits || []}
-                    boreholes={mapData?.boreholes || []}
-                    geochemistry={mapData?.geochemistry || []}
+                    operatingMines={filteredMapData?.operatingMines || []}
+                    developingMines={filteredMapData?.developingMines || []}
+                    criticalMinerals={filteredMapData?.criticalMinerals || []}
+                    deposits={filteredMapData?.deposits || []}
+                    boreholes={filteredMapData?.boreholes || []}
+                    geochemistry={filteredMapData?.geochemistry || []}
                     onSelectFeature={(feature) => setSelectedMapFeature(feature)}
                     className="h-full"
                   />
@@ -469,54 +541,410 @@ export default function AustraliaGeosciencePage() {
               )}
             </div>
             
-            {/* Selected Feature Info */}
-            {selectedMapFeature && (
-              <div className="bg-slate-900/50 rounded-xl border border-slate-800 p-4">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="text-lg font-semibold text-white">{selectedMapFeature.name}</h3>
-                    <p className="text-sm text-slate-400 capitalize">{selectedMapFeature.type.replace('_', ' ')}</p>
+            {/* Site Details Panel */}
+            {selectedMapFeature && showSiteDetailsPanel && (
+              <div className="bg-slate-900/50 rounded-xl border border-slate-800 overflow-hidden">
+                {/* Header */}
+                <div className="flex items-center justify-between p-4 border-b border-slate-800 bg-slate-800/50">
+                  <div className="flex items-center gap-3">
+                    <div className={`p-2 rounded-lg ${
+                      selectedMapFeature.type === 'operating_mine' ? 'bg-green-500/20 text-green-400' :
+                      selectedMapFeature.type === 'developing_mine' ? 'bg-blue-500/20 text-blue-400' :
+                      selectedMapFeature.type === 'critical_mineral' ? 'bg-cyan-500/20 text-cyan-400' :
+                      'bg-amber-500/20 text-amber-400'
+                    }`}>
+                      <Target className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-white">{selectedMapFeature.name}</h3>
+                      <p className="text-sm text-slate-400 capitalize">
+                        {selectedMapFeature.type.replace(/_/g, ' ')}
+                        {selectedMapFeature.status && ` • ${selectedMapFeature.status}`}
+                      </p>
+                    </div>
                   </div>
                   <button
-                    onClick={() => setSelectedMapFeature(null)}
-                    className="text-slate-400 hover:text-white"
+                    onClick={() => {
+                      setShowSiteDetailsPanel(false);
+                      setSelectedMapFeature(null);
+                    }}
+                    className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg transition-colors"
                   >
-                    ×
+                    <X className="w-5 h-5" />
                   </button>
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
-                  {selectedMapFeature.commodity && (
-                    <div>
-                      <span className="text-xs text-slate-500">Commodity</span>
-                      <p className="text-white">{selectedMapFeature.commodity}</p>
+                
+                {/* Content */}
+                <div className="p-4 space-y-6 max-h-[500px] overflow-y-auto">
+                  {siteDetailsLoading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="w-6 h-6 text-emerald-400 animate-spin mr-2" />
+                      <span className="text-slate-400">Loading site details...</span>
                     </div>
+                  ) : siteDetailsError ? (
+                    <>
+                      {/* Basic Info from Map Feature */}
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        {selectedMapFeature.commodity && (
+                          <div>
+                            <span className="text-xs text-slate-500 uppercase tracking-wide">Commodity</span>
+                            <p className="text-white font-medium">{selectedMapFeature.commodity}</p>
+                          </div>
+                        )}
+                        {selectedMapFeature.state && (
+                          <div>
+                            <span className="text-xs text-slate-500 uppercase tracking-wide">State</span>
+                            <p className="text-white font-medium">{selectedMapFeature.state}</p>
+                          </div>
+                        )}
+                        {selectedMapFeature.owner && (
+                          <div>
+                            <span className="text-xs text-slate-500 uppercase tracking-wide">Owner</span>
+                            <p className="text-white font-medium">{selectedMapFeature.owner}</p>
+                          </div>
+                        )}
+                        <div>
+                          <span className="text-xs text-slate-500 uppercase tracking-wide">Coordinates</span>
+                          <p className="text-white font-medium text-sm">
+                            {selectedMapFeature.lat.toFixed(4)}°S, {selectedMapFeature.lng.toFixed(4)}°E
+                          </p>
+                        </div>
+                      </div>
+                      {selectedMapFeature.description && (
+                        <p className="text-sm text-slate-300 bg-slate-800/50 p-3 rounded-lg">{selectedMapFeature.description}</p>
+                      )}
+                    </>
+                  ) : siteDetails ? (
+                    <>
+                      {/* Site Overview */}
+                      <div>
+                        <h4 className="text-sm font-semibold text-emerald-400 mb-3 flex items-center gap-2">
+                          <Info className="w-4 h-4" />
+                          Site Overview
+                        </h4>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-slate-800/30 p-3 rounded-lg">
+                          {siteDetails.site.commodity && (
+                            <div>
+                              <span className="text-xs text-slate-500 uppercase tracking-wide">Commodity</span>
+                              <p className="text-white font-medium">{siteDetails.site.commodity}</p>
+                            </div>
+                          )}
+                          {siteDetails.site.state && (
+                            <div>
+                              <span className="text-xs text-slate-500 uppercase tracking-wide">State</span>
+                              <p className="text-white font-medium">{siteDetails.site.state}</p>
+                            </div>
+                          )}
+                          {siteDetails.site.owner && (
+                            <div>
+                              <span className="text-xs text-slate-500 uppercase tracking-wide">Owner</span>
+                              <p className="text-white font-medium">{siteDetails.site.owner}</p>
+                            </div>
+                          )}
+                          {siteDetails.site.status && (
+                            <div>
+                              <span className="text-xs text-slate-500 uppercase tracking-wide">Status</span>
+                              <p className="text-white font-medium">{siteDetails.site.status}</p>
+                            </div>
+                          )}
+                          <div>
+                            <span className="text-xs text-slate-500 uppercase tracking-wide">Coordinates</span>
+                            <p className="text-white font-medium text-sm">
+                              {siteDetails.site.lat?.toFixed(4)}°S, {siteDetails.site.lng?.toFixed(4)}°E
+                            </p>
+                          </div>
+                          {siteDetails.site.mine_type && (
+                            <div>
+                              <span className="text-xs text-slate-500 uppercase tracking-wide">Mine Type</span>
+                              <p className="text-white font-medium">{siteDetails.site.mine_type}</p>
+                            </div>
+                          )}
+                          {siteDetails.site.size && (
+                            <div>
+                              <span className="text-xs text-slate-500 uppercase tracking-wide">Size</span>
+                              <p className="text-white font-medium">{siteDetails.site.size}</p>
+                            </div>
+                          )}
+                          {siteDetails.site.all_commodities && siteDetails.site.all_commodities.length > 1 && (
+                            <div className="col-span-2">
+                              <span className="text-xs text-slate-500 uppercase tracking-wide">All Commodities</span>
+                              <p className="text-white font-medium">{siteDetails.site.all_commodities.join(', ')}</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      
+                      {/* Resource Estimates */}
+                      {siteDetails.resources && siteDetails.resources.has_resources && (
+                        <div>
+                          <h4 className="text-sm font-semibold text-emerald-400 mb-3 flex items-center gap-2">
+                            <MapPinned className="w-4 h-4" />
+                            Resource Estimates
+                          </h4>
+                          <div className="bg-slate-800/30 p-3 rounded-lg">
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                              {siteDetails.resources.measured && (
+                                <div>
+                                  <span className="text-slate-500 text-xs">Measured</span>
+                                  <p className="text-green-400 font-medium">{siteDetails.resources.measured.toLocaleString()} Mt</p>
+                                </div>
+                              )}
+                              {siteDetails.resources.indicated && (
+                                <div>
+                                  <span className="text-slate-500 text-xs">Indicated</span>
+                                  <p className="text-blue-400 font-medium">{siteDetails.resources.indicated.toLocaleString()} Mt</p>
+                                </div>
+                              )}
+                              {siteDetails.resources.inferred && (
+                                <div>
+                                  <span className="text-slate-500 text-xs">Inferred</span>
+                                  <p className="text-amber-400 font-medium">{siteDetails.resources.inferred.toLocaleString()} Mt</p>
+                                </div>
+                              )}
+                              {siteDetails.resources.total_tonnage_mt && (
+                                <div>
+                                  <span className="text-slate-500 text-xs">Total Tonnage</span>
+                                  <p className="text-white font-bold">{siteDetails.resources.total_tonnage_mt.toLocaleString()} Mt</p>
+                                </div>
+                              )}
+                              {siteDetails.resources.primary_grade && (
+                                <div>
+                                  <span className="text-slate-500 text-xs">Primary Grade</span>
+                                  <p className="text-white font-medium">
+                                    {siteDetails.resources.primary_grade} {siteDetails.resources.grade_unit || ''}
+                                  </p>
+                                </div>
+                              )}
+                              {siteDetails.resources.contained_metal && (
+                                <div>
+                                  <span className="text-slate-500 text-xs">Contained Metal</span>
+                                  <p className="text-white font-medium">
+                                    {siteDetails.resources.contained_metal.toLocaleString()} {siteDetails.resources.metal_unit || ''}
+                                  </p>
+                                </div>
+                              )}
+                            </div>
+                            
+                            {/* Nearby Resources */}
+                            {siteDetails.resources.nearby_resources && siteDetails.resources.nearby_resources.length > 0 && (
+                              <div className="mt-4 pt-4 border-t border-slate-700">
+                                <span className="text-xs text-slate-500 uppercase tracking-wide">Nearby Resource Comparisons</span>
+                                <div className="mt-2 space-y-2">
+                                  {siteDetails.resources.nearby_resources.slice(0, 3).map((nr, idx) => (
+                                    <div key={idx} className="flex items-center justify-between text-sm">
+                                      <span className="text-slate-300">{nr.name} ({nr.commodity})</span>
+                                      <span className="text-white">
+                                        {nr.resource_tonnage_mt?.toLocaleString()} Mt @ {nr.resource_grade} {nr.resource_grade_unit}
+                                      </span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Geological Context */}
+                      {siteDetails.geological_context && (
+                        <div>
+                          <h4 className="text-sm font-semibold text-emerald-400 mb-3 flex items-center gap-2">
+                            <Layers className="w-4 h-4" />
+                            Geological Context
+                          </h4>
+                          <div className="bg-slate-800/30 p-3 rounded-lg">
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                              {siteDetails.geological_context.province && (
+                                <div>
+                                  <span className="text-slate-500 text-xs">Province</span>
+                                  <p className="text-white">
+                                    {typeof siteDetails.geological_context.province === 'object' 
+                                      ? siteDetails.geological_context.province.name || JSON.stringify(siteDetails.geological_context.province)
+                                      : siteDetails.geological_context.province}
+                                  </p>
+                                </div>
+                              )}
+                              {siteDetails.geological_context.deposit_type && (
+                                <div>
+                                  <span className="text-slate-500 text-xs">Deposit Type</span>
+                                  <p className="text-white">{siteDetails.geological_context.deposit_type}</p>
+                                </div>
+                              )}
+                              {siteDetails.geological_context.host_rock && (
+                                <div>
+                                  <span className="text-slate-500 text-xs">Host Rock</span>
+                                  <p className="text-white">{siteDetails.geological_context.host_rock}</p>
+                                </div>
+                              )}
+                              {siteDetails.geological_context.alteration && (
+                                <div>
+                                  <span className="text-slate-500 text-xs">Alteration</span>
+                                  <p className="text-white">{siteDetails.geological_context.alteration}</p>
+                                </div>
+                              )}
+                              {siteDetails.geological_context.structural_setting && (
+                                <div>
+                                  <span className="text-slate-500 text-xs">Structural Setting</span>
+                                  <p className="text-white">{siteDetails.geological_context.structural_setting}</p>
+                                </div>
+                              )}
+                              {siteDetails.geological_context.tectonic_setting && (
+                                <div>
+                                  <span className="text-slate-500 text-xs">Tectonic Setting</span>
+                                  <p className="text-white">{siteDetails.geological_context.tectonic_setting}</p>
+                                </div>
+                              )}
+                              {siteDetails.geological_context.age_of_mineralization && (
+                                <div>
+                                  <span className="text-slate-500 text-xs">Age of Mineralization</span>
+                                  <p className="text-white">{siteDetails.geological_context.age_of_mineralization}</p>
+                                </div>
+                              )}
+                              {siteDetails.geological_context.mineralization_style && (
+                                <div>
+                                  <span className="text-slate-500 text-xs">Mineralization Style</span>
+                                  <p className="text-white">{siteDetails.geological_context.mineralization_style}</p>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Nearby Deposits */}
+                      {siteDetails.nearby_deposits && siteDetails.nearby_deposits.length > 0 && (
+                        <div>
+                          <h4 className="text-sm font-semibold text-emerald-400 mb-3 flex items-center gap-2">
+                            <MapPin className="w-4 h-4" />
+                            Nearby Deposits ({siteDetails.nearby_deposits.length})
+                          </h4>
+                          <div className="overflow-x-auto">
+                            <table className="w-full text-sm">
+                              <thead>
+                                <tr className="text-slate-500 text-xs uppercase">
+                                  <th className="text-left py-2 pr-4">Name</th>
+                                  <th className="text-left py-2 pr-4">Commodity</th>
+                                  <th className="text-right py-2">Distance</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {siteDetails.nearby_deposits.slice(0, 5).map((dep, idx) => (
+                                  <tr key={idx} className="border-t border-slate-800">
+                                    <td className="py-2 pr-4 text-white">{dep.name}</td>
+                                    <td className="py-2 pr-4 text-slate-400">{dep.commodity}</td>
+                                    <td className="py-2 text-right text-slate-400">{dep.distance_km.toFixed(1)} km</td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Drilling Summary */}
+                      {siteDetails.drilling_summary && (
+                        <div>
+                          <h4 className="text-sm font-semibold text-emerald-400 mb-3 flex items-center gap-2">
+                            <Drill className="w-4 h-4" />
+                            Nearby Drilling Activity
+                          </h4>
+                          <div className="grid grid-cols-3 gap-4 bg-slate-800/30 p-3 rounded-lg">
+                            <div className="text-center">
+                              <p className="text-2xl font-bold text-white">{siteDetails.drilling_summary.total_holes_nearby || 0}</p>
+                              <span className="text-xs text-slate-500">Nearby Holes</span>
+                            </div>
+                            <div className="text-center">
+                              <p className="text-2xl font-bold text-white">{siteDetails.drilling_summary.total_metres?.toLocaleString() || 0}</p>
+                              <span className="text-xs text-slate-500">Total Metres</span>
+                            </div>
+                            <div className="text-center">
+                              <p className="text-2xl font-bold text-white">{siteDetails.drilling_summary.deepest_hole_m || 0}m</p>
+                              <span className="text-xs text-slate-500">Deepest Hole</span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Nearby Boreholes */}
+                      {siteDetails.nearby_boreholes && siteDetails.nearby_boreholes.length > 0 && (
+                        <div>
+                          <h4 className="text-sm font-semibold text-emerald-400 mb-3 flex items-center gap-2">
+                            <Crosshair className="w-4 h-4" />
+                            Nearby Boreholes ({siteDetails.nearby_boreholes.length})
+                          </h4>
+                          <div className="overflow-x-auto">
+                            <table className="w-full text-sm">
+                              <thead>
+                                <tr className="text-slate-500 text-xs uppercase">
+                                  <th className="text-left py-2 pr-4">Name</th>
+                                  <th className="text-left py-2 pr-4">Type</th>
+                                  <th className="text-right py-2 pr-4">Depth</th>
+                                  <th className="text-right py-2">Distance</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {siteDetails.nearby_boreholes.slice(0, 5).map((bh, idx) => (
+                                  <tr key={idx} className="border-t border-slate-800">
+                                    <td className="py-2 pr-4 text-white">{bh.name}</td>
+                                    <td className="py-2 pr-4 text-slate-400">{bh.drill_type || bh.purpose}</td>
+                                    <td className="py-2 pr-4 text-right text-slate-400">{bh.depth_m ? `${bh.depth_m}m` : '-'}</td>
+                                    <td className="py-2 text-right text-slate-400">{bh.distance_km.toFixed(1)} km</td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* LLM Context */}
+                      {siteDetails.llm_context && (
+                        <div>
+                          <h4 className="text-sm font-semibold text-emerald-400 mb-3 flex items-center gap-2">
+                            <FileText className="w-4 h-4" />
+                            Summary
+                          </h4>
+                          <p className="text-sm text-slate-300 bg-slate-800/30 p-3 rounded-lg whitespace-pre-wrap">
+                            {siteDetails.llm_context}
+                          </p>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    /* Fallback to basic info */
+                    <>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        {selectedMapFeature.commodity && (
+                          <div>
+                            <span className="text-xs text-slate-500 uppercase tracking-wide">Commodity</span>
+                            <p className="text-white font-medium">{selectedMapFeature.commodity}</p>
+                          </div>
+                        )}
+                        {selectedMapFeature.state && (
+                          <div>
+                            <span className="text-xs text-slate-500 uppercase tracking-wide">State</span>
+                            <p className="text-white font-medium">{selectedMapFeature.state}</p>
+                          </div>
+                        )}
+                        {selectedMapFeature.owner && (
+                          <div>
+                            <span className="text-xs text-slate-500 uppercase tracking-wide">Owner</span>
+                            <p className="text-white font-medium">{selectedMapFeature.owner}</p>
+                          </div>
+                        )}
+                        <div>
+                          <span className="text-xs text-slate-500 uppercase tracking-wide">Coordinates</span>
+                          <p className="text-white font-medium text-sm">
+                            {selectedMapFeature.lat.toFixed(4)}°S, {selectedMapFeature.lng.toFixed(4)}°E
+                          </p>
+                        </div>
+                      </div>
+                      {selectedMapFeature.description && (
+                        <p className="text-sm text-slate-300 bg-slate-800/50 p-3 rounded-lg">{selectedMapFeature.description}</p>
+                      )}
+                    </>
                   )}
-                  {selectedMapFeature.state && (
-                    <div>
-                      <span className="text-xs text-slate-500">State</span>
-                      <p className="text-white">{selectedMapFeature.state}</p>
-                    </div>
-                  )}
-                  {selectedMapFeature.owner && (
-                    <div>
-                      <span className="text-xs text-slate-500">Owner</span>
-                      <p className="text-white">{selectedMapFeature.owner}</p>
-                    </div>
-                  )}
-                  {selectedMapFeature.status && (
-                    <div>
-                      <span className="text-xs text-slate-500">Status</span>
-                      <p className="text-white">{selectedMapFeature.status}</p>
-                    </div>
-                  )}
-                  <div>
-                    <span className="text-xs text-slate-500">Coordinates</span>
-                    <p className="text-white text-sm">{selectedMapFeature.lat.toFixed(4)}, {selectedMapFeature.lng.toFixed(4)}</p>
-                  </div>
                 </div>
-                {selectedMapFeature.description && (
-                  <p className="mt-4 text-sm text-slate-300">{selectedMapFeature.description}</p>
-                )}
               </div>
             )}
           </div>

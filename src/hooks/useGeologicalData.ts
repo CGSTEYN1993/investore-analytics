@@ -831,3 +831,220 @@ export function useMapGeochemistry(element?: string, limit?: number) {
 
   return { features, isLoading, error, refresh: fetchData };
 }
+
+// ============================================================================
+// SITE DETAILS TYPES AND HOOKS
+// ============================================================================
+
+export interface SiteResourceData {
+  has_resources: boolean;
+  measured?: number | null;
+  indicated?: number | null;
+  inferred?: number | null;
+  total_tonnage_mt: number | null;
+  primary_grade: number | null;
+  grade_unit: string | null;
+  contained_metal: number | null;
+  metal_unit: string | null;
+  nearby_resources?: Array<{
+    name: string;
+    commodity: string;
+    resource_tonnage_mt: number;
+    resource_grade: number;
+    resource_grade_unit: string;
+  }>;
+}
+
+export interface GeologicalContext {
+  province: any;
+  tectonic_setting: string;
+  host_rock: string;
+  alteration: string;
+  structural_setting: string;
+  age_of_mineralization: string;
+  deposit_type: string;
+  mineralization_style: string;
+}
+
+export interface NearbyDeposit {
+  name: string;
+  commodity: string;
+  deposit_type: string;
+  mineralization_style: string;
+  status: string;
+  distance_km: number;
+  resource_tonnage_mt: number | null;
+  resource_grade: number | null;
+  resource_grade_unit: string | null;
+}
+
+export interface NearbyBorehole {
+  name: string;
+  depth_m: number | null;
+  purpose: string;
+  drill_type: string;
+  distance_km: number;
+}
+
+export interface SiteDetails {
+  site: {
+    name: string;
+    type: string;
+    lat: number;
+    lng: number;
+    state: string;
+    commodity: string;
+    all_commodities: string[];
+    status: string;
+    owner: string;
+    mine_type: string;
+    size: string;
+  };
+  resources: SiteResourceData;
+  geological_context: GeologicalContext;
+  nearby_deposits: NearbyDeposit[];
+  nearby_boreholes: NearbyBorehole[];
+  drilling_summary: {
+    total_holes_nearby: number;
+    total_metres: number;
+    deepest_hole_m: number;
+  };
+  llm_context: string;
+}
+
+/**
+ * Hook to fetch detailed site information
+ */
+export function useSiteDetails(siteName: string | null, siteType?: string) {
+  const [details, setDetails] = useState<SiteDetails | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchData = useCallback(async () => {
+    if (!siteName) {
+      setDetails(null);
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const API_URL = getPublicApiUrl();
+      const params = new URLSearchParams();
+      if (siteType) params.append('site_type', siteType);
+      params.append('radius_km', '25');
+
+      const response = await fetch(
+        `${API_URL}/api/v1/geological/map/site-details/${encodeURIComponent(siteName)}?${params}`
+      );
+      
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error('Site not found');
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const result = await response.json();
+      setDetails(result);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load site details');
+      setDetails(null);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [siteName, siteType]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  return { details, isLoading, error, refresh: fetchData };
+}
+
+/**
+ * Hook to fetch list of companies
+ */
+export function useMapCompanies() {
+  const [companies, setCompanies] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchData = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const API_URL = getPublicApiUrl();
+      const response = await fetch(`${API_URL}/api/v1/geological/map/companies`);
+      
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      
+      const result = await response.json();
+      setCompanies(result.companies || []);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load companies');
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  return { companies, isLoading, error, refresh: fetchData };
+}
+
+/**
+ * Hook to fetch sites by company
+ */
+export function useSitesByCompany(companyName: string | null) {
+  const [data, setData] = useState<{
+    company: string;
+    operating_mines: MapFeature[];
+    developing_mines: MapFeature[];
+    critical_minerals: MapFeature[];
+    deposits: MapFeature[];
+    summary: {
+      total_sites: number;
+      commodities: string[];
+      states: string[];
+    };
+  } | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchData = useCallback(async () => {
+    if (!companyName) {
+      setData(null);
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const API_URL = getPublicApiUrl();
+      const response = await fetch(
+        `${API_URL}/api/v1/geological/map/by-company/${encodeURIComponent(companyName)}`
+      );
+      
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      
+      const result = await response.json();
+      setData(result);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load company sites');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [companyName]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  return { data, isLoading, error, refresh: fetchData };
+}
