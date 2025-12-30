@@ -12,10 +12,15 @@ function stripTrailingSlashes(value: string): string {
   return value.replace(/\/+$/, '');
 }
 
+function stripApiV1Suffix(value: string): string {
+  // Remove /api/v1 from the end if present (to avoid duplication)
+  return value.replace(/\/api\/v1\/?$/, '');
+}
+
 export function getPublicApiUrl(): string {
   const raw = (process.env.NEXT_PUBLIC_API_URL ?? '').trim();
   if (raw) {
-    return stripTrailingSlashes(raw);
+    return stripApiV1Suffix(stripTrailingSlashes(raw));
   }
 
   if (process.env.NODE_ENV === 'production') {
