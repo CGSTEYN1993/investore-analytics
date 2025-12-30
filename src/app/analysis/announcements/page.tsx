@@ -166,6 +166,12 @@ export default function AnnouncementsPage() {
   const [summary, setSummary] = useState<any>(null);
   const [promisingStocks, setPromisingStocks] = useState<any[]>([]);
   const [feedAnnouncements, setFeedAnnouncements] = useState<any[]>([]);
+  
+  // Company-specific search
+  const [companySearch, setCompanySearch] = useState('');
+  const [companyAnnouncements, setCompanyAnnouncements] = useState<any[]>([]);
+  const [searchingCompany, setSearchingCompany] = useState(false);
+  const [searchedCompany, setSearchedCompany] = useState<string | null>(null);
 
   const commodities = ['all', 'Au', 'Ag', 'Cu', 'Li', 'Ni', 'U', 'Zn', 'Fe'];
   const exchanges = ['ASX', 'TSX', 'JSE', 'CSE', 'NYSE', 'LSE'];
@@ -203,6 +209,48 @@ export default function AnnouncementsPage() {
       'general': 'corporate'
     };
     return typeMap[type] || type;
+  };
+
+  // Search for company-specific announcements
+  const searchCompanyAnnouncements = async (ticker: string) => {
+    if (!ticker.trim()) return;
+    
+    const symbol = ticker.toUpperCase().trim();
+    setSearchingCompany(true);
+    setSearchedCompany(symbol);
+    
+    try {
+      const daysBack = getDaysBack(dateRange);
+      const response = await fetch(
+        `${API_BASE}/api/v1/announcements/company/${symbol}?days_back=${daysBack}&limit=50`
+      );
+      
+      if (response.ok) {
+        const data = await response.json();
+        setCompanyAnnouncements(data.announcements || []);
+      } else {
+        setCompanyAnnouncements([]);
+      }
+    } catch (err) {
+      console.error('Failed to fetch company announcements:', err);
+      setCompanyAnnouncements([]);
+    } finally {
+      setSearchingCompany(false);
+    }
+  };
+
+  // Handle search input with Enter key
+  const handleSearchKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && companySearch.trim()) {
+      searchCompanyAnnouncements(companySearch);
+    }
+  };
+
+  // Clear company search
+  const clearCompanySearch = () => {
+    setSearchedCompany(null);
+    setCompanyAnnouncements([]);
+    setCompanySearch('');
   };
 
   // Fetch data from API
@@ -312,7 +360,10 @@ export default function AnnouncementsPage() {
             {exchanges.map((exchange) => (
               <button
                 key={exchange}
-                onClick={() => setSelectedExchange(exchange)}
+                onClick={() => {
+                  setSelectedExchange(exchange);
+                  clearCompanySearch();
+                }}
                 className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
                   selectedExchange === exchange
                     ? 'bg-primary-500 text-white'
@@ -323,6 +374,131 @@ export default function AnnouncementsPage() {
               </button>
             ))}
           </div>
+
+          {/* Company Search Box */}
+          <div className="bg-gradient-to-r from-primary-500/10 to-cyan-500/10 border border-primary-500/30 rounded-xl p-4 mb-4">
+            <div className="flex flex-col sm:flex-row gap-3">
+              <div className="flex-1 relative">
+                <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary-400" />
+                <input
+                  type="text"
+                  placeholder="Enter ticker to search (e.g., BHP, RIO, FMG)..."
+                  value={companySearch}
+                  onChange={(e) => setCompanySearch(e.target.value.toUpperCase())}
+                  onKeyDown={handleSearchKeyDown}
+                  className="w-full pl-10 pr-4 py-3 bg-metallic-900 border border-metallic-700 rounded-lg text-metallic-100 placeholder-metallic-500 focus:outline-none focus:ring-2 focus:ring-primary-500 font-mono"
+                />
+              </div>
+              <button
+                onClick={() => searchCompanyAnnouncements(companySearch)}
+                disabled={!companySearch.trim() || searchingCompany}
+                className="px-6 py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 font-medium"
+              >
+                {searchingCompany ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Search className="w-4 h-4" />
+                )}
+                Search Company
+              </button>
+            </div>
+            <p className="text-xs text-metallic-500 mt-2">
+              Search any ASX company ticker to see their latest announcements
+            </p>
+          </div>
+
+          {/* Company Search Results */}
+          {searchedCompany && (
+            <div className="bg-metallic-800/50 border border-metallic-700 rounded-xl p-4 mb-4">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-primary-500 flex items-center justify-center text-white font-bold">
+                    {searchedCompany.substring(0, 2)}
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-metallic-100">
+                      {searchedCompany} Announcements
+                    </h3>
+                    <p className="text-sm text-metallic-400">
+                      {companyAnnouncements.length} announcements found
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={clearCompanySearch}
+                  className="px-3 py-1.5 text-sm bg-metallic-700 text-metallic-300 rounded-lg hover:bg-metallic-600 transition-colors"
+                >
+                  Clear Search
+                </button>
+              </div>
+              
+              {searchingCompany ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="w-6 h-6 text-primary-500 animate-spin" />
+                </div>
+              ) : companyAnnouncements.length === 0 ? (
+                <div className="text-center py-8">
+                  <FileText className="w-10 h-10 text-metallic-600 mx-auto mb-2" />
+                  <p className="text-metallic-400">No announcements found for {searchedCompany}</p>
+                  <p className="text-xs text-metallic-500 mt-1">Try a different ticker or date range</p>
+                </div>
+              ) : (
+                <div className="space-y-3 max-h-[500px] overflow-y-auto">
+                  {companyAnnouncements.map((ann, i) => (
+                    <a
+                      key={ann.id || i}
+                      href={ann.url || '#'}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block p-4 bg-metallic-900 rounded-lg hover:bg-metallic-800 transition-colors border border-metallic-700/50"
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            {ann.is_price_sensitive && (
+                              <span className="px-2 py-0.5 text-xs bg-amber-500/20 text-amber-400 rounded font-medium">
+                                ⚠ PRICE SENSITIVE
+                              </span>
+                            )}
+                            <span className={`px-2 py-0.5 text-xs rounded ${
+                              ann.sentiment === 'very_positive' ? 'bg-green-500/20 text-green-400' :
+                              ann.sentiment === 'positive' ? 'bg-green-500/10 text-green-400' :
+                              ann.sentiment === 'negative' ? 'bg-red-500/10 text-red-400' :
+                              ann.sentiment === 'very_negative' ? 'bg-red-500/20 text-red-400' :
+                              'bg-metallic-700 text-metallic-400'
+                            }`}>
+                              {ann.sentiment?.replace(/_/g, ' ') || 'neutral'}
+                            </span>
+                          </div>
+                          <h4 className="font-medium text-metallic-100 mb-1">{ann.title}</h4>
+                          <div className="flex items-center gap-3 text-xs text-metallic-500">
+                            <span className="flex items-center gap-1">
+                              <Calendar className="w-3 h-3" />
+                              {new Date(ann.date).toLocaleDateString()}
+                            </span>
+                            <span className="px-2 py-0.5 bg-metallic-700 rounded">
+                              {ann.announcement_type?.replace(/_/g, ' ') || 'general'}
+                            </span>
+                          </div>
+                        </div>
+                        <ExternalLink className="w-4 h-4 text-metallic-500 flex-shrink-0" />
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              )}
+              
+              <div className="mt-3 pt-3 border-t border-metallic-700">
+                <Link 
+                  href={`/company/${searchedCompany}`}
+                  className="text-sm text-primary-400 hover:text-primary-300 flex items-center gap-1"
+                >
+                  View full company profile for {searchedCompany}
+                  <ChevronDown className="w-4 h-4 rotate-[-90deg]" />
+                </Link>
+              </div>
+            </div>
+          )}
 
           {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
