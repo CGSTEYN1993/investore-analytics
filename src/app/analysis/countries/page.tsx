@@ -98,6 +98,11 @@ interface GeoJSONFeature {
     primary_commodity: string;
     secondary_commodities: string[];
     country: string;
+    headquarters: string;
+    latitude: number | null;
+    longitude: number | null;
+    market_cap_category: string;
+    description: string;
   };
 }
 
