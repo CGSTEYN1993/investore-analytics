@@ -550,3 +550,284 @@ export function useLLMContext(symbol: string) {
 
   return { context, isLoading, error, refresh: fetchData };
 }
+
+// ============================================================================
+// MAP DATA HOOKS
+// ============================================================================
+
+export interface MapFeature {
+  id: string;
+  name: string;
+  type: 'operating_mine' | 'developing_mine' | 'deposit' | 'borehole' | 'geochemistry' | 'critical_mineral' | 'province';
+  lat: number;
+  lng: number;
+  commodity?: string;
+  status?: string;
+  state?: string;
+  owner?: string;
+  resource?: string;
+  description?: string;
+  depth_m?: number;
+  drillType?: string;
+  element?: string;
+  concentration?: number;
+  unit?: string;
+}
+
+export interface MapDataLayers {
+  operatingMines: MapFeature[];
+  developingMines: MapFeature[];
+  criticalMinerals: MapFeature[];
+  deposits: MapFeature[];
+  boreholes: MapFeature[];
+  geochemistry: MapFeature[];
+  totals: {
+    operatingMines: number;
+    developingMines: number;
+    criticalMinerals: number;
+    deposits: number;
+    boreholes: number;
+    geochemistry: number;
+  };
+}
+
+/**
+ * Hook to fetch all map layers in a single request
+ */
+export function useGeoscienceMapData(
+  options: {
+    commodity?: string;
+    state?: string;
+    includeBoreholes?: boolean;
+    includeGeochemistry?: boolean;
+    limitPerLayer?: number;
+  } = {}
+) {
+  const [data, setData] = useState<MapDataLayers | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchData = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const API_URL = getPublicApiUrl();
+      const params = new URLSearchParams();
+      
+      if (options.commodity) params.append('commodity', options.commodity);
+      if (options.state) params.append('state', options.state);
+      if (options.includeBoreholes) params.append('include_boreholes', 'true');
+      if (options.includeGeochemistry) params.append('include_geochemistry', 'true');
+      if (options.limitPerLayer) params.append('limit_per_layer', String(options.limitPerLayer));
+
+      const response = await fetch(`${API_URL}/api/v1/geological/map/all-layers?${params}`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const result = await response.json();
+      setData(result);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load map data');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [options.commodity, options.state, options.includeBoreholes, options.includeGeochemistry, options.limitPerLayer]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  return { data, isLoading, error, refresh: fetchData };
+}
+
+/**
+ * Hook to fetch operating mines
+ */
+export function useMapOperatingMines(commodity?: string, state?: string, limit?: number) {
+  const [features, setFeatures] = useState<MapFeature[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchData = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const API_URL = getPublicApiUrl();
+      const params = new URLSearchParams();
+      if (commodity) params.append('commodity', commodity);
+      if (state) params.append('state', state);
+      if (limit) params.append('limit', String(limit));
+
+      const response = await fetch(`${API_URL}/api/v1/geological/map/operating-mines?${params}`);
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      
+      const result = await response.json();
+      setFeatures(result.features || []);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load operating mines');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [commodity, state, limit]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  return { features, isLoading, error, refresh: fetchData };
+}
+
+/**
+ * Hook to fetch critical minerals
+ */
+export function useMapCriticalMinerals(mineral?: string, limit?: number) {
+  const [features, setFeatures] = useState<MapFeature[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchData = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const API_URL = getPublicApiUrl();
+      const params = new URLSearchParams();
+      if (mineral) params.append('mineral', mineral);
+      if (limit) params.append('limit', String(limit));
+
+      const response = await fetch(`${API_URL}/api/v1/geological/map/critical-minerals?${params}`);
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      
+      const result = await response.json();
+      setFeatures(result.features || []);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load critical minerals');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [mineral, limit]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  return { features, isLoading, error, refresh: fetchData };
+}
+
+/**
+ * Hook to fetch mineral deposits
+ */
+export function useMapDeposits(commodity?: string, state?: string, depositType?: string, limit?: number) {
+  const [features, setFeatures] = useState<MapFeature[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchData = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const API_URL = getPublicApiUrl();
+      const params = new URLSearchParams();
+      if (commodity) params.append('commodity', commodity);
+      if (state) params.append('state', state);
+      if (depositType) params.append('deposit_type', depositType);
+      if (limit) params.append('limit', String(limit));
+
+      const response = await fetch(`${API_URL}/api/v1/geological/map/deposits?${params}`);
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      
+      const result = await response.json();
+      setFeatures(result.features || []);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load deposits');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [commodity, state, depositType, limit]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  return { features, isLoading, error, refresh: fetchData };
+}
+
+/**
+ * Hook to fetch boreholes
+ */
+export function useMapBoreholes(purpose?: string, minDepth?: number, limit?: number) {
+  const [features, setFeatures] = useState<MapFeature[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchData = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const API_URL = getPublicApiUrl();
+      const params = new URLSearchParams();
+      if (purpose) params.append('purpose', purpose);
+      if (minDepth) params.append('min_depth', String(minDepth));
+      if (limit) params.append('limit', String(limit));
+
+      const response = await fetch(`${API_URL}/api/v1/geological/map/boreholes?${params}`);
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      
+      const result = await response.json();
+      setFeatures(result.features || []);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load boreholes');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [purpose, minDepth, limit]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  return { features, isLoading, error, refresh: fetchData };
+}
+
+/**
+ * Hook to fetch geochemistry samples
+ */
+export function useMapGeochemistry(element?: string, limit?: number) {
+  const [features, setFeatures] = useState<MapFeature[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchData = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const API_URL = getPublicApiUrl();
+      const params = new URLSearchParams();
+      if (element) params.append('element', element);
+      if (limit) params.append('limit', String(limit));
+
+      const response = await fetch(`${API_URL}/api/v1/geological/map/geochemistry?${params}`);
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      
+      const result = await response.json();
+      setFeatures(result.features || []);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load geochemistry');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [element, limit]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  return { features, isLoading, error, refresh: fetchData };
+}

@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, lazy, Suspense } from 'react';
 import Link from 'next/link';
 import { 
   ArrowLeft, Building2, MapPin, Mountain, TrendingUp, FileText,
   Search, Filter, ChevronDown, ExternalLink, Drill, Gem, 
   AlertCircle, Loader2, RefreshCw, Database, BarChart3,
-  Globe, Layers, FileSearch, Sparkles, Play
+  Globe, Layers, FileSearch, Sparkles, Play, Map
 } from 'lucide-react';
 import { getCommodityColor } from '@/lib/subscription-tiers';
 import { 
@@ -20,8 +20,13 @@ import {
   useGeologicalProvinces,
   useDrillingParser,
   useResourceParser,
-  GeologicalProvince
+  useGeoscienceMapData,
+  GeologicalProvince,
+  MapFeature
 } from '@/hooks/useGeologicalData';
+
+// Lazy load the map component to avoid SSR issues
+const AustraliaGeoscienceMap = lazy(() => import('@/components/maps/AustraliaGeoscienceMap'));
 
 // Format market cap
 function formatNumber(num: number | undefined): string {
@@ -45,7 +50,7 @@ function getConfidenceColor(confidence: number): string {
 
 export default function AustraliaGeosciencePage() {
   // State
-  const [activeTab, setActiveTab] = useState<'links' | 'mines' | 'resources' | 'provinces' | 'drilling' | 'jorc'>('links');
+  const [activeTab, setActiveTab] = useState<'map' | 'links' | 'mines' | 'resources' | 'provinces' | 'drilling' | 'jorc'>('map');
   const [gaTypeFilter, setGaTypeFilter] = useState<'all' | 'operating_mine' | 'critical_mineral' | 'deposit'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [commodityFilter, setCommodityFilter] = useState('');
@@ -103,6 +108,29 @@ export default function AustraliaGeosciencePage() {
     error: resourceParserError,
     parseText: parseResourceText
   } = useResourceParser();
+  
+  // Map data state
+  const [mapCommodityFilter, setMapCommodityFilter] = useState('');
+  const [mapStateFilter, setMapStateFilter] = useState('');
+  const [includeBoreholes, setIncludeBoreholes] = useState(false);
+  const [includeGeochemistry, setIncludeGeochemistry] = useState(false);
+  
+  // Map data hook
+  const {
+    data: mapData,
+    isLoading: mapLoading,
+    error: mapError,
+    refresh: refreshMapData
+  } = useGeoscienceMapData({
+    commodity: mapCommodityFilter || undefined,
+    state: mapStateFilter || undefined,
+    includeBoreholes,
+    includeGeochemistry,
+    limitPerLayer: 1000
+  });
+  
+  // Selected map feature
+  const [selectedMapFeature, setSelectedMapFeature] = useState<MapFeature | null>(null);
   
   // Filter links by search query
   const filteredLinks = useMemo(() => {
@@ -230,6 +258,19 @@ export default function AustraliaGeosciencePage() {
         {/* Tabs */}
         <div className="flex items-center gap-2 border-b border-slate-800 pb-4 overflow-x-auto">
           <button
+            onClick={() => setActiveTab('map')}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
+              activeTab === 'map'
+                ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                : 'text-slate-400 hover:text-white hover:bg-slate-800'
+            }`}
+          >
+            <span className="flex items-center gap-2">
+              <Map className="w-4 h-4" />
+              Map View
+            </span>
+          </button>
+          <button
             onClick={() => setActiveTab('links')}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
               activeTab === 'links'
@@ -308,6 +349,178 @@ export default function AustraliaGeosciencePage() {
             </span>
           </button>
         </div>
+
+        {/* Map Tab */}
+        {activeTab === 'map' && (
+          <div className="space-y-4">
+            {/* Map Filters */}
+            <div className="flex flex-wrap items-center gap-4">
+              <select
+                value={mapCommodityFilter}
+                onChange={(e) => setMapCommodityFilter(e.target.value)}
+                className="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+              >
+                <option value="">All Commodities</option>
+                <option value="Gold">Gold</option>
+                <option value="Copper">Copper</option>
+                <option value="Lithium">Lithium</option>
+                <option value="Iron">Iron Ore</option>
+                <option value="Nickel">Nickel</option>
+                <option value="Uranium">Uranium</option>
+                <option value="Zinc">Zinc</option>
+                <option value="Coal">Coal</option>
+              </select>
+              
+              <select
+                value={mapStateFilter}
+                onChange={(e) => setMapStateFilter(e.target.value)}
+                className="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+              >
+                <option value="">All States</option>
+                <option value="WA">Western Australia</option>
+                <option value="QLD">Queensland</option>
+                <option value="NSW">New South Wales</option>
+                <option value="SA">South Australia</option>
+                <option value="VIC">Victoria</option>
+                <option value="NT">Northern Territory</option>
+                <option value="TAS">Tasmania</option>
+              </select>
+              
+              <label className="flex items-center gap-2 text-slate-300 text-sm">
+                <input
+                  type="checkbox"
+                  checked={includeBoreholes}
+                  onChange={(e) => setIncludeBoreholes(e.target.checked)}
+                  className="rounded bg-slate-700 border-slate-600 text-emerald-500 focus:ring-emerald-500"
+                />
+                Boreholes
+              </label>
+              
+              <label className="flex items-center gap-2 text-slate-300 text-sm">
+                <input
+                  type="checkbox"
+                  checked={includeGeochemistry}
+                  onChange={(e) => setIncludeGeochemistry(e.target.checked)}
+                  className="rounded bg-slate-700 border-slate-600 text-emerald-500 focus:ring-emerald-500"
+                />
+                Geochemistry
+              </label>
+              
+              <button
+                onClick={refreshMapData}
+                className="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white hover:bg-slate-700 transition-colors flex items-center gap-2"
+              >
+                <RefreshCw className="w-4 h-4" />
+                Refresh
+              </button>
+              
+              {mapData && (
+                <div className="ml-auto flex items-center gap-4 text-sm text-slate-400">
+                  <span className="flex items-center gap-1">
+                    <div className="w-3 h-3 bg-green-500 rotate-45" />
+                    Operating: {mapData.totals.operatingMines}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <div className="w-3 h-3 bg-blue-500 rotate-45" />
+                    Developing: {mapData.totals.developingMines}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <div className="w-3 h-3 bg-cyan-400" style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }} />
+                    Critical: {mapData.totals.criticalMinerals}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <div className="w-3 h-3 bg-amber-500 rounded-full" />
+                    Deposits: {mapData.totals.deposits}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Map Container */}
+            <div className="bg-slate-900/50 rounded-xl border border-slate-800 overflow-hidden" style={{ height: '700px' }}>
+              {mapLoading ? (
+                <div className="flex items-center justify-center h-full">
+                  <Loader2 className="w-8 h-8 text-emerald-400 animate-spin" />
+                  <span className="ml-3 text-slate-400">Loading geoscience data...</span>
+                </div>
+              ) : mapError ? (
+                <div className="flex items-center justify-center h-full text-red-400">
+                  <AlertCircle className="w-5 h-5 mr-2" />
+                  {mapError}
+                </div>
+              ) : (
+                <Suspense fallback={
+                  <div className="flex items-center justify-center h-full">
+                    <Loader2 className="w-8 h-8 text-emerald-400 animate-spin" />
+                    <span className="ml-3 text-slate-400">Loading map...</span>
+                  </div>
+                }>
+                  <AustraliaGeoscienceMap
+                    operatingMines={mapData?.operatingMines || []}
+                    developingMines={mapData?.developingMines || []}
+                    criticalMinerals={mapData?.criticalMinerals || []}
+                    deposits={mapData?.deposits || []}
+                    boreholes={mapData?.boreholes || []}
+                    geochemistry={mapData?.geochemistry || []}
+                    onSelectFeature={(feature) => setSelectedMapFeature(feature)}
+                    className="h-full"
+                  />
+                </Suspense>
+              )}
+            </div>
+            
+            {/* Selected Feature Info */}
+            {selectedMapFeature && (
+              <div className="bg-slate-900/50 rounded-xl border border-slate-800 p-4">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h3 className="text-lg font-semibold text-white">{selectedMapFeature.name}</h3>
+                    <p className="text-sm text-slate-400 capitalize">{selectedMapFeature.type.replace('_', ' ')}</p>
+                  </div>
+                  <button
+                    onClick={() => setSelectedMapFeature(null)}
+                    className="text-slate-400 hover:text-white"
+                  >
+                    ×
+                  </button>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                  {selectedMapFeature.commodity && (
+                    <div>
+                      <span className="text-xs text-slate-500">Commodity</span>
+                      <p className="text-white">{selectedMapFeature.commodity}</p>
+                    </div>
+                  )}
+                  {selectedMapFeature.state && (
+                    <div>
+                      <span className="text-xs text-slate-500">State</span>
+                      <p className="text-white">{selectedMapFeature.state}</p>
+                    </div>
+                  )}
+                  {selectedMapFeature.owner && (
+                    <div>
+                      <span className="text-xs text-slate-500">Owner</span>
+                      <p className="text-white">{selectedMapFeature.owner}</p>
+                    </div>
+                  )}
+                  {selectedMapFeature.status && (
+                    <div>
+                      <span className="text-xs text-slate-500">Status</span>
+                      <p className="text-white">{selectedMapFeature.status}</p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="text-xs text-slate-500">Coordinates</span>
+                    <p className="text-white text-sm">{selectedMapFeature.lat.toFixed(4)}, {selectedMapFeature.lng.toFixed(4)}</p>
+                  </div>
+                </div>
+                {selectedMapFeature.description && (
+                  <p className="mt-4 text-sm text-slate-300">{selectedMapFeature.description}</p>
+                )}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* GA-Company Links Tab */}
         {activeTab === 'links' && (
