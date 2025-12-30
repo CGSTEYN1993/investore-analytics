@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { 
@@ -9,6 +10,9 @@ import {
   BarChart3, DollarSign, Users, Layers, Download, Loader2, RefreshCw, AlertCircle
 } from 'lucide-react';
 import { getCommodityColor } from '@/lib/subscription-tiers';
+
+// Dynamic import for Plotly to avoid SSR issues
+const Plot = dynamic(() => import('react-plotly.js'), { ssr: false });
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://web-production-4faa7.up.railway.app';
 
@@ -96,6 +100,22 @@ function getTypeColor(type: string): string {
   }
 }
 
+interface ChartCandle {
+  timestamp: string;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  volume: number;
+}
+
+interface ChartData {
+  symbol: string;
+  period: string;
+  candles: ChartCandle[];
+  source: string;
+}
+
 export default function CompanyProfile() {
   const params = useParams();
   const ticker = (params.ticker as string)?.toUpperCase() || '';
@@ -104,6 +124,26 @@ export default function CompanyProfile() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isWatchlisted, setIsWatchlisted] = useState(false);
+  const [chartData, setChartData] = useState<ChartData | null>(null);
+  const [chartPeriod, setChartPeriod] = useState('1M');
+  const [chartLoading, setChartLoading] = useState(false);
+
+  const fetchChartData = async (period: string) => {
+    if (!ticker) return;
+    
+    setChartLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/api/v1/market/chart/${ticker}?period=${period}`);
+      if (res.ok) {
+        const data = await res.json();
+        setChartData(data);
+      }
+    } catch (err) {
+      console.error('Error fetching chart data:', err);
+    } finally {
+      setChartLoading(false);
+    }
+  };
 
   const fetchCompanyData = async () => {
     if (!ticker) return;
@@ -172,7 +212,40 @@ export default function CompanyProfile() {
 
   useEffect(() => {
     fetchCompanyData();
+    fetchChartData(chartPeriod);
   }, [ticker]);
+
+  // Fetch new chart data when period changes
+  useEffect(() => {
+    if (ticker) {
+      fetchChartData(chartPeriod);
+    }
+  }, [chartPeriod]);
+
+  // Prepare chart data for Plotly
+  const plotData = useMemo(() => {
+    if (!chartData || !chartData.candles || chartData.candles.length === 0) {
+      return null;
+    }
+    
+    const dates = chartData.candles.map(c => c.timestamp);
+    const closes = chartData.candles.map(c => c.close);
+    const volumes = chartData.candles.map(c => c.volume);
+    
+    // Calculate if trend is up or down
+    const firstClose = closes[0] || 0;
+    const lastClose = closes[closes.length - 1] || 0;
+    const isPositive = lastClose >= firstClose;
+    
+    return {
+      dates,
+      closes,
+      volumes,
+      isPositive,
+      change: lastClose - firstClose,
+      changePercent: firstClose > 0 ? ((lastClose - firstClose) / firstClose) * 100 : 0,
+    };
+  }, [chartData]);
 
   if (loading) {
     return (
@@ -352,28 +425,101 @@ export default function CompanyProfile() {
               </section>
             )}
 
-            {/* Price Chart Placeholder */}
+            {/* Price Chart */}
             <section className="bg-metallic-900 border border-metallic-800 rounded-xl p-6">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-metallic-100">Price Chart</h2>
+                <div className="flex items-center gap-4">
+                  <h2 className="text-lg font-semibold text-metallic-100">Price Chart</h2>
+                  {plotData && (
+                    <div className={`text-sm ${plotData.isPositive ? 'text-green-400' : 'text-red-400'}`}>
+                      {plotData.isPositive ? '+' : ''}{plotData.changePercent.toFixed(2)}% ({chartPeriod})
+                    </div>
+                  )}
+                </div>
                 <div className="flex items-center gap-2">
                   {['1D', '1W', '1M', '3M', '1Y', '5Y'].map((period) => (
                     <button
                       key={period}
-                      className="px-3 py-1 text-sm rounded-lg bg-metallic-800 text-metallic-400 hover:bg-metallic-700 transition-colors"
+                      onClick={() => setChartPeriod(period)}
+                      className={`px-3 py-1 text-sm rounded-lg transition-colors ${
+                        chartPeriod === period
+                          ? 'bg-primary-500 text-white'
+                          : 'bg-metallic-800 text-metallic-400 hover:bg-metallic-700'
+                      }`}
                     >
                       {period}
                     </button>
                   ))}
                 </div>
               </div>
-              {/* Chart placeholder - would integrate actual charting library */}
-              <div 
-                className="h-64 rounded-lg flex items-center justify-center"
-                style={{ backgroundColor: `${commodityColor}10` }}
-              >
-                <span className="text-metallic-500">Interactive chart would display here</span>
+              
+              {/* Chart */}
+              <div className="h-80">
+                {chartLoading ? (
+                  <div className="h-full flex items-center justify-center">
+                    <Loader2 className="w-8 h-8 text-primary-500 animate-spin" />
+                  </div>
+                ) : plotData ? (
+                  <Plot
+                    data={[
+                      {
+                        x: plotData.dates,
+                        y: plotData.closes,
+                        type: 'scatter',
+                        mode: 'lines',
+                        fill: 'tozeroy',
+                        line: { 
+                          color: plotData.isPositive ? '#22c55e' : '#ef4444',
+                          width: 2,
+                        },
+                        fillcolor: plotData.isPositive ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                        hovertemplate: '%{x}<br>$%{y:.2f}<extra></extra>',
+                      },
+                    ]}
+                    layout={{
+                      autosize: true,
+                      margin: { l: 50, r: 20, t: 20, b: 40 },
+                      paper_bgcolor: 'transparent',
+                      plot_bgcolor: 'transparent',
+                      xaxis: {
+                        showgrid: false,
+                        color: '#6b7280',
+                        tickformat: chartPeriod === '1D' ? '%H:%M' : '%b %d',
+                      },
+                      yaxis: {
+                        showgrid: true,
+                        gridcolor: 'rgba(107, 114, 128, 0.2)',
+                        color: '#6b7280',
+                        tickprefix: '$',
+                      },
+                      hovermode: 'x unified',
+                      hoverlabel: {
+                        bgcolor: '#1f2937',
+                        bordercolor: '#374151',
+                        font: { color: '#f3f4f6' },
+                      },
+                    }}
+                    config={{
+                      displayModeBar: false,
+                      responsive: true,
+                    }}
+                    style={{ width: '100%', height: '100%' }}
+                  />
+                ) : (
+                  <div 
+                    className="h-full rounded-lg flex items-center justify-center"
+                    style={{ backgroundColor: `${commodityColor}10` }}
+                  >
+                    <span className="text-metallic-500">No chart data available</span>
+                  </div>
+                )}
               </div>
+              
+              {chartData?.source && chartData.candles.length > 0 && (
+                <div className="mt-2 text-xs text-metallic-600 text-right">
+                  Data source: {chartData.source}
+                </div>
+              )}
             </section>
 
             {/* All Announcements Section */}
