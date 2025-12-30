@@ -267,6 +267,17 @@ function GlobalSpatialContent() {
     fetchFilterOptions();
   }, []);
 
+  // Debounced search query for API calls
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  
+  // Debounce search query
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
   // Fetch companies data when filters change - use /companies endpoint for ALL companies
   useEffect(() => {
     async function fetchCompanies() {
@@ -279,6 +290,7 @@ function GlobalSpatialContent() {
         if (selectedCommodity) params.append('commodity', selectedCommodity);
         if (selectedCountry) params.append('country', selectedCountry);
         if (selectedType) params.append('company_type', selectedType);
+        if (debouncedSearch) params.append('search', debouncedSearch);
         params.append('page', currentPage.toString());
         params.append('page_size', '100');
         
@@ -307,24 +319,15 @@ function GlobalSpatialContent() {
     }
     
     fetchCompanies();
-  }, [selectedExchange, selectedCommodity, selectedCountry, selectedType, currentPage]);
+  }, [selectedExchange, selectedCommodity, selectedCountry, selectedType, debouncedSearch, currentPage]);
 
   // Reset page when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [selectedExchange, selectedCommodity, selectedCountry, selectedType]);
+  }, [selectedExchange, selectedCommodity, selectedCountry, selectedType, debouncedSearch]);
 
-  // Filter companies by search query (client-side filtering)
-  const filteredCompanies = useMemo(() => {
-    if (!searchQuery) return companies;
-    
-    const query = searchQuery.toLowerCase();
-    return companies.filter(c => 
-      c.symbol.toLowerCase().includes(query) ||
-      c.name.toLowerCase().includes(query) ||
-      c.country.toLowerCase().includes(query)
-    );
-  }, [companies, searchQuery]);
+  // Companies are now filtered server-side, just use directly
+  const filteredCompanies = companies;
 
   // Group companies by country for the map view (using GeoJSON data which has coordinates)
   const companiesByCountry = useMemo(() => {
