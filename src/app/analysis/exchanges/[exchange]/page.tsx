@@ -136,6 +136,7 @@ export default function ExchangeDetailPage() {
   const exchange = params.exchange as string;
   const [companies, setCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMarketCaps, setLoadingMarketCaps] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'producer' | 'developer' | 'explorer'>('all');
@@ -148,6 +149,46 @@ export default function ExchangeDetailPage() {
     color: '#6B7280'
   };
 
+  // Fetch real market caps from exchange APIs
+  const fetchMarketCaps = async (companyList: Company[]) => {
+    if (companyList.length === 0) return;
+    
+    setLoadingMarketCaps(true);
+    try {
+      // Fetch market caps in batches of 50
+      const symbols = companyList.map(c => c.ticker);
+      const batchSize = 50;
+      const marketCapData: Record<string, { marketCap: number; price: number; change: number; changePercent: number }> = {};
+      
+      for (let i = 0; i < symbols.length; i += batchSize) {
+        const batch = symbols.slice(i, i + batchSize);
+        const response = await fetch(
+          `${API_URL}/market/market-caps/bulk?symbols=${batch.join(',')}&exchange=${exchange.toUpperCase()}`
+        );
+        if (response.ok) {
+          const data = await response.json();
+          Object.assign(marketCapData, data.marketCaps || {});
+        }
+      }
+      
+      // Update companies with real market cap data
+      setCompanies(prev => prev.map(company => {
+        const mcData = marketCapData[company.ticker];
+        if (mcData) {
+          return {
+            ...company,
+            market_cap: mcData.marketCap || null,
+          };
+        }
+        return company;
+      }));
+    } catch (err) {
+      console.error('Error fetching market caps:', err);
+    } finally {
+      setLoadingMarketCaps(false);
+    }
+  };
+
   const fetchCompanies = async () => {
     if (!exchange) return;
     setLoading(true);
@@ -157,7 +198,11 @@ export default function ExchangeDetailPage() {
       if (!response.ok) throw new Error('Failed to fetch companies');
       
       const result = await response.json();
-      setCompanies(result.companies || []);
+      const companyList = result.companies || [];
+      setCompanies(companyList);
+      
+      // Fetch real market caps after loading companies
+      fetchMarketCaps(companyList);
     } catch (err) {
       console.error('Error fetching companies:', err);
       setError('Unable to fetch company data');
@@ -334,6 +379,12 @@ export default function ExchangeDetailPage() {
             <div className="flex items-center justify-between mb-4">
               <p className="text-sm text-metallic-400">
                 Showing {filteredCompanies.length} of {companies.length} companies
+                {loadingMarketCaps && (
+                  <span className="ml-2 text-primary-400">
+                    <Loader2 className="w-3 h-3 inline animate-spin mr-1" />
+                    Loading market caps from exchange...
+                  </span>
+                )}
               </p>
               <p className="text-xs text-metallic-500">
                 Sorted alphabetically

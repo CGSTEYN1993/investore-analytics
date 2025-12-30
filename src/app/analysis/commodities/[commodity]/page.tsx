@@ -199,6 +199,7 @@ export default function CommodityDetailPage() {
   const commodity = params.commodity as string;
   const [data, setData] = useState<CommodityData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadingMarketCaps, setLoadingMarketCaps] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'primary' | 'secondary'>('all');
@@ -210,6 +211,57 @@ export default function CommodityDetailPage() {
   };
   const color = getCommodityColor(commodityInfo.symbol);
 
+  // Fetch real market caps from exchange APIs
+  const fetchMarketCaps = async (companies: Company[]) => {
+    if (companies.length === 0) return;
+    
+    setLoadingMarketCaps(true);
+    try {
+      // Group companies by exchange for efficient fetching
+      const byExchange: Record<string, string[]> = {};
+      companies.forEach(c => {
+        const ex = c.exchange || 'ASX';
+        if (!byExchange[ex]) byExchange[ex] = [];
+        byExchange[ex].push(c.ticker);
+      });
+      
+      const marketCapData: Record<string, number> = {};
+      
+      // Fetch each exchange's companies
+      for (const [exchange, symbols] of Object.entries(byExchange)) {
+        const batchSize = 50;
+        for (let i = 0; i < symbols.length; i += batchSize) {
+          const batch = symbols.slice(i, i + batchSize);
+          const response = await fetch(
+            `${API_URL}/market/market-caps/bulk?symbols=${batch.join(',')}&exchange=${exchange}`
+          );
+          if (response.ok) {
+            const result = await response.json();
+            for (const [sym, mcData] of Object.entries(result.marketCaps || {})) {
+              marketCapData[sym] = (mcData as any).marketCap || 0;
+            }
+          }
+        }
+      }
+      
+      // Update data with real market caps
+      setData(prev => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          companies: prev.companies.map(company => ({
+            ...company,
+            market_cap: marketCapData[company.ticker] || null,
+          })),
+        };
+      });
+    } catch (err) {
+      console.error('Error fetching market caps:', err);
+    } finally {
+      setLoadingMarketCaps(false);
+    }
+  };
+
   const fetchCompanies = async () => {
     if (!commodity) return;
     setLoading(true);
@@ -220,6 +272,11 @@ export default function CommodityDetailPage() {
       
       const result = await response.json();
       setData(result);
+      
+      // Fetch real market caps after loading companies
+      if (result.companies) {
+        fetchMarketCaps(result.companies);
+      }
     } catch (err) {
       console.error('Error fetching companies:', err);
       setError('Unable to fetch company data');
@@ -385,6 +442,12 @@ export default function CommodityDetailPage() {
             <div className="flex items-center justify-between mb-4">
               <p className="text-sm text-metallic-400">
                 Showing {filteredCompanies.length} of {data?.total || 0} companies
+                {loadingMarketCaps && (
+                  <span className="ml-2 text-primary-400">
+                    <Loader2 className="w-3 h-3 inline animate-spin mr-1" />
+                    Loading market caps from exchanges...
+                  </span>
+                )}
               </p>
               <p className="text-xs text-metallic-500">
                 Sorted by market cap
