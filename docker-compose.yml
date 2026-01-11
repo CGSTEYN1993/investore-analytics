@@ -1,0 +1,191 @@
+# InvestOre Analytics - Docker Compose Configuration
+# Development environment setup with all services
+
+services:
+  # ===========================================
+  # PostgreSQL with TimescaleDB
+  # ===========================================
+  db:
+    image: riotinto-docker.artifactory.riotinto.com/timescale/timescaledb:latest-pg15
+    container_name: investore_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-investore}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-investore_dev_password}
+      POSTGRES_DB: ${POSTGRES_DB:-investore}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./infra/init-db.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-investore}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - investore_network
+
+  # ===========================================
+  # Redis Cache
+  # ===========================================
+  redis:
+    image: riotinto-docker.artifactory.riotinto.com/redis:7-alpine
+    container_name: investore_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - investore_network
+
+  # ===========================================
+  # FastAPI Backend
+  # ===========================================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: investore_backend
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-investore}:${POSTGRES_PASSWORD:-investore_dev_password}@db:5432/${POSTGRES_DB:-investore}
+      - REDIS_URL=redis://redis:6379/0
+      - SECRET_KEY=${SECRET_KEY:-development_secret_key_change_in_production}
+      - DEBUG=${DEBUG:-true}
+      - ENVIRONMENT=${ENVIRONMENT:-development}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY:-}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET:-}
+      - STRIPE_PRO_MONTHLY_PRICE_ID=${STRIPE_PRO_MONTHLY_PRICE_ID:-}
+      - STRIPE_PRO_ANNUAL_PRICE_ID=${STRIPE_PRO_ANNUAL_PRICE_ID:-}
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:3000}
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - investore_network
+
+  # ===========================================
+  # Next.js Frontend
+  # ===========================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: development
+    container_name: investore_frontend
+    restart: unless-stopped
+    environment:
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+      - NEXT_PUBLIC_MAPBOX_TOKEN=${NEXT_PUBLIC_MAPBOX_TOKEN:-}
+      - NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:-}
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      - backend
+    networks:
+      - investore_network
+
+  # ===========================================
+  # Prefect ETL Worker
+  # ===========================================
+  etl:
+    build:
+      context: ./etl
+      dockerfile: Dockerfile
+    container_name: investore_etl
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-investore}:${POSTGRES_PASSWORD:-investore_dev_password}@db:5432/${POSTGRES_DB:-investore}
+      - PREFECT_API_URL=${PREFECT_API_URL:-}
+      - FX_API_KEY=${FX_API_KEY:-}
+    volumes:
+      - ./etl:/app
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - investore_network
+
+  # ===========================================
+  # pgAdmin (Development only)
+  # ===========================================
+  pgadmin:
+    image: riotinto-docker.artifactory.riotinto.com/dpage/pgadmin4:latest
+    container_name: investore_pgadmin
+    profiles:
+      - dev-tools
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@investore.local}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - db
+    networks:
+      - investore_network
+
+  # ===========================================
+  # Nginx Reverse Proxy (Production-like)
+  # ===========================================
+  nginx:
+    image: riotinto-docker.artifactory.riotinto.com/nginx:alpine
+    container_name: investore_nginx
+    profiles:
+      - production
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./infra/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./infra/nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - investore_network
+
+# ===========================================
+# Volumes
+# ===========================================
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  pgadmin_data:
+    driver: local
+
+# ===========================================
+# Networks
+# ===========================================
+networks:
+  investore_network:
+    driver: bridge

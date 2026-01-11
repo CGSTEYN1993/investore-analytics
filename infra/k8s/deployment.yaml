@@ -1,0 +1,343 @@
+# InvestOre Analytics - Kubernetes Deployment
+# Production-ready Kubernetes manifests
+
+---
+# Namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: investore
+  labels:
+    app: investore-analytics
+
+---
+# ConfigMap for shared configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: investore-config
+  namespace: investore
+data:
+  ENVIRONMENT: "production"
+  DEBUG: "false"
+  API_V1_PREFIX: "/api/v1"
+  FRONTEND_URL: "https://www.investoreanalytics.com"
+  RATE_LIMIT_FREE_REQUESTS_PER_MINUTE: "30"
+  RATE_LIMIT_PAID_REQUESTS_PER_MINUTE: "300"
+
+---
+# Secret for sensitive values (use sealed-secrets or external-secrets in production)
+apiVersion: v1
+kind: Secret
+metadata:
+  name: investore-secrets
+  namespace: investore
+type: Opaque
+stringData:
+  SECRET_KEY: "REPLACE_WITH_SECURE_SECRET"
+  DATABASE_URL: "postgresql+asyncpg://user:pass@postgres:5432/investore"
+  REDIS_URL: "redis://redis:6379/0"
+  STRIPE_SECRET_KEY: "sk_live_xxx"
+  STRIPE_WEBHOOK_SECRET: "whsec_xxx"
+
+---
+# Backend Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: investore-backend
+  namespace: investore
+  labels:
+    app: investore
+    component: backend
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: investore
+      component: backend
+  template:
+    metadata:
+      labels:
+        app: investore
+        component: backend
+    spec:
+      containers:
+        - name: backend
+          image: investore/backend:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+              name: http
+          envFrom:
+            - configMapRef:
+                name: investore-config
+            - secretRef:
+                name: investore-secrets
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+            limits:
+              cpu: "1000m"
+              memory: "2Gi"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app: investore
+                    component: backend
+                topologyKey: "kubernetes.io/hostname"
+
+---
+# Backend Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: investore-backend
+  namespace: investore
+  labels:
+    app: investore
+    component: backend
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8000
+      targetPort: 8000
+      name: http
+  selector:
+    app: investore
+    component: backend
+
+---
+# Frontend Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: investore-frontend
+  namespace: investore
+  labels:
+    app: investore
+    component: frontend
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: investore
+      component: frontend
+  template:
+    metadata:
+      labels:
+        app: investore
+        component: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: investore/frontend:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3000
+              name: http
+          env:
+            - name: NEXT_PUBLIC_API_URL
+              value: "https://www.investoreanalytics.com/api/v1"
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "1Gi"
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+
+---
+# Frontend Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: investore-frontend
+  namespace: investore
+  labels:
+    app: investore
+    component: frontend
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3000
+      targetPort: 3000
+      name: http
+  selector:
+    app: investore
+    component: frontend
+
+---
+# Ingress
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: investore-ingress
+  namespace: investore
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    nginx.ingress.kubernetes.io/rate-limit-window: "1m"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+spec:
+  tls:
+    - hosts:
+        - investoreanalytics.com
+        - www.investoreanalytics.com
+      secretName: investore-tls
+  rules:
+    - host: investoreanalytics.com
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: investore-backend
+                port:
+                  number: 8000
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: investore-frontend
+                port:
+                  number: 3000
+    - host: www.investoreanalytics.com
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: investore-backend
+                port:
+                  number: 8000
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: investore-frontend
+                port:
+                  number: 3000
+
+---
+# Horizontal Pod Autoscaler for Backend
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: investore-backend-hpa
+  namespace: investore
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: investore-backend
+  minReplicas: 3
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+
+---
+# ETL CronJob for daily data refresh
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: investore-etl-daily
+  namespace: investore
+spec:
+  schedule: "0 6 * * *"  # Run at 6 AM UTC daily
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: etl
+              image: investore/etl:latest
+              command: ["python", "-m", "flows.market_data_flow"]
+              envFrom:
+                - configMapRef:
+                    name: investore-config
+                - secretRef:
+                    name: investore-secrets
+              resources:
+                requests:
+                  cpu: "500m"
+                  memory: "1Gi"
+                limits:
+                  cpu: "2000m"
+                  memory: "4Gi"
+          restartPolicy: OnFailure
+
+---
+# PodDisruptionBudget for backend
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: investore-backend-pdb
+  namespace: investore
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: investore
+      component: backend
