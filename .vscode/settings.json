@@ -1,0 +1,19 @@
+{
+    "sqltools.connections": [
+        {
+            "pgOptions": {
+                "statement_timeout": 30000
+            },
+            "ssh": "Disabled",
+            "previewLimit": 50,
+            "server": "127.0.0.1",
+            "port": 5432,
+            "driver": "PostgreSQL",
+            "name": "Investore",
+            "group": "Development",
+            "database": "investore",
+            "username": "investore",
+            "password": "investore123"
+        }
+    ]
+}
