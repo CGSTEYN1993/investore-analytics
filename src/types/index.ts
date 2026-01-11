@@ -352,3 +352,6 @@ export const COMMODITY_COLORS: Record<string, string> = {
   Pd: '#CED0DD',
   U: '#39FF14',
 };
+
+// Re-export Prospector types
+export * from './prospector';
