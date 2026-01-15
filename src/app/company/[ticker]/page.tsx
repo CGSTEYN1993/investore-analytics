@@ -10,8 +10,7 @@ import {
   BarChart3, DollarSign, Users, Layers, Download, Loader2, RefreshCw, AlertCircle
 } from 'lucide-react';
 import { getCommodityColor } from '@/lib/subscription-tiers';
-import CompanyGeoscienceWidget from '@/components/dashboard/CompanyGeoscienceWidget';
-
+import CompanyGeoscienceWidget from '@/components/dashboard/CompanyGeoscienceWidget';import CompanyMiningDataWidget from '@/components/mining/CompanyMiningDataWidget';
 // Dynamic import for Plotly to avoid SSR issues
 const Plot = dynamic(() => import('react-plotly.js'), { ssr: false });
 
@@ -536,6 +535,9 @@ export default function CompanyProfile() {
                 </div>
               )}
             </section>
+
+            {/* Extracted Mining Data Section */}
+            <CompanyMiningDataWidget symbol={ticker} className="bg-metallic-900 border border-metallic-800 rounded-xl" />
 
             {/* All Announcements Section */}
             <section className="bg-metallic-900 border border-metallic-800 rounded-xl p-6">

@@ -404,8 +404,15 @@ export default function AnalysisDashboard() {
                     <cat.icon className="w-4 h-4 text-metallic-400 group-hover/item:text-cyan-400 transition-colors" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium text-metallic-200 group-hover/item:text-cyan-400 transition-colors">
-                      {cat.title}
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium text-metallic-200 group-hover/item:text-cyan-400 transition-colors">
+                        {cat.title}
+                      </span>
+                      {'badge' in cat && cat.badge && (
+                        <span className="px-1.5 py-0.5 text-[10px] font-medium bg-cyan-500/20 text-cyan-400 rounded">
+                          {cat.badge}
+                        </span>
+                      )}
                     </div>
                     <div className="text-xs text-metallic-500">{cat.description}</div>
                   </div>

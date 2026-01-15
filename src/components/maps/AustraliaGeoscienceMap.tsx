@@ -14,7 +14,7 @@ import {
 export interface GeoscienceMapFeature {
   id: string;
   name: string;
-  type: 'operating_mine' | 'developing_mine' | 'deposit' | 'province' | 'borehole' | 'geochemistry' | 'critical_mineral';
+  type: 'operating_mine' | 'developing_mine' | 'deposit' | 'province' | 'borehole' | 'geochemistry' | 'critical_mineral' | 'tenement';
   lat: number;
   lng: number;
   commodity?: string;
@@ -23,6 +23,13 @@ export interface GeoscienceMapFeature {
   owner?: string;
   resource?: string;
   description?: string;
+  // Tenement-specific
+  tenement_id?: string;
+  tenement_type?: string;
+  holder?: string;
+  area_ha?: number;
+  grant_date?: string;
+  end_date?: string;
   // Province-specific
   age?: string;
   rockType?: string;
@@ -34,6 +41,13 @@ export interface GeoscienceMapFeature {
   element?: string;
   concentration?: number;
   unit?: string;
+  // JORC Resource data (Measured/Indicated/Inferred)
+  measured_mt?: number | null;
+  indicated_mt?: number | null;
+  inferred_mt?: number | null;
+  total_resource_mt?: number | null;
+  grade?: number | null;
+  grade_unit?: string;
 }
 
 export interface GeoscienceMapLayer {
@@ -53,6 +67,7 @@ export interface AustraliaGeoscienceMapProps {
   provinces?: GeoscienceMapFeature[];
   boreholes?: GeoscienceMapFeature[];
   geochemistry?: GeoscienceMapFeature[];
+  tenements?: GeoscienceMapFeature[];
   onSelectFeature?: (feature: GeoscienceMapFeature) => void;
   className?: string;
 }
@@ -103,48 +118,48 @@ const wmsOverlays: Record<WMSOverlayId, {
   enabled: boolean;
 }> = {
   surfaceGeology: {
-    url: 'https://services.ga.gov.au/gis/services/Surface_Geology_of_Australia_2012/MapServer/WMSServer',
-    layers: '0', // Main geology layer
+    url: 'https://services.ga.gov.au/gis/rest/services/Surface_Geology_of_Australia/MapServer/export',
+    layers: 'show:0,1,2,3',
     name: 'Surface Geology',
     description: 'Lithological units and rock types',
-    opacity: 0.6,
+    opacity: 0.65,
     enabled: false,
   },
   geologicalProvinces: {
-    url: 'https://services.ga.gov.au/gis/services/Australian_Geological_Provinces/MapServer/WMSServer',
-    layers: '0',
+    url: 'https://services.ga.gov.au/gis/rest/services/Australian_Geological_Provinces/MapServer/export',
+    layers: 'show:0',
     name: 'Geological Provinces',
     description: 'Major tectonic provinces and domains',
     opacity: 0.5,
     enabled: false,
   },
   faults: {
-    url: 'https://services.ga.gov.au/gis/services/Australian_Geological_Features/MapServer/WMSServer',
-    layers: '0',
+    url: 'https://services.ga.gov.au/gis/rest/services/Geological_Features_of_Australia/MapServer/export',
+    layers: 'show:0,1',
     name: 'Faults & Structures',
     description: 'Major faults and structural features',
     opacity: 0.7,
     enabled: false,
   },
   magneticAnomalies: {
-    url: 'https://services.ga.gov.au/gis/services/Total_Magnetic_Intensity_Grid_2019/MapServer/WMSServer',
-    layers: '0',
+    url: 'https://services.ga.gov.au/gis/rest/services/Total_Magnetic_Intensity_2019_Grey/MapServer/export',
+    layers: 'show:0',
     name: 'Magnetic Anomalies',
     description: 'Total magnetic intensity (TMI)',
     opacity: 0.5,
     enabled: false,
   },
   gravityAnomalies: {
-    url: 'https://services.ga.gov.au/gis/services/Gravity_Anomaly_Grid_2019/MapServer/WMSServer',
-    layers: '0',
+    url: 'https://services.ga.gov.au/gis/rest/services/Gravity_Anomaly_2019_Grey/MapServer/export',
+    layers: 'show:0',
     name: 'Gravity Anomalies',
     description: 'Bouguer gravity anomaly',
     opacity: 0.5,
     enabled: false,
   },
   radiometrics: {
-    url: 'https://services.ga.gov.au/gis/services/Radiometric_Grid_2019/MapServer/WMSServer',
-    layers: '0',
+    url: 'https://services.ga.gov.au/gis/rest/services/Radiometric_Grid_2019_Ternary/MapServer/export',
+    layers: 'show:0',
     name: 'Radiometrics',
     description: 'Radiometric ternary image (K-Th-U)',
     opacity: 0.5,
@@ -190,6 +205,7 @@ const featureTypeColors: Record<string, string> = {
   'province': '#8b5cf6',          // Purple (outline)
   'borehole': '#ec4899',          // Pink
   'geochemistry': '#14b8a6',      // Teal
+  'tenement': '#a855f7',          // Purple
 };
 
 // Australia bounds
@@ -226,6 +242,7 @@ export default function AustraliaGeoscienceMap({
   provinces = [],
   boreholes = [],
   geochemistry = [],
+  tenements = [],
   onSelectFeature,
   className = '',
 }: AustraliaGeoscienceMapProps) {
@@ -250,6 +267,7 @@ export default function AustraliaGeoscienceMap({
     provinces: false, // Background context
     boreholes: false, // Can be many
     geochemistry: false, // Can be many
+    tenements: false, // WA Mining Tenements - off by default
   });
   
   // WMS overlay visibility
@@ -360,6 +378,7 @@ export default function AustraliaGeoscienceMap({
     };
     
     // Add in order (bottom to top)
+    addMarkers(tenements, layers.tenements);
     addMarkers(geochemistry, layers.geochemistry);
     addMarkers(boreholes, layers.boreholes);
     addMarkers(deposits, layers.deposits);
@@ -368,7 +387,7 @@ export default function AustraliaGeoscienceMap({
     addMarkers(operatingMines, layers.operatingMines);
     
     return result;
-  }, [operatingMines, developingMines, criticalMinerals, deposits, boreholes, geochemistry, layers, center, zoom, containerSize, tileSize]);
+  }, [operatingMines, developingMines, criticalMinerals, deposits, boreholes, geochemistry, tenements, layers, center, zoom, containerSize, tileSize]);
 
   // Mouse handlers
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -414,20 +433,21 @@ export default function AustraliaGeoscienceMap({
       .replace('{r}', '');
   };
 
-  // Generate WMS tile URL for overlay layers
+  // Generate ArcGIS REST export URL for overlay layers
   const getWmsTileUrl = (x: number, y: number, z: number, overlayId: WMSOverlayId) => {
     const overlay = wmsOverlays[overlayId];
     
-    // Calculate tile bounds in EPSG:4326
+    // Calculate tile bounds in EPSG:4326 (WGS84)
     const n = Math.pow(2, z);
     const lng1 = (x / n) * 360 - 180;
     const lng2 = ((x + 1) / n) * 360 - 180;
     const lat1 = Math.atan(Math.sinh(Math.PI * (1 - 2 * (y + 1) / n))) * 180 / Math.PI;
     const lat2 = Math.atan(Math.sinh(Math.PI * (1 - 2 * y / n))) * 180 / Math.PI;
     
+    // ArcGIS REST export format with bounding box
     const bbox = `${lng1},${lat1},${lng2},${lat2}`;
     
-    return `${overlay.url}?service=WMS&request=GetMap&version=1.1.1&layers=${overlay.layers}&styles=&format=image/png&transparent=true&srs=EPSG:4326&width=${tileSize}&height=${tileSize}&bbox=${bbox}`;
+    return `${overlay.url}?bbox=${bbox}&bboxSR=4326&imageSR=4326&size=${tileSize},${tileSize}&layers=${overlay.layers}&format=png32&transparent=true&f=image`;
   };
 
   const getMarkerStyle = (feature: GeoscienceMapFeature) => {
@@ -446,6 +466,8 @@ export default function AustraliaGeoscienceMap({
         return { shape: 'triangle', size: 8, color };
       case 'geochemistry':
         return { shape: 'dot', size: 6, color };
+      case 'tenement':
+        return { shape: 'square', size: 10, color };
       default:
         return { shape: 'circle', size: 10, color };
     }
@@ -525,6 +547,43 @@ export default function AustraliaGeoscienceMap({
             style={{ width: style.size, height: style.size, backgroundColor: style.color }}
           />
         )}
+        {style.shape === 'square' && (
+          <div
+            className="border border-white shadow-lg"
+            style={{ width: style.size, height: style.size, backgroundColor: style.color }}
+          />
+        )}
+        
+        {/* JORC Resource indicator badge - shows M/I/I bar for sites with resource data */}
+        {(marker.feature.measured_mt || marker.feature.indicated_mt || marker.feature.inferred_mt) && (
+          <div 
+            className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 flex gap-px rounded-sm overflow-hidden shadow-lg"
+            style={{ 
+              height: 3,
+              minWidth: Math.max(style.size, 16),
+              backgroundColor: 'rgba(0,0,0,0.5)'
+            }}
+          >
+            {marker.feature.measured_mt && marker.feature.total_resource_mt && (
+              <div 
+                className="bg-green-500" 
+                style={{ width: `${(marker.feature.measured_mt / marker.feature.total_resource_mt) * 100}%`, height: '100%' }}
+              />
+            )}
+            {marker.feature.indicated_mt && marker.feature.total_resource_mt && (
+              <div 
+                className="bg-blue-500" 
+                style={{ width: `${(marker.feature.indicated_mt / marker.feature.total_resource_mt) * 100}%`, height: '100%' }}
+              />
+            )}
+            {marker.feature.inferred_mt && marker.feature.total_resource_mt && (
+              <div 
+                className="bg-amber-500" 
+                style={{ width: `${(marker.feature.inferred_mt / marker.feature.total_resource_mt) * 100}%`, height: '100%' }}
+              />
+            )}
+          </div>
+        )}
       </div>
     );
   };
@@ -538,6 +597,7 @@ export default function AustraliaGeoscienceMap({
     provinces: provinces.length,
     boreholes: boreholes.length,
     geochemistry: geochemistry.length,
+    tenements: tenements.length,
   };
 
   return (
@@ -705,6 +765,20 @@ export default function AustraliaGeoscienceMap({
                 <span>Geochemistry Samples</span>
               </span>
               <span className="text-xs text-metallic-500">{layerCounts.geochemistry}</span>
+            </button>
+            
+            {/* Tenements (WA) */}
+            <button
+              onClick={() => setLayers(l => ({ ...l, tenements: !l.tenements }))}
+              className={`w-full flex items-center justify-between px-2 py-1.5 rounded text-sm transition-colors ${
+                layers.tenements ? 'text-purple-400 bg-purple-500/10' : 'text-metallic-500 hover:bg-metallic-800'
+              }`}
+            >
+              <span className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-purple-500 border border-white" />
+                <span>Mining Tenements (WA)</span>
+              </span>
+              <span className="text-xs text-metallic-500">{layerCounts.tenements}</span>
             </button>
             
             {/* Separator */}
@@ -913,6 +987,43 @@ export default function AustraliaGeoscienceMap({
                 <span className="text-metallic-100">{selectedFeature.depth_m}m</span>
               </div>
             )}
+            {/* Tenement-specific fields */}
+            {selectedFeature.tenement_id && (
+              <div className="flex justify-between">
+                <span className="text-metallic-400">Tenement ID:</span>
+                <span className="text-metallic-100">{selectedFeature.tenement_id}</span>
+              </div>
+            )}
+            {selectedFeature.tenement_type && (
+              <div className="flex justify-between">
+                <span className="text-metallic-400">Tenement Type:</span>
+                <span className="text-metallic-100">{selectedFeature.tenement_type}</span>
+              </div>
+            )}
+            {selectedFeature.holder && (
+              <div className="flex justify-between">
+                <span className="text-metallic-400">Holder:</span>
+                <span className="text-metallic-100 text-right max-w-[180px] truncate">{selectedFeature.holder}</span>
+              </div>
+            )}
+            {selectedFeature.area_ha && (
+              <div className="flex justify-between">
+                <span className="text-metallic-400">Area:</span>
+                <span className="text-metallic-100">{selectedFeature.area_ha.toLocaleString()} ha</span>
+              </div>
+            )}
+            {selectedFeature.grant_date && (
+              <div className="flex justify-between">
+                <span className="text-metallic-400">Grant Date:</span>
+                <span className="text-metallic-100">{selectedFeature.grant_date}</span>
+              </div>
+            )}
+            {selectedFeature.end_date && (
+              <div className="flex justify-between">
+                <span className="text-metallic-400">End Date:</span>
+                <span className="text-metallic-100">{selectedFeature.end_date}</span>
+              </div>
+            )}
             {selectedFeature.description && (
               <p className="text-metallic-300 text-xs mt-2 border-t border-metallic-700 pt-2">
                 {selectedFeature.description}
@@ -926,18 +1037,108 @@ export default function AustraliaGeoscienceMap({
         </div>
       )}
 
-      {/* Hover Tooltip */}
+      {/* Hover Tooltip - Enhanced with JORC resource data */}
       {hoveredFeature && !selectedFeature && (
         <div
-          className="absolute pointer-events-none bg-metallic-900/95 backdrop-blur-sm rounded px-2 py-1 text-xs text-metallic-100 border border-metallic-700 shadow-lg z-50"
+          className="absolute pointer-events-none bg-metallic-900/95 backdrop-blur-sm rounded-lg px-3 py-2 text-xs text-metallic-100 border border-metallic-700 shadow-lg z-50 min-w-[200px] max-w-[320px]"
           style={{
             left: '50%',
             bottom: 70,
             transform: 'translateX(-50%)',
           }}
         >
-          <span className="font-medium">{hoveredFeature.name}</span>
-          {hoveredFeature.commodity && <span className="text-metallic-400"> • {hoveredFeature.commodity}</span>}
+          <div className="font-semibold text-sm mb-1">{hoveredFeature.name}</div>
+          <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-metallic-400 mb-1">
+            {hoveredFeature.commodity && <span>{hoveredFeature.commodity}</span>}
+            {hoveredFeature.state && <span>• {hoveredFeature.state}</span>}
+            {hoveredFeature.owner && <span>• {hoveredFeature.owner}</span>}
+            {hoveredFeature.holder && <span>• {hoveredFeature.holder}</span>}
+          </div>
+          
+          {/* Tenement Info Display */}
+          {hoveredFeature.type === 'tenement' && (
+            <div className="border-t border-metallic-700 pt-1.5 mt-1.5">
+              <div className="text-[10px] text-metallic-500 uppercase tracking-wide mb-1">Tenement Details</div>
+              <div className="grid grid-cols-2 gap-x-3 gap-y-1">
+                {hoveredFeature.tenement_id && (
+                  <div className="text-metallic-300">ID: <span className="text-purple-400">{hoveredFeature.tenement_id}</span></div>
+                )}
+                {hoveredFeature.tenement_type && (
+                  <div className="text-metallic-300">Type: <span className="text-metallic-100">{hoveredFeature.tenement_type}</span></div>
+                )}
+                {hoveredFeature.area_ha && (
+                  <div className="text-metallic-300">Area: <span className="text-metallic-100">{hoveredFeature.area_ha.toLocaleString()} ha</span></div>
+                )}
+                {hoveredFeature.status && (
+                  <div className="text-metallic-300">Status: <span className={hoveredFeature.status === 'LIVE' ? 'text-green-400' : 'text-amber-400'}>{hoveredFeature.status}</span></div>
+                )}
+              </div>
+            </div>
+          )}
+          
+          {/* JORC Resource Display */}
+          {(hoveredFeature.measured_mt || hoveredFeature.indicated_mt || hoveredFeature.inferred_mt || hoveredFeature.total_resource_mt) && (
+            <div className="border-t border-metallic-700 pt-1.5 mt-1.5">
+              <div className="text-[10px] text-metallic-500 uppercase tracking-wide mb-1">JORC Resources</div>
+              <div className="grid grid-cols-4 gap-1 text-center">
+                {hoveredFeature.measured_mt !== null && hoveredFeature.measured_mt !== undefined && (
+                  <div>
+                    <div className="text-[10px] text-metallic-500">Measured</div>
+                    <div className="text-green-400 font-medium">{hoveredFeature.measured_mt.toFixed(1)}Mt</div>
+                  </div>
+                )}
+                {hoveredFeature.indicated_mt !== null && hoveredFeature.indicated_mt !== undefined && (
+                  <div>
+                    <div className="text-[10px] text-metallic-500">Indicated</div>
+                    <div className="text-blue-400 font-medium">{hoveredFeature.indicated_mt.toFixed(1)}Mt</div>
+                  </div>
+                )}
+                {hoveredFeature.inferred_mt !== null && hoveredFeature.inferred_mt !== undefined && (
+                  <div>
+                    <div className="text-[10px] text-metallic-500">Inferred</div>
+                    <div className="text-amber-400 font-medium">{hoveredFeature.inferred_mt.toFixed(1)}Mt</div>
+                  </div>
+                )}
+                {hoveredFeature.total_resource_mt !== null && hoveredFeature.total_resource_mt !== undefined && (
+                  <div>
+                    <div className="text-[10px] text-metallic-500">Total</div>
+                    <div className="text-white font-bold">{hoveredFeature.total_resource_mt.toFixed(1)}Mt</div>
+                  </div>
+                )}
+              </div>
+              {hoveredFeature.grade && (
+                <div className="text-center mt-1 text-metallic-300">
+                  Grade: {hoveredFeature.grade} {hoveredFeature.grade_unit || ''}
+                </div>
+              )}
+            </div>
+          )}
+          
+          {/* Resource bar visualization */}
+          {(hoveredFeature.measured_mt || hoveredFeature.indicated_mt || hoveredFeature.inferred_mt) && (
+            <div className="mt-1.5 h-2 rounded overflow-hidden flex bg-metallic-800">
+              {hoveredFeature.measured_mt && hoveredFeature.total_resource_mt && (
+                <div 
+                  className="bg-green-500 h-full" 
+                  style={{ width: `${(hoveredFeature.measured_mt / hoveredFeature.total_resource_mt) * 100}%` }}
+                />
+              )}
+              {hoveredFeature.indicated_mt && hoveredFeature.total_resource_mt && (
+                <div 
+                  className="bg-blue-500 h-full" 
+                  style={{ width: `${(hoveredFeature.indicated_mt / hoveredFeature.total_resource_mt) * 100}%` }}
+                />
+              )}
+              {hoveredFeature.inferred_mt && hoveredFeature.total_resource_mt && (
+                <div 
+                  className="bg-amber-500 h-full" 
+                  style={{ width: `${(hoveredFeature.inferred_mt / hoveredFeature.total_resource_mt) * 100}%` }}
+                />
+              )}
+            </div>
+          )}
+          
+          <div className="text-[10px] text-metallic-500 mt-1 text-center">Click for full details</div>
         </div>
       )}
 

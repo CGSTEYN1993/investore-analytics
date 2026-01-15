@@ -25,6 +25,7 @@ import {
   useSiteDetails,
   useMapCompanies,
   useSitesByCompany,
+  useMapTenements,
   GeologicalProvince,
   MapFeature,
   SiteDetails
@@ -157,6 +158,17 @@ export default function AustraliaGeosciencePage() {
     data: companySites, 
     isLoading: companySitesLoading 
   } = useSitesByCompany(mapCompanyFilter || null);
+  
+  // WA Mining Tenements
+  const [includeTenements, setIncludeTenements] = useState(false);
+  const {
+    features: tenements,
+    isLoading: tenementsLoading,
+    error: tenementsError,
+    refresh: refreshTenements
+  } = useMapTenements({
+    limit: includeTenements ? 1000 : 0,
+  });
   
   // When a feature is selected, show the details panel
   useEffect(() => {
@@ -534,6 +546,7 @@ export default function AustraliaGeosciencePage() {
                     deposits={filteredMapData?.deposits || []}
                     boreholes={filteredMapData?.boreholes || []}
                     geochemistry={filteredMapData?.geochemistry || []}
+                    tenements={includeTenements ? tenements : []}
                     onSelectFeature={(feature) => setSelectedMapFeature(feature)}
                     className="h-full"
                   />

@@ -558,7 +558,7 @@ export function useLLMContext(symbol: string) {
 export interface MapFeature {
   id: string;
   name: string;
-  type: 'operating_mine' | 'developing_mine' | 'deposit' | 'borehole' | 'geochemistry' | 'critical_mineral' | 'province';
+  type: 'operating_mine' | 'developing_mine' | 'deposit' | 'borehole' | 'geochemistry' | 'critical_mineral' | 'province' | 'tenement';
   lat: number;
   lng: number;
   commodity?: string;
@@ -572,6 +572,20 @@ export interface MapFeature {
   element?: string;
   concentration?: number;
   unit?: string;
+  // JORC Resource data (Measured/Indicated/Inferred)
+  measured_mt?: number | null;
+  indicated_mt?: number | null;
+  inferred_mt?: number | null;
+  total_resource_mt?: number | null;
+  grade?: number | null;
+  grade_unit?: string;
+  // Tenement-specific fields
+  tenement_id?: string;
+  tenement_type?: string;
+  holder?: string;
+  area_ha?: number;
+  grant_date?: string;
+  end_date?: string;
 }
 
 export interface MapDataLayers {
@@ -1047,4 +1061,52 @@ export function useSitesByCompany(companyName: string | null) {
   }, [fetchData]);
 
   return { data, isLoading, error, refresh: fetchData };
+}
+
+/**
+ * Hook to fetch WA mining tenements from DMIRS SLIP service
+ */
+export function useMapTenements(
+  options: {
+    status?: string;
+    tenementType?: string;
+    holder?: string;
+    bbox?: string;
+    limit?: number;
+  } = {}
+) {
+  const [features, setFeatures] = useState<MapFeature[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchData = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const API_URL = getPublicApiUrl();
+      const params = new URLSearchParams();
+      if (options.status) params.append('status', options.status);
+      if (options.tenementType) params.append('tenement_type', options.tenementType);
+      if (options.holder) params.append('holder', options.holder);
+      if (options.bbox) params.append('bbox', options.bbox);
+      if (options.limit) params.append('limit', String(options.limit));
+
+      const response = await fetch(`${API_URL}/api/v1/geological/map/tenements?${params}`);
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      
+      const result = await response.json();
+      setFeatures(result.features || []);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load tenements');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [options.status, options.tenementType, options.holder, options.bbox, options.limit]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  return { features, isLoading, error, refresh: fetchData };
 }

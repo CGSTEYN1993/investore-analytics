@@ -89,11 +89,11 @@ function AnnouncementCard({ announcement }: { announcement: Announcement }) {
     <div className={`bg-metallic-900 border rounded-xl p-6 transition-all hover:shadow-lg ${
       announcement.isBreaking ? 'border-amber-500/50' : 'border-metallic-800 hover:border-primary-500/50'
     }`}>
-      {/* Breaking Badge */}
+      {/* Price Sensitive Badge */}
       {announcement.isBreaking && (
         <div className="flex items-center gap-2 text-amber-400 text-xs font-medium mb-3">
           <AlertCircle className="w-4 h-4" />
-          BREAKING NEWS
+          ⚠ PRICE SENSITIVE
         </div>
       )}
 
@@ -147,9 +147,23 @@ function AnnouncementCard({ announcement }: { announcement: Announcement }) {
         </div>
         <div className="flex items-center gap-2">
           <span className="text-xs text-metallic-500">{announcement.source}</span>
-          <button className="p-1.5 rounded-lg hover:bg-metallic-800 text-metallic-500 hover:text-metallic-300 transition-colors">
-            <ExternalLink className="w-4 h-4" />
-          </button>
+          {announcement.url ? (
+            <a 
+              href={announcement.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-primary-500/10 hover:bg-primary-500/20 text-primary-400 rounded-lg text-sm font-medium transition-colors"
+              title="View PDF on ASX"
+            >
+              <FileText className="w-4 h-4" />
+              <span className="hidden sm:inline">View PDF</span>
+              <ExternalLink className="w-3 h-3" />
+            </a>
+          ) : (
+            <button className="p-1.5 rounded-lg hover:bg-metallic-800 text-metallic-500 hover:text-metallic-300 transition-colors">
+              <ExternalLink className="w-4 h-4" />
+            </button>
+          )}
         </div>
       </div>
     </div>
@@ -166,6 +180,7 @@ export default function AnnouncementsPage() {
   const [summary, setSummary] = useState<any>(null);
   const [promisingStocks, setPromisingStocks] = useState<any[]>([]);
   const [feedAnnouncements, setFeedAnnouncements] = useState<any[]>([]);
+  const [showPriceSensitiveOnly, setShowPriceSensitiveOnly] = useState(false);
   
   // Company-specific search
   const [companySearch, setCompanySearch] = useState('');
@@ -321,7 +336,8 @@ export default function AnnouncementsPage() {
       a.title.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesType = selectedType === 'all' || a.type === selectedType || a.type?.includes(selectedType);
     const matchesCommodity = selectedCommodity === 'all' || a.commodity === selectedCommodity;
-    return matchesSearch && matchesType && matchesCommodity;
+    const matchesPriceSensitive = !showPriceSensitiveOnly || a.isBreaking;
+    return matchesSearch && matchesType && matchesCommodity && matchesPriceSensitive;
   });
 
   const breakingNews = allAnnouncements.filter(a => a.isBreaking);
@@ -385,13 +401,21 @@ export default function AnnouncementsPage() {
               </div>
               <p className="text-2xl font-bold text-metallic-100">{todayCount}</p>
             </div>
-            <div className="bg-metallic-800/50 rounded-lg p-4">
+            <button 
+              onClick={() => setShowPriceSensitiveOnly(!showPriceSensitiveOnly)}
+              className={`bg-metallic-800/50 rounded-lg p-4 text-left transition-all cursor-pointer hover:bg-metallic-700/50 ${
+                showPriceSensitiveOnly ? 'ring-2 ring-amber-500 bg-amber-500/10' : 'hover:ring-1 hover:ring-amber-500/50'
+              }`}
+              title="Click to filter by price sensitive announcements"
+            >
               <div className="flex items-center gap-2 text-amber-400 text-sm mb-1">
                 <AlertCircle className="w-4 h-4" />
                 Price Sensitive
+                {showPriceSensitiveOnly && <span className="text-xs bg-amber-500/30 px-1.5 py-0.5 rounded">ON</span>}
               </div>
               <p className="text-2xl font-bold text-metallic-100">{summary?.price_sensitive_count || breakingNews.length}</p>
-            </div>
+              <p className="text-xs text-metallic-500 mt-1">Click to filter</p>
+            </button>
             <div className="bg-metallic-800/50 rounded-lg p-4">
               <div className="flex items-center gap-2 text-green-400 text-sm mb-1">
                 <Sparkles className="w-4 h-4" />
@@ -413,7 +437,7 @@ export default function AnnouncementsPage() {
       {/* Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Type Filter Tabs */}
-        <div className="flex gap-2 overflow-x-auto pb-4 mb-6 scrollbar-hide">
+        <div className="flex gap-2 overflow-x-auto pb-4 mb-4 scrollbar-hide">
           {announcementTypes.map((type) => (
             <button
               key={type.id}
@@ -429,6 +453,21 @@ export default function AnnouncementsPage() {
             </button>
           ))}
         </div>
+
+        {/* Active Filters */}
+        {showPriceSensitiveOnly && (
+          <div className="flex items-center gap-2 mb-4">
+            <span className="text-metallic-400 text-sm">Active Filters:</span>
+            <button
+              onClick={() => setShowPriceSensitiveOnly(false)}
+              className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-500/20 text-amber-400 rounded-full text-sm hover:bg-amber-500/30 transition-colors"
+            >
+              <AlertCircle className="w-3 h-3" />
+              Price Sensitive Only
+              <span className="ml-1">×</span>
+            </button>
+          </div>
+        )}
 
         {/* Search and Filters */}
         <div className="flex flex-col md:flex-row gap-4 mb-6">
@@ -523,6 +562,23 @@ export default function AnnouncementsPage() {
             >
               ✕ Clear
             </button>
+          </div>
+        )}
+
+        {/* Results Header */}
+        {!loading && !searchingCompany && !searchedCompany && (
+          <div className="flex items-center justify-between mb-4">
+            <div className="text-sm text-metallic-400">
+              Showing <span className="text-metallic-100 font-medium">{filteredAnnouncements.length}</span> announcements
+              {showPriceSensitiveOnly && (
+                <span className="text-amber-400"> (Price Sensitive only)</span>
+              )}
+            </div>
+            {breakingNews.length > 0 && !showPriceSensitiveOnly && (
+              <div className="text-sm text-metallic-500">
+                <span className="text-amber-400 font-medium">{breakingNews.length}</span> price sensitive
+              </div>
+            )}
           </div>
         )}
 
