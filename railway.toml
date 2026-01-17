@@ -1,0 +1,53 @@
+# Railway Configuration for InvestOre Analytics
+# Multi-service deployment with ETL worker
+
+# Main Backend API Service
+[service.backend]
+name = "investore-backend"
+dockerfile = "backend/Dockerfile"
+region = "us-west1"
+healthcheck_path = "/health"
+healthcheck_timeout_sec = 30
+
+[service.backend.env]
+DATABASE_URL = "${DATABASE_URL}"
+REDIS_URL = "${REDIS_URL}"
+SECRET_KEY = "${SECRET_KEY}"
+ENVIRONMENT = "production"
+
+# ETL Worker Service (SEDAR+ scraping + extraction)
+[service.etl]
+name = "investore-etl"
+dockerfile = "backend/Dockerfile.etl"
+region = "us-west1"
+
+[service.etl.env]
+DATABASE_URL = "${DATABASE_URL}"
+PYTHONPATH = "/app"
+
+# Cron schedule for ETL jobs
+[service.etl.cron]
+# Run TSX pipeline daily at 6 AM UTC
+tsx_daily = "0 6 * * *"
+# Run ASX pipeline daily at 10 AM UTC (after ASX market close)
+asx_daily = "0 10 * * *"
+
+# Frontend Service
+[service.frontend]
+name = "investore-frontend"
+dockerfile = "frontend/Dockerfile"
+region = "us-west1"
+
+[service.frontend.env]
+NEXT_PUBLIC_API_URL = "${BACKEND_URL}"
+
+# PostgreSQL Database (TimescaleDB)
+[database.postgres]
+name = "investore-db"
+plan = "pro"
+extensions = ["timescaledb", "pg_stat_statements"]
+
+# Redis Cache
+[cache.redis]
+name = "investore-redis"
+plan = "basic"
