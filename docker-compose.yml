@@ -94,9 +94,10 @@ services:
     container_name: investore_frontend
     restart: unless-stopped
     environment:
-      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-https://web-production-4faa7.up.railway.app}
       - NEXT_PUBLIC_MAPBOX_TOKEN=${NEXT_PUBLIC_MAPBOX_TOKEN:-}
       - NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:-}
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
     ports:
       - "3000:3000"
     volumes:
