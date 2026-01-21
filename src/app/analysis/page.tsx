@@ -410,7 +410,7 @@ export default function AnalysisDashboard() {
                       </span>
                       {'badge' in cat && cat.badge && (
                         <span className="px-1.5 py-0.5 text-[10px] font-medium bg-cyan-500/20 text-cyan-400 rounded">
-                          {cat.badge}
+                          {String(cat.badge)}
                         </span>
                       )}
                     </div>
