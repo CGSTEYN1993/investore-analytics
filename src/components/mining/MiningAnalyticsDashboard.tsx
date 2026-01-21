@@ -173,7 +173,7 @@ export default function MiningAnalyticsDashboard() {
                     <XAxis dataKey="commodity" />
                     <YAxis tickFormatter={(value) => `${(value / 1000000).toFixed(0)}M`} />
                     <Tooltip 
-                      formatter={(value: number) => `${value.toLocaleString()} Mt`}
+                      formatter={(value) => [`${Number(value).toLocaleString()} Mt`, '']}
                     />
                     <Legend />
                     <Bar dataKey="measured" name="Measured" fill="#10B981" stackId="a" />
