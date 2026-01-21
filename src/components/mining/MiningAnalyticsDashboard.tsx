@@ -237,9 +237,10 @@ export default function MiningAnalyticsDashboard() {
                       cx="50%"
                       cy="50%"
                       labelLine={false}
-                      label={({ phase, count }) => `${phase}: ${count}`}
+                      label={({ name, value }) => `${name}: ${value}`}
                       outerRadius={100}
                       dataKey="count"
+                      nameKey="phase"
                     >
                       {phaseChartData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={entry.fill} />
