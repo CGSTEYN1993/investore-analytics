@@ -6,7 +6,7 @@ import {
   ArrowLeft, Building2, MapPin, Mountain, TrendingUp, FileText,
   Search, Filter, ChevronDown, ExternalLink, Drill, Gem, 
   AlertCircle, Loader2, RefreshCw, Database, BarChart3,
-  Layers, FlaskConical, Clock, Map, Pickaxe
+  Layers, FlaskConical, Clock, Map, Hammer
 } from 'lucide-react';
 import { getCommodityColor } from '@/lib/subscription-tiers';
 import { 
@@ -358,7 +358,7 @@ export default function GeoscienceIntelligencePage() {
             <div className="bg-slate-900/50 rounded-xl p-4 border border-amber-800/30">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-lg bg-amber-500/20 flex items-center justify-center">
-                  <Pickaxe className="w-5 h-5 text-amber-400" />
+                  <Hammer className="w-5 h-5 text-amber-400" />
                 </div>
                 <div>
                   <div className="text-2xl font-bold text-white">{waData?.minedex?.length || 0}</div>
@@ -453,7 +453,7 @@ export default function GeoscienceIntelligencePage() {
             }`}
           >
             <span className="flex items-center gap-2">
-              <Pickaxe className="w-4 h-4" />
+              <Hammer className="w-4 h-4" />
               MINEDEX Sites
             </span>
           </button>
@@ -892,7 +892,7 @@ export default function GeoscienceIntelligencePage() {
                           >
                             <td className="px-4 py-3">
                               <div className="flex items-center gap-2">
-                                <Pickaxe className="w-4 h-4 text-amber-500" />
+                                <Hammer className="w-4 h-4 text-amber-500" />
                                 <span className="text-white font-medium">{site.name}</span>
                               </div>
                             </td>
