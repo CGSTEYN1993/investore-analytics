@@ -408,11 +408,6 @@ export default function AnalysisDashboard() {
                       <span className="text-sm font-medium text-metallic-200 group-hover/item:text-cyan-400 transition-colors">
                         {cat.title}
                       </span>
-                      {'badge' in cat && cat.badge && (
-                        <span className="px-1.5 py-0.5 text-[10px] font-medium bg-cyan-500/20 text-cyan-400 rounded">
-                          {String(cat.badge)}
-                        </span>
-                      )}
                     </div>
                     <div className="text-xs text-metallic-500">{cat.description}</div>
                   </div>
