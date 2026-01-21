@@ -165,7 +165,11 @@ export default function AIAnalystPage() {
 
       setMessages(prev => [...prev, assistantMessage]);
       // Auto-expand the new message
-      setExpandedMessages(prev => new Set([...prev, assistantMessage.id]));
+      setExpandedMessages(prev => {
+        const newSet = new Set(Array.from(prev));
+        newSet.add(assistantMessage.id);
+        return newSet;
+      });
 
     } catch (error) {
       console.error('Chat error:', error);
