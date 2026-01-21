@@ -137,30 +137,38 @@ export default function HomePage() {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <ModuleCard
-              icon={<BarChart3 className="w-8 h-8 text-primary-400" />}
-              title="Peer Analytics"
-              description="Create custom peer sets with multi-filter criteria and compare valuations across companies."
-              stats={['P/NAV', 'EV/Resource', 'Grade %']}
-            />
-            <ModuleCard
-              icon={<Zap className="w-8 h-8 text-accent-copper" />}
-              title="Resource Norm"
-              description="Standardized resource reporting (AuEq, CuEq, Li2CO3) for apples-to-apples comparison."
-              stats={['Inferred', 'Indicated', 'Measured']}
-            />
-            <ModuleCard
-              icon={<Globe className="w-8 h-8 text-blue-400" />}
-              title="Geo-Spatial"
-              description="Interactive project mapping with layers for infrastructure, geology, and jurisdiction risk."
-              stats={['Fraser Index', 'Infra', 'Tenure']}
-            />
-            <ModuleCard
-              icon={<Activity className="w-8 h-8 text-green-400" />}
-              title="Market Sentiment"
-              description="Real-time news aggregation and sentiment scoring to track market momentum."
-              stats={['News Flow', 'Insider', 'Shorts']}
-            />
+            <Link href="/analysis/compare" className="block">
+              <ModuleCard
+                icon={<BarChart3 className="w-8 h-8 text-primary-400" />}
+                title="Peer Analytics"
+                description="Create custom peer sets with multi-filter criteria and compare valuations across companies."
+                stats={['P/NAV', 'EV/Resource', 'Grade %']}
+              />
+            </Link>
+            <Link href="/analysis/exploration" className="block">
+              <ModuleCard
+                icon={<Zap className="w-8 h-8 text-accent-copper" />}
+                title="Exploration Data"
+                description="Drill intercepts, resource estimates, and project data extracted from company announcements."
+                stats={['Drill Results', 'Resources', 'Reserves']}
+              />
+            </Link>
+            <Link href="/analysis/global" className="block">
+              <ModuleCard
+                icon={<Globe className="w-8 h-8 text-blue-400" />}
+                title="Global Map"
+                description="Interactive project mapping with layers for infrastructure, geology, and jurisdiction risk."
+                stats={['7 Exchanges', '50+ Countries', 'Live Data']}
+              />
+            </Link>
+            <Link href="/analysis/announcements" className="block">
+              <ModuleCard
+                icon={<Activity className="w-8 h-8 text-green-400" />}
+                title="Announcements"
+                description="Real-time ASX, TSX, LSE, NYSE and JSE announcements with AI-powered extraction."
+                stats={['6000+ Docs', 'PDF Parsing', 'AI Extract']}
+              />
+            </Link>
           </div>
         </div>
       </section>
@@ -172,56 +180,76 @@ export default function HomePage() {
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-900/30 border border-primary-700/50 text-primary-400 text-sm font-medium mb-6">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-900/30 border border-green-700/50 text-green-400 text-sm font-medium mb-6">
               <Sparkles className="w-4 h-4" />
-              Powered by AI
+              NOW LIVE
             </div>
             <h2 className="text-4xl font-bold text-metallic-100 mb-4">
               Your AI Research Analyst
             </h2>
-            <p className="text-xl text-metallic-400 max-w-3xl mx-auto">
+            <p className="text-xl text-metallic-400 max-w-3xl mx-auto mb-8">
               While competitors give you raw data, InvestOre interprets it for you. Our AI reads every announcement, 
               flags opportunities, and explains why stocks are mispriced.
             </p>
+            <Link 
+              href="/analysis/ai-analyst" 
+              className="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors"
+            >
+              <Brain className="w-5 h-5" />
+              Open AI Research Analyst
+              <ArrowRight className="w-4 h-4" />
+            </Link>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <AIFeatureCard
-              icon={<Brain className="w-7 h-7" />}
-              title="Announcement Interpreter"
-              description="AI parses dense technical reports and extracts key metrics, drill results, and resource updates in seconds."
-              highlight="Save 5+ hours per week"
-            />
-            <AIFeatureCard
-              icon={<MessageSquare className="w-7 h-7" />}
-              title="Natural Language Search"
-              description="Ask questions like 'Show me gold explorers in Canada with >1M oz resource trading below $50/oz'"
-              highlight="No complex filters needed"
-            />
-            <AIFeatureCard
-              icon={<Target className="w-7 h-7" />}
-              title="Valuation Explainer"
-              description="AI explains why Company X trades at 0.4x NAV vs peer average 0.7x — instant investment thesis."
-              highlight="Understand the discount"
-            />
-            <AIFeatureCard
-              icon={<AlertTriangle className="w-7 h-7" />}
-              title="Risk Detection"
-              description="Auto-detect red flags: jurisdiction risk, management changes, dilution patterns, insider selling."
-              highlight="Protect your capital"
-            />
-            <AIFeatureCard
-              icon={<Sparkles className="w-7 h-7" />}
-              title="Opportunity Alerts"
-              description="Get notified when a company announces results that historically lead to significant re-rates."
-              highlight="Be first to act"
-            />
-            <AIFeatureCard
-              icon={<Activity className="w-7 h-7" />}
-              title="Sentiment Scoring"
-              description="Aggregate news, social media, and insider activity into a daily sentiment score for each stock."
-              highlight="Gauge market mood"
-            />
+            <Link href="/analysis/ai-analyst" className="block">
+              <AIFeatureCard
+                icon={<Brain className="w-7 h-7" />}
+                title="Announcement Interpreter"
+                description="AI parses dense technical reports and extracts key metrics, drill results, and resource updates in seconds."
+                highlight="LIVE — Try it now"
+              />
+            </Link>
+            <Link href="/analysis/ai-analyst" className="block">
+              <AIFeatureCard
+                icon={<MessageSquare className="w-7 h-7" />}
+                title="Natural Language Search"
+                description="Ask questions like 'Show me gold explorers in Canada with >1M oz resource trading below $50/oz'"
+                highlight="LIVE — Try it now"
+              />
+            </Link>
+            <Link href="/analysis/compare" className="block">
+              <AIFeatureCard
+                icon={<Target className="w-7 h-7" />}
+                title="Peer Comparison"
+                description="Compare companies side-by-side with normalized metrics — instant valuation benchmarking."
+                highlight="LIVE — Compare now"
+              />
+            </Link>
+            <Link href="/analysis/ai-analyst" className="block">
+              <AIFeatureCard
+                icon={<AlertTriangle className="w-7 h-7" />}
+                title="Risk Detection"
+                description="Auto-detect red flags: jurisdiction risk, management changes, dilution patterns, insider selling."
+                highlight="LIVE — Try it now"
+              />
+            </Link>
+            <Link href="/analysis/exploration" className="block">
+              <AIFeatureCard
+                icon={<Sparkles className="w-7 h-7" />}
+                title="Drill Results Database"
+                description="Browse thousands of extracted drill intercepts with grades, depths, and widths from ASX & TSX announcements."
+                highlight="LIVE — Explore data"
+              />
+            </Link>
+            <Link href="/analysis/geoscience" className="block">
+              <AIFeatureCard
+                icon={<Activity className="w-7 h-7" />}
+                title="Geoscience Data"
+                description="Australian DMIRS/GSWA, Canadian BCGS, US USGS and South African CGS geological survey data integrated."
+                highlight="LIVE — View layers"
+              />
+            </Link>
           </div>
         </div>
       </section>
