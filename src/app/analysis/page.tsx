@@ -470,13 +470,13 @@ export default function AnalysisDashboard() {
             </div>
             
             <div className="p-4 pt-0">
-              <button
-                disabled
-                className="flex items-center justify-center gap-2 w-full py-3 bg-gradient-to-r from-emerald-500/50 to-teal-600/50 text-white/70 font-medium rounded-lg cursor-not-allowed"
+              <Link
+                href="/analysis/ai-analyst"
+                className="flex items-center justify-center gap-2 w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-medium rounded-lg hover:from-emerald-600 hover:to-teal-700 transition-all"
               >
                 <Sparkles className="w-4 h-4" />
-                Coming Q1 2026
-              </button>
+                Open AI Analyst
+              </Link>
             </div>
           </div>
         </div>
