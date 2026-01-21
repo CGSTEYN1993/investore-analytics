@@ -120,13 +120,22 @@ const InterceptCard = ({ intercept }: { intercept: DrillIntercept }) => (
   <div className="bg-metallic-800/50 rounded-lg border border-metallic-700 p-4 hover:border-amber-500/50 transition-colors">
     <div className="flex items-start justify-between mb-3">
       <div>
-        <h3 className="font-semibold text-metallic-100">{intercept.hole_id}</h3>
-        <Link 
-          href={`/company/${intercept.symbol}`}
-          className="text-sm text-accent-gold hover:underline"
-        >
-          {intercept.symbol}
-        </Link>
+        <h3 className="font-semibold text-metallic-100">
+          {intercept.hole_id && intercept.hole_id !== 'Unknown' 
+            ? intercept.hole_id 
+            : intercept.project_name || `${intercept.symbol} Intercept`}
+        </h3>
+        <div className="flex items-center gap-2">
+          <Link 
+            href={`/company/${intercept.symbol}`}
+            className="text-sm text-accent-gold hover:underline"
+          >
+            {intercept.symbol}
+          </Link>
+          {intercept.project_name && intercept.hole_id !== 'Unknown' && (
+            <span className="text-xs text-metallic-500">• {intercept.project_name}</span>
+          )}
+        </div>
       </div>
       {intercept.commodity && (
         <span className="px-2 py-1 text-xs bg-amber-500/20 text-amber-400 rounded-full border border-amber-500/30">

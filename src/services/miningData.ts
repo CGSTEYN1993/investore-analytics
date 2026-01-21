@@ -165,6 +165,7 @@ export interface DrillIntercept {
   id: number;
   symbol: string;
   hole_id: string;
+  project_name?: string;
   from_m?: number;
   to_m?: number;
   width_m?: number;
