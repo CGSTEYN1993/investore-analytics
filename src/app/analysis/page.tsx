@@ -3,10 +3,11 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { 
-  Globe, Building2, MapPin, TrendingUp, 
+  Globe, Building2, MapPin, TrendingUp, TrendingDown,
   Search, ChevronRight, Gem, FileText, Clock,
   Sparkles, MessageSquare, Target, AlertTriangle, Bell, Activity,
-  BarChart3, Briefcase, Bookmark, Database, Layers, Factory, Hammer, Map
+  BarChart3, Briefcase, Bookmark, Database, Layers, Factory, Hammer, Map,
+  RefreshCw, DollarSign, Fuel, Zap
 } from 'lucide-react';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://web-production-4faa7.up.railway.app';
@@ -17,6 +18,30 @@ interface SpatialSummary {
   by_exchange: Record<string, number>;
   by_commodity: [string, number][];
   total_countries: number;
+}
+
+// Interface for commodity prices
+interface CommodityPrice {
+  id: string;
+  name: string;
+  symbol: string;
+  price: number;
+  change: number;
+  changePercent: number;
+  unit: string;
+  currency: string;
+  category: string;
+}
+
+// Interface for recent announcements
+interface RecentAnnouncement {
+  id: number;
+  ticker: string;
+  exchange: string;
+  article_title: string;
+  article_date: string;
+  event_type: string | null;
+  sentiment_label: string | null;
 }
 
 // AI Research Analyst features from the design
@@ -143,6 +168,13 @@ const geoscienceCategories = [
 // Mining Analytics sub-categories
 const analyticsCategories = [
   {
+    id: 'commodity-prices',
+    title: 'Commodity Prices',
+    description: 'Spot prices & movers',
+    href: '/analysis/prices',
+    icon: DollarSign,
+  },
+  {
     id: 'market-data',
     title: 'Market Data',
     description: 'Real-time prices & volume',
@@ -151,9 +183,9 @@ const analyticsCategories = [
   },
   {
     id: 'announcements',
-    title: 'Announcements',
+    title: 'News & Announcements',
     description: 'Latest company news',
-    href: '/analysis/announcements',
+    href: '/news',
     icon: FileText,
   },
   {
@@ -188,10 +220,15 @@ const analyticsCategories = [
 
 export default function AnalysisDashboard() {
   const [dynamicStats, setDynamicStats] = useState<SpatialSummary | null>(null);
+  const [commodities, setCommodities] = useState<CommodityPrice[]>([]);
+  const [recentAnnouncements, setRecentAnnouncements] = useState<RecentAnnouncement[]>([]);
+  const [loadingCommodities, setLoadingCommodities] = useState(true);
+  const [loadingAnnouncements, setLoadingAnnouncements] = useState(true);
   
-  // Fetch dynamic stats from the API
+  // Fetch all dynamic data from the API
   useEffect(() => {
-    async function fetchStats() {
+    async function fetchAllData() {
+      // Fetch spatial summary
       try {
         const response = await fetch(`${API_BASE}/api/v1/spatial/summary`);
         if (response.ok) {
@@ -201,9 +238,55 @@ export default function AnalysisDashboard() {
       } catch (err) {
         console.error('Failed to fetch spatial summary:', err);
       }
+      
+      // Fetch commodity prices
+      try {
+        const response = await fetch(`${API_BASE}/api/v1/market/commodities`);
+        if (response.ok) {
+          const data = await response.json();
+          setCommodities(data.commodities || []);
+        }
+      } catch (err) {
+        console.error('Failed to fetch commodities:', err);
+      } finally {
+        setLoadingCommodities(false);
+      }
+      
+      // Fetch recent announcements/news hits
+      try {
+        const response = await fetch(`${API_BASE}/api/v1/news-hits/recent?days=7&limit=8`);
+        if (response.ok) {
+          const data = await response.json();
+          setRecentAnnouncements(data.news_hits || []);
+        }
+      } catch (err) {
+        console.error('Failed to fetch announcements:', err);
+      } finally {
+        setLoadingAnnouncements(false);
+      }
     }
-    fetchStats();
+    fetchAllData();
   }, []);
+
+  // Helper to format time ago
+  const formatTimeAgo = (dateStr: string) => {
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    
+    if (diffHours < 1) return 'Just now';
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays < 7) return `${diffDays}d ago`;
+    return date.toLocaleDateString('en-AU', { day: 'numeric', month: 'short' });
+  };
+
+  // Helper to format event type
+  const formatEventType = (eventType: string | null) => {
+    if (!eventType) return 'News';
+    return eventType.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+  };
 
   return (
     <div className="min-h-screen bg-metallic-950">
@@ -482,73 +565,86 @@ export default function AnalysisDashboard() {
           <div className="lg:col-span-2 bg-metallic-900 border border-metallic-800 rounded-xl p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-metallic-100">Recent Announcements</h3>
-              <Link href="/analysis/announcements" className="text-sm text-primary-400 hover:text-primary-300 flex items-center gap-1">
+              <Link href="/news" className="text-sm text-primary-400 hover:text-primary-300 flex items-center gap-1">
                 View all
                 <ChevronRight className="w-4 h-4" />
               </Link>
             </div>
-            <div className="space-y-3">
-              {[
-                { company: 'NEM.ASX', title: 'Quarterly Production Report Released', time: '2 hours ago', type: 'Production' },
-                { company: 'BHP.ASX', title: 'Resource Update - Olympic Dam', time: '4 hours ago', type: 'Resource' },
-                { company: 'RIO.ASX', title: 'Exploration Drilling Results - Pilbara', time: '6 hours ago', type: 'Drilling' },
-                { company: 'FMG.ASX', title: 'Q3 Shipments Above Guidance', time: '8 hours ago', type: 'Production' },
-              ].map((item, i) => (
-                <div key={i} className="flex items-start gap-4 p-3 rounded-lg hover:bg-metallic-800/50 transition-colors cursor-pointer">
-                  <div className="w-10 h-10 rounded-lg bg-metallic-800 flex items-center justify-center flex-shrink-0">
-                    <FileText className="w-5 h-5 text-metallic-500" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="font-mono text-sm font-semibold text-primary-400">{item.company}</span>
-                      <span className="px-2 py-0.5 text-[10px] font-medium bg-metallic-700 text-metallic-300 rounded">
-                        {item.type}
-                      </span>
+            {loadingAnnouncements ? (
+              <div className="flex items-center justify-center py-8">
+                <RefreshCw className="w-6 h-6 animate-spin text-metallic-500" />
+              </div>
+            ) : recentAnnouncements.length === 0 ? (
+              <div className="text-center py-8 text-metallic-500">No recent announcements</div>
+            ) : (
+              <div className="space-y-3">
+                {recentAnnouncements.slice(0, 6).map((item) => (
+                  <div key={item.id} className="flex items-start gap-4 p-3 rounded-lg hover:bg-metallic-800/50 transition-colors cursor-pointer">
+                    <div className="w-10 h-10 rounded-lg bg-metallic-800 flex items-center justify-center flex-shrink-0">
+                      <FileText className="w-5 h-5 text-metallic-500" />
                     </div>
-                    <p className="text-sm text-metallic-200 truncate">{item.title}</p>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-mono text-sm font-semibold text-primary-400">{item.ticker}.{item.exchange}</span>
+                        <span className={`px-2 py-0.5 text-[10px] font-medium rounded ${
+                          item.sentiment_label === 'positive' ? 'bg-green-500/20 text-green-400' :
+                          item.sentiment_label === 'negative' ? 'bg-red-500/20 text-red-400' :
+                          'bg-metallic-700 text-metallic-300'
+                        }`}>
+                          {formatEventType(item.event_type)}
+                        </span>
+                      </div>
+                      <p className="text-sm text-metallic-200 truncate">{item.article_title}</p>
+                    </div>
+                    <div className="text-xs text-metallic-500 flex-shrink-0 flex items-center gap-1">
+                      <Clock className="w-3 h-3" />
+                      {formatTimeAgo(item.article_date)}
+                    </div>
                   </div>
-                  <div className="text-xs text-metallic-500 flex-shrink-0 flex items-center gap-1">
-                    <Clock className="w-3 h-3" />
-                    {item.time}
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
 
-          {/* Quick Search & Actions */}
+          {/* Commodity Prices Widget */}
           <div className="bg-metallic-900 border border-metallic-800 rounded-xl p-6">
-            <h3 className="text-lg font-semibold text-metallic-100 mb-4">Quick Search</h3>
-            
-            <div className="relative mb-6">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-metallic-500" />
-              <input
-                type="text"
-                placeholder="Search companies, commodities..."
-                className="w-full pl-10 pr-4 py-3 bg-metallic-800 border border-metallic-700 rounded-lg text-metallic-100 placeholder-metallic-500 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-              />
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-metallic-100 flex items-center gap-2">
+                <DollarSign className="w-5 h-5 text-primary-400" />
+                Spot Prices
+              </h3>
+              <Link href="/analysis/prices" className="text-sm text-primary-400 hover:text-primary-300 flex items-center gap-1">
+                All prices
+                <ChevronRight className="w-4 h-4" />
+              </Link>
             </div>
-            
-            <div className="space-y-2">
-              <p className="text-xs text-metallic-500 uppercase tracking-wider mb-3">Popular Searches</p>
-              {[
-                { label: 'Gold Producers', href: '/analysis/global?commodity=Gold&type=producer' },
-                { label: 'Lithium Explorers', href: '/analysis/global?commodity=Lithium' },
-                { label: 'Canadian Copper', href: '/analysis/global?country=Canada&commodity=Copper' },
-                { label: 'ASX Small Caps', href: '/analysis/exchanges?exchange=ASX&cap=small' },
-              ].map((item, i) => (
-                <Link
-                  key={i}
-                  href={item.href}
-                  className="flex items-center gap-2 p-2.5 rounded-lg hover:bg-metallic-800/70 transition-colors group"
-                >
-                  <div className="w-2 h-2 rounded-full bg-primary-500/50 group-hover:bg-primary-500 transition-colors" />
-                  <span className="text-sm text-metallic-300 group-hover:text-metallic-100 transition-colors">
-                    {item.label}
-                  </span>
-                </Link>
-              ))}
-            </div>
+            {loadingCommodities ? (
+              <div className="flex items-center justify-center py-8">
+                <RefreshCw className="w-6 h-6 animate-spin text-metallic-500" />
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {commodities.slice(0, 8).map((commodity) => (
+                  <div key={commodity.id} className="flex items-center justify-between p-2.5 rounded-lg hover:bg-metallic-800/50 transition-colors">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium text-metallic-200">{commodity.name}</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm font-mono text-metallic-100">
+                        ${commodity.price.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                        <span className="text-xs text-metallic-500">/{commodity.unit}</span>
+                      </span>
+                      <span className={`text-xs font-medium flex items-center gap-0.5 ${
+                        commodity.changePercent >= 0 ? 'text-green-400' : 'text-red-400'
+                      }`}>
+                        {commodity.changePercent >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                        {commodity.changePercent >= 0 ? '+' : ''}{commodity.changePercent.toFixed(2)}%
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
