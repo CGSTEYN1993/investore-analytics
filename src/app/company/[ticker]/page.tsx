@@ -121,6 +121,16 @@ interface ChartData {
   source: string;
 }
 
+interface CapitalRaising {
+  id: number;
+  announcement_date: string;
+  raising_type: string;
+  amount_raised: number | null;
+  price_per_share: number | null;
+  shares_issued: number | null;
+  discount_percent: number | null;
+}
+
 export default function CompanyProfile() {
   const params = useParams();
   const ticker = (params.ticker as string)?.toUpperCase() || '';
@@ -133,6 +143,23 @@ export default function CompanyProfile() {
   const [chartPeriod, setChartPeriod] = useState('1M');
   const [chartLoading, setChartLoading] = useState(false);
   const [logoError, setLogoError] = useState(false);
+  const [chartType, setChartType] = useState<'line' | 'candlestick'>('line');
+  const [showVolume, setShowVolume] = useState(true);
+  const [capitalRaisings, setCapitalRaisings] = useState<CapitalRaising[]>([]);
+  const [showCapitalRaisings, setShowCapitalRaisings] = useState(true);
+
+  const fetchCapitalRaisings = async () => {
+    if (!ticker) return;
+    try {
+      const res = await fetch(`${API_URL}/api/v1/market/stock/${ticker}/capital-raisings`);
+      if (res.ok) {
+        const data = await res.json();
+        setCapitalRaisings(data.capital_raisings || []);
+      }
+    } catch (err) {
+      console.error('Error fetching capital raisings:', err);
+    }
+  };
 
   const fetchChartData = async (period: string) => {
     if (!ticker) return;
@@ -245,6 +272,7 @@ export default function CompanyProfile() {
   useEffect(() => {
     fetchCompanyData();
     fetchChartData(chartPeriod);
+    fetchCapitalRaisings();
   }, [ticker]);
 
   // Fetch new chart data when period changes
@@ -254,13 +282,16 @@ export default function CompanyProfile() {
     }
   }, [chartPeriod]);
 
-  // Prepare chart data for Plotly
+  // Prepare chart data for Plotly with OHLCV support
   const plotData = useMemo(() => {
     if (!chartData || !chartData.candles || chartData.candles.length === 0) {
       return null;
     }
     
     const dates = chartData.candles.map(c => c.timestamp);
+    const opens = chartData.candles.map(c => c.open);
+    const highs = chartData.candles.map(c => c.high);
+    const lows = chartData.candles.map(c => c.low);
     const closes = chartData.candles.map(c => c.close);
     const volumes = chartData.candles.map(c => c.volume);
     
@@ -269,15 +300,31 @@ export default function CompanyProfile() {
     const lastClose = closes[closes.length - 1] || 0;
     const isPositive = lastClose >= firstClose;
     
+    // Find capital raisings that fall within the chart period
+    const chartStart = new Date(dates[0]);
+    const chartEnd = new Date(dates[dates.length - 1]);
+    
+    const relevantRaisings = capitalRaisings.filter(cr => {
+      const crDate = new Date(cr.announcement_date);
+      return crDate >= chartStart && crDate <= chartEnd;
+    });
+    
     return {
       dates,
+      opens,
+      highs,
+      lows,
       closes,
       volumes,
       isPositive,
       change: lastClose - firstClose,
       changePercent: firstClose > 0 ? ((lastClose - firstClose) / firstClose) * 100 : 0,
+      capitalRaisings: relevantRaisings,
+      maxVolume: Math.max(...volumes),
+      minPrice: Math.min(...lows),
+      maxPrice: Math.max(...highs),
     };
-  }, [chartData]);
+  }, [chartData, capitalRaisings]);
 
   if (loading) {
     return (
@@ -529,7 +576,7 @@ export default function CompanyProfile() {
 
             {/* Price Chart */}
             <section className="bg-metallic-900 border border-metallic-800 rounded-xl p-6">
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
                 <div className="flex items-center gap-4">
                   <h2 className="text-lg font-semibold text-metallic-100">Price Chart</h2>
                   {plotData && (
@@ -538,7 +585,33 @@ export default function CompanyProfile() {
                     </div>
                   )}
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
+                  {/* Chart type toggle */}
+                  <div className="flex items-center gap-1 mr-2">
+                    <button
+                      onClick={() => setChartType('line')}
+                      className={`px-2 py-1 text-xs rounded-l-lg border transition-colors ${
+                        chartType === 'line'
+                          ? 'bg-primary-500 text-white border-primary-500'
+                          : 'bg-metallic-800 text-metallic-400 border-metallic-700 hover:bg-metallic-700'
+                      }`}
+                      title="Line Chart"
+                    >
+                      Line
+                    </button>
+                    <button
+                      onClick={() => setChartType('candlestick')}
+                      className={`px-2 py-1 text-xs rounded-r-lg border-t border-r border-b transition-colors ${
+                        chartType === 'candlestick'
+                          ? 'bg-primary-500 text-white border-primary-500'
+                          : 'bg-metallic-800 text-metallic-400 border-metallic-700 hover:bg-metallic-700'
+                      }`}
+                      title="Candlestick Chart"
+                    >
+                      Candle
+                    </button>
+                  </div>
+                  {/* Period buttons */}
                   {['1D', '1W', '1M', '3M', '1Y', '5Y'].map((period) => (
                     <button
                       key={period}
@@ -555,8 +628,30 @@ export default function CompanyProfile() {
                 </div>
               </div>
               
+              {/* Chart toggles */}
+              <div className="flex items-center gap-4 mb-4 text-sm">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={showVolume}
+                    onChange={(e) => setShowVolume(e.target.checked)}
+                    className="rounded bg-metallic-800 border-metallic-700 text-primary-500 focus:ring-primary-500"
+                  />
+                  <span className="text-metallic-400">Volume Bars</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={showCapitalRaisings}
+                    onChange={(e) => setShowCapitalRaisings(e.target.checked)}
+                    className="rounded bg-metallic-800 border-metallic-700 text-primary-500 focus:ring-primary-500"
+                  />
+                  <span className="text-metallic-400">Capital Raisings ({capitalRaisings.length})</span>
+                </label>
+              </div>
+              
               {/* Chart */}
-              <div className="h-80">
+              <div className={showVolume ? "h-96" : "h-80"}>
                 {chartLoading ? (
                   <div className="h-full flex items-center justify-center">
                     <Loader2 className="w-8 h-8 text-primary-500 animate-spin" />
@@ -564,41 +659,109 @@ export default function CompanyProfile() {
                 ) : plotData ? (
                   <Plot
                     data={[
-                      {
+                      // Main price trace (line or candlestick)
+                      chartType === 'candlestick' ? {
+                        x: plotData.dates,
+                        open: plotData.opens,
+                        high: plotData.highs,
+                        low: plotData.lows,
+                        close: plotData.closes,
+                        type: 'candlestick',
+                        name: 'Price',
+                        increasing: { line: { color: '#22c55e' }, fillcolor: '#22c55e' },
+                        decreasing: { line: { color: '#ef4444' }, fillcolor: '#ef4444' },
+                        yaxis: 'y2',
+                      } : {
                         x: plotData.dates,
                         y: plotData.closes,
                         type: 'scatter',
                         mode: 'lines',
                         fill: 'tozeroy',
+                        name: 'Price',
                         line: { 
                           color: plotData.isPositive ? '#22c55e' : '#ef4444',
                           width: 2,
                         },
                         fillcolor: plotData.isPositive ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-                        hovertemplate: '%{x}<br>$%{y:.2f}<extra></extra>',
+                        hovertemplate: '%{x}<br>$%{y:.4f}<extra></extra>',
+                        yaxis: 'y2',
                       },
+                      // Volume bars
+                      ...(showVolume ? [{
+                        x: plotData.dates,
+                        y: plotData.volumes,
+                        type: 'bar' as const,
+                        name: 'Volume',
+                        marker: {
+                          color: plotData.closes.map((close, i) => 
+                            i > 0 && close >= plotData.closes[i - 1] ? 'rgba(34, 197, 94, 0.5)' : 'rgba(239, 68, 68, 0.5)'
+                          ),
+                        },
+                        yaxis: 'y',
+                        hovertemplate: '%{x}<br>Vol: %{y:,.0f}<extra></extra>',
+                      }] : []),
+                      // Capital raisings markers
+                      ...(showCapitalRaisings && plotData.capitalRaisings.length > 0 ? [{
+                        x: plotData.capitalRaisings.map(cr => cr.announcement_date),
+                        y: plotData.capitalRaisings.map(cr => {
+                          // Find the close price on that date
+                          const idx = plotData.dates.findIndex(d => d.startsWith(cr.announcement_date.split('T')[0]));
+                          return idx >= 0 ? plotData.closes[idx] : plotData.closes[plotData.closes.length - 1];
+                        }),
+                        type: 'scatter' as const,
+                        mode: 'markers',
+                        name: 'Capital Raising',
+                        marker: {
+                          symbol: 'triangle-down',
+                          size: 14,
+                          color: '#f59e0b',
+                          line: { color: '#ffffff', width: 1 },
+                        },
+                        yaxis: 'y2',
+                        text: plotData.capitalRaisings.map(cr => 
+                          `${cr.raising_type}${cr.amount_raised ? ` $${(cr.amount_raised / 1e6).toFixed(1)}M` : ''}`
+                        ),
+                        hovertemplate: '%{text}<br>%{x}<extra>Capital Raising</extra>',
+                      }] : []),
                     ]}
                     layout={{
                       autosize: true,
-                      margin: { l: 50, r: 20, t: 20, b: 40 },
+                      margin: { l: 60, r: 20, t: 20, b: 40 },
                       paper_bgcolor: 'transparent',
                       plot_bgcolor: 'transparent',
                       xaxis: {
                         showgrid: false,
                         color: '#6b7280',
                         tickformat: chartPeriod === '1D' ? '%H:%M' : '%b %d',
+                        rangeslider: { visible: false },
                       },
                       yaxis: {
+                        showgrid: false,
+                        color: '#6b7280',
+                        domain: showVolume ? [0, 0.25] : [0, 0],
+                        showticklabels: showVolume,
+                        title: showVolume ? 'Volume' : undefined,
+                      },
+                      yaxis2: {
                         showgrid: true,
                         gridcolor: 'rgba(107, 114, 128, 0.2)',
                         color: '#6b7280',
                         tickprefix: '$',
+                        domain: showVolume ? [0.3, 1] : [0, 1],
+                        side: 'right',
                       },
                       hovermode: 'x unified',
                       hoverlabel: {
                         bgcolor: '#1f2937',
                         bordercolor: '#374151',
                         font: { color: '#f3f4f6' },
+                      },
+                      showlegend: false,
+                      legend: {
+                        x: 0,
+                        y: 1.1,
+                        orientation: 'h',
+                        font: { color: '#9ca3af' },
                       },
                     }}
                     config={{
@@ -631,6 +794,35 @@ export default function CompanyProfile() {
                 <div className="mt-2 flex items-center justify-between text-xs text-metallic-600">
                   <span>{chartData.candles.length} data points</span>
                   <span>Source: {chartData.source}</span>
+                </div>
+              )}
+              
+              {/* Capital Raisings Table */}
+              {showCapitalRaisings && capitalRaisings.length > 0 && (
+                <div className="mt-4 pt-4 border-t border-metallic-800">
+                  <h3 className="text-sm font-medium text-metallic-300 mb-2">Capital Raisings</h3>
+                  <div className="space-y-2 max-h-40 overflow-y-auto">
+                    {capitalRaisings.slice(0, 5).map((cr, i) => (
+                      <div key={cr.id || i} className="flex items-center justify-between text-xs bg-metallic-800/50 rounded px-3 py-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-amber-400">▼</span>
+                          <span className="text-metallic-400">{cr.announcement_date.split('T')[0]}</span>
+                          <span className="text-metallic-300">{cr.raising_type}</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          {cr.amount_raised && (
+                            <span className="text-green-400">${(cr.amount_raised / 1e6).toFixed(1)}M</span>
+                          )}
+                          {cr.price_per_share && (
+                            <span className="text-metallic-400">${cr.price_per_share.toFixed(3)}/sh</span>
+                          )}
+                          {cr.discount_percent && (
+                            <span className="text-red-400">-{cr.discount_percent.toFixed(1)}%</span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </section>
