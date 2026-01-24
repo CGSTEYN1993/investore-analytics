@@ -75,9 +75,10 @@ function StockCard({ stock, onClick, isSelected }: {
   const isPositive = stock.changePercent >= 0;
   
   return (
-    <button
+    <Link
+      href={`/company/${stock.symbol}`}
       onClick={onClick}
-      className={`w-full text-left bg-metallic-900 border rounded-xl p-4 transition-all hover:scale-[1.01] ${
+      className={`block w-full text-left bg-metallic-900 border rounded-xl p-4 transition-all hover:scale-[1.01] ${
         isSelected 
           ? 'border-primary-500 ring-1 ring-primary-500/30' 
           : 'border-metallic-800 hover:border-metallic-700'
@@ -123,7 +124,7 @@ function StockCard({ stock, onClick, isSelected }: {
           <p>Cap: {formatLargeNumber(stock.marketCap)}</p>
         </div>
       </div>
-    </button>
+    </Link>
   );
 }
 
@@ -173,9 +174,13 @@ function TopMoversSection({
       </h4>
       <div className="space-y-2">
         {stocks.slice(0, 5).map((stock) => (
-          <div key={stock.symbol} className="flex items-center justify-between py-2 border-b border-metallic-800/50 last:border-0">
+          <Link 
+            key={stock.symbol} 
+            href={`/company/${stock.symbol}`}
+            className="flex items-center justify-between py-2 border-b border-metallic-800/50 last:border-0 hover:bg-metallic-800/50 -mx-2 px-2 rounded transition-colors cursor-pointer"
+          >
             <div className="flex items-center gap-2">
-              <span className="font-medium text-metallic-100">{stock.symbol}</span>
+              <span className="font-medium text-metallic-100 hover:text-primary-400 transition-colors">{stock.symbol}</span>
               <span className="text-xs text-metallic-500">{stock.commodity}</span>
             </div>
             <div className="text-right">
@@ -184,7 +189,7 @@ function TopMoversSection({
                 {formatPercent(stock.changePercent)}
               </span>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
     </div>
