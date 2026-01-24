@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Newspaper, TrendingUp, TrendingDown, Minus, Filter, RefreshCw,
   Calendar, Building2, Globe, ChevronDown, ChevronRight, ExternalLink,
@@ -30,11 +30,7 @@ export default function NewsHitsPage() {
   const [selectedExchange, setSelectedExchange] = useState<string | null>(null);
   const [searchTicker, setSearchTicker] = useState('');
 
-  useEffect(() => {
-    loadData();
-  }, [selectedDays, selectedExchange]);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setLoading(true);
     setError(null);
     
@@ -53,7 +49,11 @@ export default function NewsHitsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedDays, selectedExchange]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   const filteredNews = searchTicker
     ? recentNews.filter(n => n.ticker.toLowerCase().includes(searchTicker.toLowerCase()))

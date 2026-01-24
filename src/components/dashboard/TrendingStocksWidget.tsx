@@ -199,7 +199,7 @@ const TrendingStocksWidget: React.FC<TrendingStocksWidgetProps> = ({
                 <div className="mt-2 pt-2 border-t border-slate-700/50">
                   <div className="text-xs text-slate-400 mb-1">Latest:</div>
                   <div className="text-xs text-slate-300 truncate">
-                    "{stock.recent_headlines[0]}"
+                    &ldquo;{stock.recent_headlines[0]}&rdquo;
                   </div>
                 </div>
               )}
