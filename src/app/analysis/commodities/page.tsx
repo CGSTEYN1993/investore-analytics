@@ -4,8 +4,9 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Search, Filter, ChevronRight, TrendingUp, TrendingDown, Building2, Loader2, RefreshCw } from 'lucide-react';
 import { getCommodityColor, COMMODITY_COLORS } from '@/lib/subscription-tiers';
+import { RAILWAY_API_URL } from '@/lib/public-api-url';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://web-production-4faa7.up.railway.app';
+const API_URL = RAILWAY_API_URL;
 
 interface Commodity {
   symbol: string;

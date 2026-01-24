@@ -14,7 +14,8 @@ import CompanyGeoscienceWidget from '@/components/dashboard/CompanyGeoscienceWid
 // Dynamic import for Plotly to avoid SSR issues
 const Plot = dynamic(() => import('react-plotly.js'), { ssr: false });
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://web-production-4faa7.up.railway.app';
+import { RAILWAY_API_URL } from '@/lib/public-api-url';
+const API_URL = RAILWAY_API_URL;
 
 interface Announcement {
   id: string;

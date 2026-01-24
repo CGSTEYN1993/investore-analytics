@@ -17,7 +17,9 @@ import {
   Filter
 } from 'lucide-react';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://web-production-4faa7.up.railway.app';
+import { RAILWAY_API_URL } from '@/lib/public-api-url';
+
+const API_BASE = RAILWAY_API_URL;
 
 interface CommodityPrice {
   id: string;

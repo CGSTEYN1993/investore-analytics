@@ -5,8 +5,9 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { ArrowLeft, Building2, Globe, ExternalLink, Search, Filter, Loader2, RefreshCw, ChevronDown, MapPin, Gem, TrendingUp, TrendingDown } from 'lucide-react';
 import { getCommodityColor } from '@/lib/subscription-tiers';
+import { RAILWAY_API_URL } from '@/lib/public-api-url';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://web-production-4faa7.up.railway.app';
+const API_URL = RAILWAY_API_URL;
 
 interface Company {
   ticker: string;

@@ -20,7 +20,9 @@ import {
   BoreholesFilter,
 } from '@/types/geoscience';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://web-production-4faa7.up.railway.app';
+import { RAILWAY_API_URL } from '@/lib/public-api-url';
+
+const API_BASE_URL = RAILWAY_API_URL;
 const GA_ENDPOINT = `${API_BASE_URL}/api/v1/geoscience`;
 
 /**

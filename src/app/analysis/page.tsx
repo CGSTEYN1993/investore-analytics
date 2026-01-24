@@ -9,8 +9,9 @@ import {
   BarChart3, Briefcase, Bookmark, Database, Layers, Factory, Hammer, Map,
   RefreshCw, DollarSign, Fuel, Zap
 } from 'lucide-react';
+import { RAILWAY_API_URL } from '@/lib/public-api-url';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://web-production-4faa7.up.railway.app';
+const API_BASE = RAILWAY_API_URL;
 
 // Interface for dynamic stats from API
 interface SpatialSummary {

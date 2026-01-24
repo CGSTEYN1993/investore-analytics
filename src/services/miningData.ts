@@ -5,7 +5,9 @@
  * Data sources: V1-V10 extraction pipeline (projects, resources, reserves, drilling, economics)
  */
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://web-production-4faa7.up.railway.app';
+import { RAILWAY_API_URL } from '@/lib/public-api-url';
+
+const API_BASE_URL = RAILWAY_API_URL;
 
 // Types
 export interface ProjectSummary {

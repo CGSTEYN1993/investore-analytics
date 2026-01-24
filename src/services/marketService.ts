@@ -20,17 +20,10 @@ import {
   NewsArticle,
   CompanyProfile,
 } from '@/types/market';
+import { RAILWAY_API_URL } from '@/lib/public-api-url';
 
 // Always use Railway backend for market data to ensure reliability
-const RAILWAY_API = 'https://web-production-4faa7.up.railway.app';
-const API_BASE_URL = (() => {
-  const envUrl = process.env.NEXT_PUBLIC_API_URL?.trim();
-  // Only use env URL if it's a valid https URL, otherwise use Railway
-  if (envUrl && envUrl.startsWith('https://')) {
-    return envUrl;
-  }
-  return RAILWAY_API;
-})();
+const API_BASE_URL = RAILWAY_API_URL;
 const MARKET_ENDPOINT = `${API_BASE_URL}/api/v1/market`;
 
 /**

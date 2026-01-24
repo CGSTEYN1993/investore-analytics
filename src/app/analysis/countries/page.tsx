@@ -7,11 +7,12 @@ import {
   Building2, ChevronDown, ArrowLeft, Loader2,
   Factory, Compass, Hammer, Map
 } from 'lucide-react';
+import { RAILWAY_API_URL } from '@/lib/public-api-url';
 
 // Lazy load the map component to avoid SSR issues
 const GlobalMiningMap = lazy(() => import('@/components/maps/GlobalMiningMap'));
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://web-production-4faa7.up.railway.app';
+const API_URL = RAILWAY_API_URL;
 
 // Country metadata with flags, regions, and coordinates
 const countryMetadata: Record<string, { flag: string; region: string; lat: number; lng: number }> = {

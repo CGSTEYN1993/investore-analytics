@@ -8,7 +8,9 @@
  * All news is processed with LLM for sentiment analysis and company matching.
  */
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://web-production-4faa7.up.railway.app';
+import { RAILWAY_API_URL } from '@/lib/public-api-url';
+
+const API_BASE_URL = RAILWAY_API_URL;
 
 // Types
 export interface NewsHit {
