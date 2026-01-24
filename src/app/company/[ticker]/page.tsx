@@ -132,6 +132,7 @@ export default function CompanyProfile() {
   const [chartData, setChartData] = useState<ChartData | null>(null);
   const [chartPeriod, setChartPeriod] = useState('1M');
   const [chartLoading, setChartLoading] = useState(false);
+  const [logoError, setLogoError] = useState(false);
 
   const fetchChartData = async (period: string) => {
     if (!ticker) return;
@@ -309,7 +310,6 @@ export default function CompanyProfile() {
   const { marketData, announcements, name, exchange, commodity, website, logoUrl, asxUrl, description } = companyData;
   const commodityColor = getCommodityColor(commodity);
   const isPositive = marketData ? marketData.changePercent >= 0 : true;
-  const [logoError, setLogoError] = useState(false);
 
   return (
     <div className="min-h-screen bg-metallic-950">
