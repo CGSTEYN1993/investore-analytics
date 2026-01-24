@@ -15,6 +15,8 @@ import {
   Clock,
   Loader2,
   ChevronDown,
+  DollarSign,
+  AlertCircle,
 } from 'lucide-react';
 import {
   LineChart as RechartsLineChart,
@@ -29,6 +31,8 @@ import {
   AreaChart,
   ComposedChart,
   Bar,
+  ReferenceLine,
+  ReferenceDot,
 } from 'recharts';
 import { RAILWAY_API_URL } from '@/lib/public-api-url';
 
@@ -90,6 +94,28 @@ interface CommodityOption {
   category: string;
 }
 
+interface CapitalRaising {
+  id: number;
+  date: string;
+  completion_date: string | null;
+  type: string;
+  amount: number | null;
+  currency: string;
+  shares_issued: number | null;
+  issue_price: number | null;
+  dilution_pct: number | null;
+  use_of_funds: string | null;
+  purpose: string | null;
+}
+
+interface CapitalRaisingsResponse {
+  symbol: string;
+  period: string;
+  capital_raisings: CapitalRaising[];
+  count: number;
+  source: string;
+}
+
 const COMMODITIES: CommodityOption[] = [
   { id: 'gold', name: 'Gold', symbol: 'XAU', category: 'precious_metals' },
   { id: 'silver', name: 'Silver', symbol: 'XAG', category: 'precious_metals' },
@@ -126,6 +152,16 @@ const COLORS = {
   commodity: '#f59e0b', // Amber for commodity
   stock: '#3b82f6', // Blue for stock
   comparison: '#10b981', // Green for comparison
+  capitalRaising: '#ef4444', // Red for capital raisings
+};
+
+// Capital raising type colors
+const RAISING_TYPE_COLORS: Record<string, string> = {
+  'Placement': '#ef4444',
+  'Rights Issue': '#f97316',
+  'SPP': '#eab308',
+  'Entitlement Offer': '#84cc16',
+  'Convertible Note': '#8b5cf6',
 };
 
 export default function CommodityPriceChartsPage() {
@@ -141,6 +177,11 @@ export default function CommodityPriceChartsPage() {
   const [showCommodityDropdown, setShowCommodityDropdown] = useState(false);
   const [chartType, setChartType] = useState<'line' | 'area'>('area');
   const [normalizeData, setNormalizeData] = useState(true);
+  
+  // Capital raisings state
+  const [capitalRaisings, setCapitalRaisings] = useState<CapitalRaising[]>([]);
+  const [showCapitalRaisings, setShowCapitalRaisings] = useState(true);
+  const [capitalRaisingsLoading, setCapitalRaisingsLoading] = useState(false);
 
   // Fetch commodity history
   const fetchCommodityHistory = useCallback(async () => {
@@ -167,6 +208,7 @@ export default function CommodityPriceChartsPage() {
   const fetchStockHistory = useCallback(async (symbol: string) => {
     if (!symbol) {
       setStockData(null);
+      setCapitalRaisings([]);
       return;
     }
     
@@ -181,11 +223,40 @@ export default function CommodityPriceChartsPage() {
       
       const data = await res.json();
       setStockData(data);
+      
+      // Also fetch capital raisings for this stock
+      fetchCapitalRaisings(symbol);
     } catch (err) {
       console.error('Stock fetch error:', err);
       setStockData(null);
     } finally {
       setStockLoading(false);
+    }
+  }, [selectedPeriod]);
+  
+  // Fetch capital raisings for a stock
+  const fetchCapitalRaisings = useCallback(async (symbol: string) => {
+    if (!symbol) {
+      setCapitalRaisings([]);
+      return;
+    }
+    
+    setCapitalRaisingsLoading(true);
+    
+    try {
+      const res = await fetch(
+        `${API_BASE}/api/v1/market/stock/${symbol}/capital-raisings?period=${selectedPeriod}`
+      );
+      
+      if (!res.ok) throw new Error('Failed to fetch capital raisings');
+      
+      const data: CapitalRaisingsResponse = await res.json();
+      setCapitalRaisings(data.capital_raisings || []);
+    } catch (err) {
+      console.error('Capital raisings fetch error:', err);
+      setCapitalRaisings([]);
+    } finally {
+      setCapitalRaisingsLoading(false);
     }
   }, [selectedPeriod]);
 
@@ -211,11 +282,15 @@ export default function CommodityPriceChartsPage() {
   const handleRemoveComparison = () => {
     setComparisonTicker('');
     setStockData(null);
+    setCapitalRaisings([]);
   };
 
   // Prepare chart data
   const chartData = React.useMemo(() => {
     if (!commodityData?.history) return [];
+    
+    // Create a map of capital raising dates for quick lookup
+    const capitalRaisingDates = new Set(capitalRaisings.map(cr => cr.date));
     
     const data = commodityData.history.map((point, idx) => {
       const entry: Record<string, unknown> = {
@@ -239,13 +314,23 @@ export default function CommodityPriceChartsPage() {
           const startPrice = stockData.history[0].price;
           entry.stockNormalized = ((stockData.history[idx].price - startPrice) / startPrice) * 100;
         }
+        
+        // Mark if this date has a capital raising
+        if (capitalRaisingDates.has(point.date)) {
+          entry.hasCapitalRaising = true;
+          const raising = capitalRaisings.find(cr => cr.date === point.date);
+          if (raising) {
+            entry.capitalRaisingType = raising.type;
+            entry.capitalRaisingAmount = raising.amount;
+          }
+        }
       }
       
       return entry;
     });
     
     return data;
-  }, [commodityData, stockData, normalizeData]);
+  }, [commodityData, stockData, normalizeData, capitalRaisings]);
 
   const selectedCommodityInfo = COMMODITIES.find(c => c.id === selectedCommodity);
 
@@ -416,20 +501,43 @@ export default function CommodityPriceChartsPage() {
           
           {/* Active comparison */}
           {comparisonTicker && (
-            <div className="mt-3 flex items-center gap-2">
-              <span className="text-sm text-slate-400">Comparing with:</span>
-              <span className="inline-flex items-center gap-1 px-3 py-1 bg-blue-500/20 border border-blue-500/30 rounded-full text-blue-400 text-sm">
-                {comparisonTicker}
-                {stockLoading && <Loader2 className="w-3 h-3 animate-spin" />}
-                <button onClick={handleRemoveComparison} className="ml-1 hover:text-blue-200">
-                  <X className="w-3 h-3" />
-                </button>
-              </span>
-              {stockData && (
-                <span className="text-xs text-slate-500">
-                  ({stockData.name})
+            <div className="mt-3 flex flex-wrap items-center gap-4">
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-slate-400">Comparing with:</span>
+                <span className="inline-flex items-center gap-1 px-3 py-1 bg-blue-500/20 border border-blue-500/30 rounded-full text-blue-400 text-sm">
+                  {comparisonTicker}
+                  {stockLoading && <Loader2 className="w-3 h-3 animate-spin" />}
+                  <button onClick={handleRemoveComparison} className="ml-1 hover:text-blue-200">
+                    <X className="w-3 h-3" />
+                  </button>
                 </span>
-              )}
+                {stockData && (
+                  <span className="text-xs text-slate-500">
+                    ({stockData.name})
+                  </span>
+                )}
+              </div>
+              
+              {/* Capital Raisings Toggle */}
+              <div className="h-4 w-px bg-slate-700" />
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={showCapitalRaisings}
+                  onChange={(e) => setShowCapitalRaisings(e.target.checked)}
+                  className="w-4 h-4 rounded border-slate-600 bg-slate-700 text-red-500 focus:ring-red-500"
+                />
+                <span className="text-sm text-slate-400 flex items-center gap-1">
+                  <DollarSign className="w-3 h-3 text-red-400" />
+                  Capital Raisings
+                  {capitalRaisings.length > 0 && (
+                    <span className="text-xs bg-red-500/20 text-red-400 px-1.5 py-0.5 rounded-full">
+                      {capitalRaisings.length}
+                    </span>
+                  )}
+                  {capitalRaisingsLoading && <Loader2 className="w-3 h-3 animate-spin text-slate-500" />}
+                </span>
+              </label>
             </div>
           )}
         </div>
@@ -558,6 +666,22 @@ export default function CommodityPriceChartsPage() {
                         strokeWidth={2}
                       />
                     )}
+                    {/* Capital Raising Reference Lines */}
+                    {showCapitalRaisings && capitalRaisings.map((raising, idx) => (
+                      <ReferenceLine
+                        key={`cr-${idx}`}
+                        x={raising.date}
+                        stroke={RAISING_TYPE_COLORS[raising.type] || COLORS.capitalRaising}
+                        strokeWidth={2}
+                        strokeDasharray="4 4"
+                        label={{
+                          value: '💰',
+                          position: 'top',
+                          fill: RAISING_TYPE_COLORS[raising.type] || COLORS.capitalRaising,
+                          fontSize: 14,
+                        }}
+                      />
+                    ))}
                   </AreaChart>
                 ) : (
                   <RechartsLineChart data={chartData}>
@@ -617,6 +741,22 @@ export default function CommodityPriceChartsPage() {
                         dot={false}
                       />
                     )}
+                    {/* Capital Raising Reference Lines */}
+                    {showCapitalRaisings && capitalRaisings.map((raising, idx) => (
+                      <ReferenceLine
+                        key={`cr-line-${idx}`}
+                        x={raising.date}
+                        stroke={RAISING_TYPE_COLORS[raising.type] || COLORS.capitalRaising}
+                        strokeWidth={2}
+                        strokeDasharray="4 4"
+                        label={{
+                          value: '💰',
+                          position: 'top',
+                          fill: RAISING_TYPE_COLORS[raising.type] || COLORS.capitalRaising,
+                          fontSize: 14,
+                        }}
+                      />
+                    ))}
                   </RechartsLineChart>
                 )}
               </ResponsiveContainer>
@@ -702,6 +842,79 @@ export default function CommodityPriceChartsPage() {
             </div>
           )}
         </div>
+
+        {/* Capital Raisings Details */}
+        {comparisonTicker && capitalRaisings.length > 0 && showCapitalRaisings && (
+          <div className="mt-6 bg-slate-800/50 border border-slate-700 rounded-xl p-5">
+            <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+              <DollarSign className="w-5 h-5 text-red-400" />
+              Capital Raisings for {comparisonTicker}
+              <span className="text-sm font-normal text-slate-400">({capitalRaisings.length} in period)</span>
+            </h3>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-slate-700">
+                    <th className="text-left py-2 px-3 text-slate-400 font-medium">Date</th>
+                    <th className="text-left py-2 px-3 text-slate-400 font-medium">Type</th>
+                    <th className="text-right py-2 px-3 text-slate-400 font-medium">Amount</th>
+                    <th className="text-right py-2 px-3 text-slate-400 font-medium">Issue Price</th>
+                    <th className="text-right py-2 px-3 text-slate-400 font-medium">Dilution</th>
+                    <th className="text-left py-2 px-3 text-slate-400 font-medium">Purpose</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {capitalRaisings.map((raising, idx) => (
+                    <tr key={idx} className="border-b border-slate-800 hover:bg-slate-800/50">
+                      <td className="py-2 px-3 text-white">
+                        {new Date(raising.date).toLocaleDateString()}
+                      </td>
+                      <td className="py-2 px-3">
+                        <span
+                          className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium"
+                          style={{
+                            backgroundColor: `${RAISING_TYPE_COLORS[raising.type] || COLORS.capitalRaising}20`,
+                            color: RAISING_TYPE_COLORS[raising.type] || COLORS.capitalRaising,
+                          }}
+                        >
+                          {raising.type}
+                        </span>
+                      </td>
+                      <td className="py-2 px-3 text-right text-white font-medium">
+                        {raising.amount 
+                          ? `$${(raising.amount / 1_000_000).toFixed(1)}M`
+                          : '-'}
+                      </td>
+                      <td className="py-2 px-3 text-right text-slate-300">
+                        {raising.issue_price 
+                          ? `$${raising.issue_price.toFixed(3)}`
+                          : '-'}
+                      </td>
+                      <td className="py-2 px-3 text-right text-red-400">
+                        {raising.dilution_pct 
+                          ? `${raising.dilution_pct.toFixed(1)}%`
+                          : '-'}
+                      </td>
+                      <td className="py-2 px-3 text-slate-400 max-w-[200px] truncate" title={raising.purpose || ''}>
+                        {raising.purpose || '-'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            
+            {/* Legend */}
+            <div className="mt-4 flex flex-wrap gap-3 text-xs">
+              {Object.entries(RAISING_TYPE_COLORS).map(([type, color]) => (
+                <div key={type} className="flex items-center gap-1.5">
+                  <div className="w-3 h-0.5" style={{ backgroundColor: color }} />
+                  <span className="text-slate-400">{type}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
