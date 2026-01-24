@@ -51,6 +51,10 @@ interface CompanyData {
   commodity: string;
   marketData: MarketData | null;
   announcements: Announcement[];
+  website?: string;
+  logoUrl?: string;
+  asxUrl?: string;
+  description?: string;
 }
 
 function StatCard({ label, value, subValue, icon: Icon, trend }: { 
@@ -156,9 +160,10 @@ export default function CompanyProfile() {
     setError(null);
     
     try {
-      // Fetch market data and announcements in parallel
-      const [quoteRes, announcementsRes] = await Promise.all([
+      // Fetch market data, company details, and announcements in parallel
+      const [quoteRes, detailsRes, announcementsRes] = await Promise.all([
         fetch(`${API_URL}/api/v1/market/quote/${ticker}`).catch(() => null),
+        fetch(`${API_URL}/api/v1/market/company/${ticker}/details`).catch(() => null),
         fetch(`${API_URL}/api/v1/announcements/company/${ticker}?days_back=90&limit=20`).catch(() => null)
       ]);
       
@@ -167,13 +172,31 @@ export default function CompanyProfile() {
       let companyName = ticker;
       let commodity = 'Unknown';
       let exchange = 'ASX';
+      let website: string | undefined;
+      let logoUrl: string | undefined;
+      let asxUrl: string | undefined;
+      let description: string | undefined;
+      
+      // Parse company details
+      if (detailsRes && detailsRes.ok) {
+        const details = await detailsRes.json();
+        website = details.website || undefined;
+        logoUrl = details.logoUrl || undefined;
+        asxUrl = details.asxUrl || undefined;
+        description = details.description || undefined;
+        // Use details for name/commodity if available
+        if (details.name) companyName = details.name;
+        if (details.commodity) commodity = details.commodity;
+        if (details.exchange) exchange = details.exchange;
+      }
       
       // Parse market data
       if (quoteRes && quoteRes.ok) {
         const quote = await quoteRes.json();
-        companyName = quote.name || ticker;
-        commodity = quote.commodity || 'Unknown';
-        exchange = quote.exchange || 'ASX';
+        // Only override if not already set from details
+        if (!companyName || companyName === ticker) companyName = quote.name || ticker;
+        if (commodity === 'Unknown') commodity = quote.commodity || 'Unknown';
+        if (!exchange) exchange = quote.exchange || 'ASX';
         marketData = {
           price: quote.price || 0,
           change: quote.change || 0,
@@ -204,6 +227,10 @@ export default function CompanyProfile() {
         commodity,
         marketData,
         announcements,
+        website,
+        logoUrl,
+        asxUrl,
+        description,
       });
       
     } catch (err) {
@@ -279,9 +306,10 @@ export default function CompanyProfile() {
     );
   }
 
-  const { marketData, announcements, name, exchange, commodity } = companyData;
+  const { marketData, announcements, name, exchange, commodity, website, logoUrl, asxUrl, description } = companyData;
   const commodityColor = getCommodityColor(commodity);
   const isPositive = marketData ? marketData.changePercent >= 0 : true;
+  const [logoError, setLogoError] = useState(false);
 
   return (
     <div className="min-h-screen bg-metallic-950">
@@ -300,13 +328,24 @@ export default function CompanyProfile() {
           {/* Company Header */}
           <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
             <div className="flex items-start gap-4">
-              {/* Company Logo/Symbol */}
-              <div 
-                className="w-16 h-16 rounded-xl flex items-center justify-center text-white font-bold text-xl"
-                style={{ backgroundColor: commodityColor }}
-              >
-                {commodity.substring(0, 2)}
-              </div>
+              {/* Company Logo */}
+              {logoUrl && !logoError ? (
+                <div className="w-16 h-16 rounded-xl bg-white flex items-center justify-center overflow-hidden">
+                  <img 
+                    src={logoUrl} 
+                    alt={`${name} logo`}
+                    className="w-12 h-12 object-contain"
+                    onError={() => setLogoError(true)}
+                  />
+                </div>
+              ) : (
+                <div 
+                  className="w-16 h-16 rounded-xl flex items-center justify-center text-white font-bold text-xl"
+                  style={{ backgroundColor: commodityColor }}
+                >
+                  {ticker.substring(0, 2)}
+                </div>
+              )}
               <div>
                 <div className="flex items-center gap-3 mb-1">
                   <h1 className="text-2xl font-bold text-metallic-100">{name}</h1>
@@ -319,9 +358,35 @@ export default function CompanyProfile() {
                     <Building2 className="w-4 h-4" />
                     {commodity}
                   </span>
+                  {/* Website Link */}
+                  {website && (
+                    <a
+                      href={website.startsWith('http') ? website : `https://${website}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1 text-primary-400 hover:text-primary-300"
+                    >
+                      <Globe className="w-4 h-4" />
+                      Website
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                  )}
+                  {/* ASX Link as fallback */}
+                  {!website && asxUrl && (
+                    <a
+                      href={asxUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1 text-primary-400 hover:text-primary-300"
+                    >
+                      <Globe className="w-4 h-4" />
+                      ASX Page
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                  )}
                   <button
                     onClick={fetchCompanyData}
-                    className="flex items-center gap-1 text-primary-400 hover:text-primary-300"
+                    className="flex items-center gap-1 text-metallic-500 hover:text-metallic-300"
                   >
                     <RefreshCw className="w-4 h-4" />
                     Refresh
@@ -379,8 +444,41 @@ export default function CompanyProfile() {
             <section className="bg-metallic-900 border border-metallic-800 rounded-xl p-6">
               <h2 className="text-lg font-semibold text-metallic-100 mb-4">About</h2>
               <p className="text-metallic-400 leading-relaxed">
-                {name} ({ticker}) is an {exchange}-listed mining company focused on {commodity} exploration and production.
+                {description || `${name} (${ticker}) is an ${exchange}-listed mining company focused on ${commodity} exploration and production.`}
               </p>
+              {/* External Links */}
+              <div className="mt-4 flex flex-wrap gap-3">
+                {website && (
+                  <a
+                    href={website.startsWith('http') ? website : `https://${website}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary-500/10 text-primary-400 rounded-lg hover:bg-primary-500/20 transition-colors text-sm"
+                  >
+                    <Globe className="w-4 h-4" />
+                    Company Website
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                )}
+                <a
+                  href={`https://www2.asx.com.au/markets/company/${ticker}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-3 py-1.5 bg-metallic-800 text-metallic-300 rounded-lg hover:bg-metallic-700 transition-colors text-sm"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  ASX Listing
+                </a>
+                <a
+                  href={`https://www.google.com/finance/quote/${ticker}:ASX`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-3 py-1.5 bg-metallic-800 text-metallic-300 rounded-lg hover:bg-metallic-700 transition-colors text-sm"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  Google Finance
+                </a>
+              </div>
             </section>
 
             {/* Market Data Grid */}
