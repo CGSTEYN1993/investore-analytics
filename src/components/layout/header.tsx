@@ -68,6 +68,12 @@ export function Header() {
                   Dashboard
                 </Link>
                 <Link
+                  href="/news"
+                  className="text-metallic-300 hover:text-primary-400 font-medium transition-colors"
+                >
+                  News
+                </Link>
+                <Link
                   href="/peers"
                   className="text-metallic-300 hover:text-primary-400 font-medium transition-colors"
                 >
@@ -205,6 +211,13 @@ export function Header() {
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Dashboard
+                  </Link>
+                  <Link
+                    href="/news"
+                    className="text-metallic-300 hover:text-primary-400 font-medium"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    News
                   </Link>
                   <Link
                     href="/peers"
