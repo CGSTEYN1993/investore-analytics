@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Newspaper, TrendingUp, TrendingDown, Minus, Filter, RefreshCw,
   Calendar, Building2, Globe, ChevronDown, ChevronRight, ExternalLink,
-  Zap, AlertTriangle, CheckCircle, Clock, Search, BarChart3
+  Zap, AlertTriangle, CheckCircle, Clock, Search, BarChart3, X
 } from 'lucide-react';
 import {
   getNewsStats,
@@ -19,6 +19,48 @@ import {
   RecentNewsHit,
   NewsSource
 } from '@/services/newsHits';
+import { RAILWAY_API_URL } from '@/lib/public-api-url';
+
+// Stat detail types
+interface StatDetailCompany {
+  ticker: string;
+  exchange: string;
+  company_name: string;
+  hit_count: number;
+  source_count: number;
+  sources: string[];
+  latest_date: string | null;
+}
+
+interface StatDetailSource {
+  source: string;
+  hit_count: number;
+  company_count: number;
+}
+
+interface StatDetailRecent {
+  id: number;
+  ticker: string;
+  exchange: string;
+  company_name: string;
+  title: string;
+  date: string | null;
+  source: string;
+  sentiment: string | null;
+  event_type: string | null;
+  is_material: boolean;
+}
+
+interface StatDetailResponse {
+  stat_type: string;
+  period_days: number;
+  total_count: number;
+  companies: StatDetailCompany[];
+  sources: StatDetailSource[];
+  recent_examples: StatDetailRecent[];
+}
+
+type StatType = 'total' | 'companies' | 'llm_analyzed' | 'positive' | 'negative' | 'material';
 
 export default function NewsHitsPage() {
   const [stats, setStats] = useState<NewsStatsResponse | null>(null);
@@ -29,6 +71,12 @@ export default function NewsHitsPage() {
   const [selectedDays, setSelectedDays] = useState(30);
   const [selectedExchange, setSelectedExchange] = useState<string | null>(null);
   const [searchTicker, setSearchTicker] = useState('');
+  
+  // Modal state
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalStat, setModalStat] = useState<StatType | null>(null);
+  const [modalData, setModalData] = useState<StatDetailResponse | null>(null);
+  const [modalLoading, setModalLoading] = useState(false);
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -51,6 +99,27 @@ export default function NewsHitsPage() {
     }
   }, [selectedDays, selectedExchange]);
 
+  // Load stat detail when a card is clicked
+  const loadStatDetail = useCallback(async (statType: StatType) => {
+    setModalStat(statType);
+    setModalOpen(true);
+    setModalLoading(true);
+    setModalData(null);
+    
+    try {
+      const response = await fetch(
+        `${RAILWAY_API_URL}/api/v1/news-hits/stats/detail/${statType}?days=${selectedDays}&limit=50`
+      );
+      if (!response.ok) throw new Error('Failed to load details');
+      const data = await response.json();
+      setModalData(data);
+    } catch (err) {
+      console.error('Failed to load stat detail:', err);
+    } finally {
+      setModalLoading(false);
+    }
+  }, [selectedDays]);
+
   useEffect(() => {
     loadData();
   }, [loadData]);
@@ -72,8 +141,170 @@ export default function NewsHitsPage() {
     return date.toLocaleDateString('en-AU', { day: 'numeric', month: 'short' });
   };
 
+  const getStatTitle = (stat: StatType) => {
+    const titles: Record<StatType, string> = {
+      total: 'All News Hits',
+      companies: 'Companies with News',
+      llm_analyzed: 'LLM Analyzed News',
+      positive: 'Positive Sentiment News',
+      negative: 'Negative Sentiment News',
+      material: 'Material Events',
+    };
+    return titles[stat] || stat;
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
+      {/* Stat Detail Modal */}
+      {modalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+          <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-4xl max-h-[85vh] overflow-hidden shadow-2xl">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-4 border-b border-slate-700 bg-slate-800/50">
+              <h2 className="text-xl font-bold text-white">
+                {modalStat && getStatTitle(modalStat)}
+              </h2>
+              <button
+                onClick={() => setModalOpen(false)}
+                className="p-2 hover:bg-slate-700 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5 text-slate-400" />
+              </button>
+            </div>
+            
+            {/* Modal Content */}
+            <div className="p-4 overflow-y-auto max-h-[calc(85vh-80px)]">
+              {modalLoading ? (
+                <div className="flex items-center justify-center py-12">
+                  <RefreshCw className="w-8 h-8 animate-spin text-amber-400" />
+                </div>
+              ) : modalData ? (
+                <div className="space-y-6">
+                  {/* Summary */}
+                  <div className="bg-slate-800/50 rounded-xl p-4">
+                    <div className="grid grid-cols-3 gap-4 text-center">
+                      <div>
+                        <div className="text-2xl font-bold text-amber-400">{modalData.total_count}</div>
+                        <div className="text-xs text-slate-400">Total Hits</div>
+                      </div>
+                      <div>
+                        <div className="text-2xl font-bold text-blue-400">{modalData.companies.length}</div>
+                        <div className="text-xs text-slate-400">Companies</div>
+                      </div>
+                      <div>
+                        <div className="text-2xl font-bold text-purple-400">{modalData.sources.length}</div>
+                        <div className="text-xs text-slate-400">Sources</div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {/* Companies */}
+                    <div>
+                      <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
+                        <Building2 className="w-5 h-5 text-blue-400" />
+                        Companies ({modalData.companies.length})
+                      </h3>
+                      <div className="bg-slate-800/30 rounded-xl overflow-hidden max-h-80 overflow-y-auto">
+                        {modalData.companies.map((company, idx) => (
+                          <div 
+                            key={`${company.ticker}-${company.exchange}`}
+                            className="flex items-center justify-between p-3 border-b border-slate-700/50 hover:bg-slate-700/30"
+                          >
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <span className="font-mono font-bold text-amber-400">{company.ticker}</span>
+                                <span className="text-xs text-slate-500">{company.exchange}</span>
+                              </div>
+                              <div className="text-xs text-slate-400 mt-0.5">{company.company_name}</div>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-white font-semibold">{company.hit_count} hits</div>
+                              <div className="text-xs text-slate-500">{company.source_count} sources</div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    {/* Sources */}
+                    <div>
+                      <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
+                        <Globe className="w-5 h-5 text-purple-400" />
+                        News Sources ({modalData.sources.length})
+                      </h3>
+                      <div className="bg-slate-800/30 rounded-xl overflow-hidden max-h-80 overflow-y-auto">
+                        {modalData.sources.map((source) => (
+                          <div 
+                            key={source.source}
+                            className="flex items-center justify-between p-3 border-b border-slate-700/50 hover:bg-slate-700/30"
+                          >
+                            <div className="flex items-center gap-2">
+                              <span className="text-lg">{getSourceIcon(source.source)}</span>
+                              <span className="text-white capitalize">
+                                {source.source.replace(/_/g, ' ')}
+                              </span>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-white font-semibold">{source.hit_count} hits</div>
+                              <div className="text-xs text-slate-500">{source.company_count} companies</div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Recent Examples */}
+                  <div>
+                    <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
+                      <Clock className="w-5 h-5 text-amber-400" />
+                      Recent Examples
+                    </h3>
+                    <div className="bg-slate-800/30 rounded-xl overflow-hidden">
+                      {modalData.recent_examples.slice(0, 10).map((item) => (
+                        <div 
+                          key={item.id}
+                          className="p-3 border-b border-slate-700/50 hover:bg-slate-700/30"
+                        >
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-mono font-bold text-amber-400">{item.ticker}</span>
+                            <span className="text-xs text-slate-500">{item.exchange}</span>
+                            {item.sentiment && (
+                              <span className={`text-xs px-2 py-0.5 rounded ${
+                                item.sentiment.includes('positive') ? 'bg-green-500/20 text-green-400' :
+                                item.sentiment.includes('negative') ? 'bg-red-500/20 text-red-400' :
+                                'bg-slate-600/20 text-slate-400'
+                              }`}>
+                                {item.sentiment.replace('_', ' ')}
+                              </span>
+                            )}
+                            {item.is_material && (
+                              <span className="text-xs px-2 py-0.5 rounded bg-orange-500/20 text-orange-400">
+                                Material
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-sm text-slate-300 line-clamp-2">{item.title}</div>
+                          <div className="flex items-center gap-3 mt-1 text-xs text-slate-500">
+                            <span>{getSourceIcon(item.source)} {item.source.replace(/_/g, ' ')}</span>
+                            {item.date && <span>{formatDate(item.date)}</span>}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-12 text-slate-500">
+                  No data available
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="border-b border-slate-800 bg-slate-900/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 py-4">
@@ -142,36 +373,42 @@ export default function NewsHitsPage() {
               value={stats.overview.total_hits} 
               icon={<Newspaper className="w-5 h-5" />}
               color="amber"
+              onClick={() => loadStatDetail('total')}
             />
             <StatCard 
               label="Companies" 
               value={stats.overview.unique_companies} 
               icon={<Building2 className="w-5 h-5" />}
               color="blue"
+              onClick={() => loadStatDetail('companies')}
             />
             <StatCard 
               label="LLM Analyzed" 
               value={stats.overview.llm_processed} 
               icon={<Zap className="w-5 h-5" />}
               color="purple"
+              onClick={() => loadStatDetail('llm_analyzed')}
             />
             <StatCard 
               label="Positive" 
               value={stats.overview.positive_news} 
               icon={<TrendingUp className="w-5 h-5" />}
               color="green"
+              onClick={() => loadStatDetail('positive')}
             />
             <StatCard 
               label="Negative" 
               value={stats.overview.negative_news} 
               icon={<TrendingDown className="w-5 h-5" />}
               color="red"
+              onClick={() => loadStatDetail('negative')}
             />
             <StatCard 
               label="Material Events" 
               value={stats.overview.material_events} 
               icon={<AlertTriangle className="w-5 h-5" />}
               color="orange"
+              onClick={() => loadStatDetail('material')}
             />
           </div>
         )}
@@ -317,30 +554,35 @@ function StatCard({
   label, 
   value, 
   icon, 
-  color 
+  color,
+  onClick 
 }: { 
   label: string; 
   value: number; 
   icon: React.ReactNode;
   color: 'amber' | 'blue' | 'purple' | 'green' | 'red' | 'orange';
+  onClick?: () => void;
 }) {
   const colorClasses = {
-    amber: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
-    blue: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-    purple: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
-    green: 'bg-green-500/20 text-green-400 border-green-500/30',
-    red: 'bg-red-500/20 text-red-400 border-red-500/30',
-    orange: 'bg-orange-500/20 text-orange-400 border-orange-500/30',
+    amber: 'bg-amber-500/20 text-amber-400 border-amber-500/30 hover:bg-amber-500/30',
+    blue: 'bg-blue-500/20 text-blue-400 border-blue-500/30 hover:bg-blue-500/30',
+    purple: 'bg-purple-500/20 text-purple-400 border-purple-500/30 hover:bg-purple-500/30',
+    green: 'bg-green-500/20 text-green-400 border-green-500/30 hover:bg-green-500/30',
+    red: 'bg-red-500/20 text-red-400 border-red-500/30 hover:bg-red-500/30',
+    orange: 'bg-orange-500/20 text-orange-400 border-orange-500/30 hover:bg-orange-500/30',
   };
 
   return (
-    <div className={`p-4 rounded-xl border ${colorClasses[color]}`}>
+    <button 
+      onClick={onClick}
+      className={`p-4 rounded-xl border ${colorClasses[color]} transition-all cursor-pointer hover:scale-[1.02] text-left w-full`}
+    >
       <div className="flex items-center gap-2 mb-2">
         {icon}
         <span className="text-xs text-slate-400">{label}</span>
       </div>
       <div className="text-2xl font-bold text-white">{value.toLocaleString()}</div>
-    </div>
+    </button>
   );
 }
 
