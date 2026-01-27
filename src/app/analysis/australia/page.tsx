@@ -502,19 +502,19 @@ export default function AustraliaGeosciencePage() {
                 <div className="ml-auto flex items-center gap-4 text-sm text-slate-400">
                   <span className="flex items-center gap-1">
                     <div className="w-3 h-3 bg-green-500 rotate-45" />
-                    Operating: {filteredMapData.totals.operatingMines}
+                    Operating: {filteredMapData.totals?.operatingMines ?? filteredMapData.operatingMines?.length ?? 0}
                   </span>
                   <span className="flex items-center gap-1">
                     <div className="w-3 h-3 bg-blue-500 rotate-45" />
-                    Developing: {filteredMapData.totals.developingMines}
+                    Developing: {filteredMapData.totals?.developingMines ?? filteredMapData.developingMines?.length ?? 0}
                   </span>
                   <span className="flex items-center gap-1">
                     <div className="w-3 h-3 bg-cyan-400" style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }} />
-                    Critical: {filteredMapData.totals.criticalMinerals}
+                    Critical: {filteredMapData.totals?.criticalMinerals ?? filteredMapData.criticalMinerals?.length ?? 0}
                   </span>
                   <span className="flex items-center gap-1">
                     <div className="w-3 h-3 bg-amber-500 rounded-full" />
-                    Deposits: {filteredMapData.totals.deposits}
+                    Deposits: {filteredMapData.totals?.deposits ?? filteredMapData.deposits?.length ?? 0}
                   </span>
                 </div>
               )}
