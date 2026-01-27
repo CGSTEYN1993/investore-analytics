@@ -422,7 +422,7 @@ export default function AIAnalystPage() {
                                   </div>
 
                                   {/* Supporting Data */}
-                                  {message.response.supporting_data.length > 0 && (
+                                  {message.response.supporting_data && message.response.supporting_data.length > 0 && (
                                     <div>
                                       <h4 className="text-xs font-semibold text-purple-400 uppercase tracking-wider mb-2">
                                         Supporting Data

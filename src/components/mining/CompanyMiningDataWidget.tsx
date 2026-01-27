@@ -95,11 +95,11 @@ export default function CompanyMiningDataWidget({
   if (!data) return null;
 
   // Check if there's any data to display
-  const hasData = data.projects.length > 0 || 
-                  data.resources.length > 0 || 
-                  data.reserves.length > 0 ||
-                  data.drilling.length > 0 ||
-                  data.economics.length > 0;
+  const hasData = (data.projects?.length ?? 0) > 0 || 
+                  (data.resources?.length ?? 0) > 0 || 
+                  (data.reserves?.length ?? 0) > 0 ||
+                  (data.drilling?.length ?? 0) > 0 ||
+                  (data.economics?.length ?? 0) > 0;
 
   if (!hasData) {
     return (
@@ -132,22 +132,22 @@ export default function CompanyMiningDataWidget({
           <SummaryCard 
             icon={<MapPin className="h-4 w-4" />}
             label="Projects"
-            value={data.projects.length}
+            value={data.projects?.length ?? 0}
           />
           <SummaryCard 
             icon={<Database className="h-4 w-4" />}
             label="Resources"
-            value={`${data.total_resources_mt.toFixed(1)} Mt`}
+            value={`${(data.total_resources_mt ?? 0).toFixed(1)} Mt`}
           />
           <SummaryCard 
             icon={<Target className="h-4 w-4" />}
             label="Reserves"
-            value={`${data.total_reserves_mt.toFixed(1)} Mt`}
+            value={`${(data.total_reserves_mt ?? 0).toFixed(1)} Mt`}
           />
           <SummaryCard 
             icon={<Hammer className="h-4 w-4" />}
             label="Drill Holes"
-            value={data.drilling.length}
+            value={data.drilling?.length ?? 0}
           />
         </div>
 
@@ -162,9 +162,9 @@ export default function CompanyMiningDataWidget({
 
           {/* Projects Tab */}
           <TabsContent value="projects" className="mt-4">
-            {data.projects.length > 0 ? (
+            {(data.projects?.length ?? 0) > 0 ? (
               <div className="space-y-3">
-                {data.projects.map((project) => (
+                {(data.projects ?? []).map((project) => (
                   <div 
                     key={project.id}
                     className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
@@ -204,7 +204,7 @@ export default function CompanyMiningDataWidget({
 
           {/* Resources Tab */}
           <TabsContent value="resources" className="mt-4">
-            {data.resources.length > 0 ? (
+            {(data.resources?.length ?? 0) > 0 ? (
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
@@ -217,7 +217,7 @@ export default function CompanyMiningDataWidget({
                     </tr>
                   </thead>
                   <tbody>
-                    {data.resources.slice(0, 10).map((resource) => (
+                    {(data.resources ?? []).slice(0, 10).map((resource) => (
                       <tr key={resource.id} className="border-b">
                         <td className="py-2">{resource.project_name || '-'}</td>
                         <td className="py-2">
@@ -234,9 +234,9 @@ export default function CompanyMiningDataWidget({
                     ))}
                   </tbody>
                 </table>
-                {data.resources.length > 10 && (
+                {(data.resources?.length ?? 0) > 10 && (
                   <p className="text-xs text-muted-foreground mt-2">
-                    Showing 10 of {data.resources.length} resource estimates
+                    Showing 10 of {data.resources?.length ?? 0} resource estimates
                   </p>
                 )}
               </div>
@@ -247,7 +247,7 @@ export default function CompanyMiningDataWidget({
 
           {/* Drilling Tab */}
           <TabsContent value="drilling" className="mt-4">
-            {data.drilling.length > 0 ? (
+            {(data.drilling?.length ?? 0) > 0 ? (
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
@@ -261,7 +261,7 @@ export default function CompanyMiningDataWidget({
                     </tr>
                   </thead>
                   <tbody>
-                    {data.drilling.slice(0, 10).map((drill) => (
+                    {(data.drilling ?? []).slice(0, 10).map((drill) => (
                       <tr key={drill.id} className="border-b">
                         <td className="py-2 font-mono text-xs">{drill.hole_id}</td>
                         <td className="py-2">{drill.drill_type || '-'}</td>
@@ -277,9 +277,9 @@ export default function CompanyMiningDataWidget({
                     ))}
                   </tbody>
                 </table>
-                {data.drilling.length > 10 && (
+                {(data.drilling?.length ?? 0) > 10 && (
                   <p className="text-xs text-muted-foreground mt-2">
-                    Showing 10 of {data.drilling.length} drill results
+                    Showing 10 of {data.drilling?.length ?? 0} drill results
                   </p>
                 )}
               </div>
@@ -290,9 +290,9 @@ export default function CompanyMiningDataWidget({
 
           {/* Economics Tab */}
           <TabsContent value="economics" className="mt-4">
-            {data.economics.length > 0 ? (
+            {(data.economics?.length ?? 0) > 0 ? (
               <div className="space-y-4">
-                {data.economics.map((econ) => (
+                {(data.economics ?? []).map((econ) => (
                   <div 
                     key={econ.id}
                     className="p-4 rounded-lg bg-muted/50"
