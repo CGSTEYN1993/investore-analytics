@@ -740,7 +740,7 @@ export default function CompanyProfile() {
                         color: '#6b7280',
                         domain: showVolume ? [0, 0.25] : [0, 0],
                         showticklabels: showVolume,
-                        title: showVolume ? 'Volume' : undefined,
+                        title: showVolume ? { text: 'Volume' } : undefined,
                       },
                       yaxis2: {
                         showgrid: true,
