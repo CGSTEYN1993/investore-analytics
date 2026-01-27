@@ -709,7 +709,7 @@ export default function CompanyProfile() {
                           return idx >= 0 ? plotData.closes[idx] : plotData.closes[plotData.closes.length - 1];
                         }),
                         type: 'scatter' as const,
-                        mode: 'markers',
+                        mode: 'markers' as const,
                         name: 'Capital Raising',
                         marker: {
                           symbol: 'triangle-down',
