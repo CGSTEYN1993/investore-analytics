@@ -638,11 +638,12 @@ export default function CommodityPriceChartsPage() {
                         borderRadius: '8px',
                         color: '#fff',
                       }}
-                      formatter={(value: number, name: string) => {
+                      formatter={(value, name) => {
+                        const numValue = typeof value === 'number' ? value : 0;
                         if (normalizeData && comparisonTicker) {
-                          return [`${value > 0 ? '+' : ''}${value.toFixed(2)}%`, name];
+                          return [`${numValue > 0 ? '+' : ''}${numValue.toFixed(2)}%`, name];
                         }
-                        return [`$${value.toLocaleString()}`, name];
+                        return [`$${numValue.toLocaleString()}`, name];
                       }}
                     />
                     <Legend />
