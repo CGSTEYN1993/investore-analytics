@@ -105,6 +105,19 @@ function getTypeColor(type: string): string {
   }
 }
 
+const LASSONDE_STAGES = [
+  'Concept/Prospecting',
+  'Discovery',
+  'Resource Definition',
+  'Development',
+  'Production',
+];
+
+function getLassondeIndex(stage: string): number {
+  const idx = LASSONDE_STAGES.findIndex(s => s.toLowerCase() === stage.toLowerCase());
+  return idx >= 0 ? idx : 0;
+}
+
 interface ChartCandle {
   timestamp: string;
   open: number;
@@ -131,6 +144,29 @@ interface CapitalRaising {
   discount_percent: number | null;
 }
 
+interface LassondeSignals {
+  drilling_count: number;
+  intercepts_count: number;
+  resources_count: number;
+  economics_count: number;
+  feasibility_events: number;
+  production_events: number;
+}
+
+interface LassondeProject {
+  project_name: string;
+  drilling_count: number;
+  stage: string;
+}
+
+interface LassondeResponse {
+  ticker: string;
+  stage: string;
+  confidence: 'high' | 'medium' | 'low';
+  signals: LassondeSignals;
+  projects: LassondeProject[];
+}
+
 export default function CompanyProfile() {
   const params = useParams();
   const ticker = (params.ticker as string)?.toUpperCase() || '';
@@ -147,6 +183,8 @@ export default function CompanyProfile() {
   const [showVolume, setShowVolume] = useState(true);
   const [capitalRaisings, setCapitalRaisings] = useState<CapitalRaising[]>([]);
   const [showCapitalRaisings, setShowCapitalRaisings] = useState(true);
+  const [lassondeData, setLassondeData] = useState<LassondeResponse | null>(null);
+  const [lassondeLoading, setLassondeLoading] = useState(false);
 
   const fetchCapitalRaisings = async () => {
     if (!ticker) return;
@@ -189,10 +227,12 @@ export default function CompanyProfile() {
     
     try {
       // Fetch market data, company details, and announcements in parallel
-      const [quoteRes, detailsRes, announcementsRes] = await Promise.all([
+      setLassondeLoading(true);
+      const [quoteRes, detailsRes, announcementsRes, lassondeRes] = await Promise.all([
         fetch(`${API_URL}/api/v1/market/quote/${ticker}`).catch(() => null),
         fetch(`${API_URL}/api/v1/market/company/${ticker}/details`).catch(() => null),
-        fetch(`${API_URL}/api/v1/announcements/company/${ticker}?days_back=90&limit=20`).catch(() => null)
+        fetch(`${API_URL}/api/v1/announcements/company/${ticker}?days_back=90&limit=20`).catch(() => null),
+        fetch(`${API_URL}/api/v1/mining/company/${ticker}/lassonde`).catch(() => null)
       ]);
       
       let marketData: MarketData | null = null;
@@ -247,6 +287,14 @@ export default function CompanyProfile() {
         const annData = await announcementsRes.json();
         announcements = annData.announcements || [];
       }
+
+      // Parse Lassonde curve position
+      if (lassondeRes && lassondeRes.ok) {
+        const lassonde = await lassondeRes.json();
+        setLassondeData(lassonde);
+      } else {
+        setLassondeData(null);
+      }
       
       setCompanyData({
         ticker,
@@ -264,8 +312,10 @@ export default function CompanyProfile() {
     } catch (err) {
       console.error('Error fetching company data:', err);
       setError('Unable to fetch company data');
+      setLassondeData(null);
     } finally {
       setLoading(false);
+      setLassondeLoading(false);
     }
   };
 
@@ -357,6 +407,7 @@ export default function CompanyProfile() {
   const { marketData, announcements, name, exchange, commodity, website, logoUrl, asxUrl, description } = companyData;
   const commodityColor = getCommodityColor(commodity);
   const isPositive = marketData ? marketData.changePercent >= 0 : true;
+  const lassondeIndex = lassondeData ? getLassondeIndex(lassondeData.stage) : 0;
 
   return (
     <div className="min-h-screen bg-metallic-950">
@@ -829,6 +880,73 @@ export default function CompanyProfile() {
 
             {/* Extracted Mining Data Section */}
             <CompanyMiningDataWidget symbol={ticker} className="bg-metallic-900 border border-metallic-800 rounded-xl" />
+
+            {/* Lassonde Curve Section */}
+            <section className="bg-metallic-900 border border-metallic-800 rounded-xl p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-metallic-100">Lassonde Curve Position</h2>
+                {lassondeData && (
+                  <span className={`text-xs px-2 py-1 rounded ${lassondeData.confidence === 'high' ? 'bg-green-500/20 text-green-400' : lassondeData.confidence === 'medium' ? 'bg-yellow-500/20 text-yellow-400' : 'bg-red-500/20 text-red-400'}`}>
+                    {lassondeData.confidence} confidence
+                  </span>
+                )}
+              </div>
+
+              {lassondeLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="w-6 h-6 text-primary-500 animate-spin" />
+                </div>
+              ) : lassondeData ? (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between text-sm text-metallic-400">
+                    <span>{lassondeData.stage}</span>
+                    <span>{lassondeData.ticker}</span>
+                  </div>
+
+                  <div className="relative">
+                    <div className="h-2 rounded-full bg-metallic-800" />
+                    <div
+                      className="absolute top-0 h-2 rounded-full bg-gradient-to-r from-emerald-500 via-yellow-500 to-red-500"
+                      style={{ width: `${((lassondeIndex + 1) / LASSONDE_STAGES.length) * 100}%` }}
+                    />
+                    <div className="absolute top-1/2 -translate-y-1/2 w-full flex justify-between">
+                      {LASSONDE_STAGES.map((stage, idx) => (
+                        <div
+                          key={stage}
+                          className={`w-3 h-3 rounded-full border ${idx <= lassondeIndex ? 'bg-primary-400 border-primary-300' : 'bg-metallic-700 border-metallic-600'}`}
+                          title={stage}
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 text-xs text-metallic-400">
+                    <div className="bg-metallic-800/50 rounded-lg px-3 py-2">Drilling: <span className="text-metallic-200">{lassondeData.signals.drilling_count}</span></div>
+                    <div className="bg-metallic-800/50 rounded-lg px-3 py-2">Intercepts: <span className="text-metallic-200">{lassondeData.signals.intercepts_count}</span></div>
+                    <div className="bg-metallic-800/50 rounded-lg px-3 py-2">Resources: <span className="text-metallic-200">{lassondeData.signals.resources_count}</span></div>
+                    <div className="bg-metallic-800/50 rounded-lg px-3 py-2">Economics: <span className="text-metallic-200">{lassondeData.signals.economics_count}</span></div>
+                    <div className="bg-metallic-800/50 rounded-lg px-3 py-2">Feasibility: <span className="text-metallic-200">{lassondeData.signals.feasibility_events}</span></div>
+                    <div className="bg-metallic-800/50 rounded-lg px-3 py-2">Production: <span className="text-metallic-200">{lassondeData.signals.production_events}</span></div>
+                  </div>
+
+                  {lassondeData.projects && lassondeData.projects.length > 0 && (
+                    <div>
+                      <h3 className="text-sm font-medium text-metallic-300 mb-2">Project Placement</h3>
+                      <div className="space-y-2">
+                        {lassondeData.projects.slice(0, 5).map((proj) => (
+                          <div key={proj.project_name} className="flex items-center justify-between text-xs bg-metallic-800/50 rounded px-3 py-2">
+                            <span className="text-metallic-200">{proj.project_name}</span>
+                            <span className="text-metallic-400">{proj.stage}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <p className="text-metallic-500">No Lassonde data available for {ticker}.</p>
+              )}
+            </section>
 
             {/* All Announcements Section */}
             <section className="bg-metallic-900 border border-metallic-800 rounded-xl p-6">
