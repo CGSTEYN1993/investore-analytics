@@ -85,6 +85,12 @@ export function Header() {
                 >
                   Map
                 </Link>
+                <Link
+                  href="/resources/mining-economics"
+                  className="text-metallic-300 hover:text-primary-400 font-medium transition-colors"
+                >
+                  Knowledge
+                </Link>
               </>
             )}
           </div>
@@ -232,6 +238,13 @@ export function Header() {
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Map
+                  </Link>
+                  <Link
+                    href="/resources/mining-economics"
+                    className="text-metallic-300 hover:text-primary-400 font-medium"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Mining Knowledge
                   </Link>
                 </>
               )}
