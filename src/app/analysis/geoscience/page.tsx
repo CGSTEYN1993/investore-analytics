@@ -219,10 +219,10 @@ export default function GeoscienceIntelligencePage() {
     if (!searchQuery) return links;
     const query = searchQuery.toLowerCase();
     return links.filter(link => 
-      link.ga_name.toLowerCase().includes(query) ||
-      link.company_name.toLowerCase().includes(query) ||
-      link.company_symbol.toLowerCase().includes(query) ||
-      link.commodity.toLowerCase().includes(query)
+      (link.ga_name || '').toLowerCase().includes(query) ||
+      (link.company_name || '').toLowerCase().includes(query) ||
+      (link.company_symbol || '').toLowerCase().includes(query) ||
+      (link.commodity || '').toLowerCase().includes(query)
     );
   }, [links, searchQuery]);
   

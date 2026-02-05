@@ -125,7 +125,7 @@ export default function NewsHitsPage() {
   }, [loadData]);
 
   const filteredNews = searchTicker
-    ? recentNews.filter(n => n.ticker.toLowerCase().includes(searchTicker.toLowerCase()))
+    ? recentNews.filter(n => (n.ticker || '').toLowerCase().includes(searchTicker.toLowerCase()))
     : recentNews;
 
   const formatDate = (dateStr: string) => {

@@ -206,8 +206,8 @@ function CompanyList({ companies, country }: { companies: Company[]; country: st
 
   const filtered = useMemo(() => {
     return companies.filter(c => {
-      const matchesSearch = c.ticker.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           c.name.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesSearch = (c.ticker || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           (c.name || '').toLowerCase().includes(searchTerm.toLowerCase());
       const matchesType = typeFilter === 'all' || c.company_type === typeFilter;
       return matchesSearch && matchesType;
     });

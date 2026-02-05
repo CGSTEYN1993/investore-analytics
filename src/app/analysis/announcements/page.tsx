@@ -332,9 +332,9 @@ export default function AnnouncementsPage() {
 
   const filteredAnnouncements = allAnnouncements.filter(a => {
     const matchesSearch = 
-      a.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      a.ticker.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      a.title.toLowerCase().includes(searchTerm.toLowerCase());
+      (a.company || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (a.ticker || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (a.title || '').toLowerCase().includes(searchTerm.toLowerCase());
     const matchesType = selectedType === 'all' || a.type === selectedType || a.type?.includes(selectedType);
     const matchesCommodity = selectedCommodity === 'all' || a.commodity === selectedCommodity;
     const matchesPriceSensitive = !showPriceSensitiveOnly || a.isBreaking;

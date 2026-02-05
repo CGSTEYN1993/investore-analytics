@@ -301,9 +301,9 @@ export default function MarketPage() {
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       stocks = stocks.filter(s => 
-        s.symbol.toLowerCase().includes(query) ||
-        s.name.toLowerCase().includes(query) ||
-        s.commodity.toLowerCase().includes(query)
+        (s.symbol || '').toLowerCase().includes(query) ||
+        (s.name || '').toLowerCase().includes(query) ||
+        (s.commodity || '').toLowerCase().includes(query)
       );
     }
     

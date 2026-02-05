@@ -321,8 +321,8 @@ export default function StagesPage() {
   // Filter projects by search
   const filteredProjects = projects.filter(p => 
     !searchTerm || 
-    p.symbol.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    p.project_name.toLowerCase().includes(searchTerm.toLowerCase())
+    (p.symbol || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (p.project_name || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // Check for active filters

@@ -293,8 +293,8 @@ export default function CommodityDetailPage() {
   // Filter companies
   const filteredCompanies = data?.companies.filter(company => {
     const matchesSearch = 
-      company.ticker.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      company.name.toLowerCase().includes(searchTerm.toLowerCase());
+      (company.ticker || company.symbol || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (company.name || '').toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesType = 
       filterType === 'all' ||
