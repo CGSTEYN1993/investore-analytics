@@ -11,6 +11,7 @@ const API_URL = RAILWAY_API_URL;
 
 interface Company {
   ticker: string;
+  symbol?: string;
   name: string;
   exchange: string;
   primary_commodity: string | null;
@@ -59,10 +60,11 @@ function formatMarketCap(value: number | null, category: string | null): string 
 
 function CompanyCard({ company }: { company: Company }) {
   const color = getCommodityColor(company.primary_commodity || 'Au');
+  const displayTicker = company.ticker || company.symbol || '';
   
   return (
     <Link 
-      href={`/company/${company.ticker}`}
+      href={`/company/${displayTicker}`}
       className="block bg-metallic-900 border border-metallic-800 rounded-xl p-4 hover:border-primary-500/50 hover:bg-metallic-900/80 transition-all"
     >
       <div className="flex items-start justify-between mb-3">
@@ -71,11 +73,11 @@ function CompanyCard({ company }: { company: Company }) {
             className="w-10 h-10 rounded-lg flex items-center justify-center font-bold text-white text-sm"
             style={{ backgroundColor: color }}
           >
-            {company.ticker.slice(0, 3)}
+            {displayTicker.slice(0, 3)}
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="font-semibold text-metallic-100">{company.ticker}</h3>
+              <h3 className="font-semibold text-metallic-100">{displayTicker}</h3>
               <span className={`text-xs px-1.5 py-0.5 rounded ${
                 company.company_type === 'producer' ? 'bg-green-500/20 text-green-400' :
                 company.company_type === 'developer' ? 'bg-blue-500/20 text-blue-400' :
@@ -157,7 +159,7 @@ export default function ExchangeDetailPage() {
     setLoadingMarketCaps(true);
     try {
       // Fetch market caps in batches of 50
-      const symbols = companyList.map(c => c.ticker);
+      const symbols = companyList.map(c => c.ticker || c.symbol || '');
       const batchSize = 50;
       const marketCapData: Record<string, { marketCap: number; price: number; change: number; changePercent: number }> = {};
       
@@ -199,7 +201,11 @@ export default function ExchangeDetailPage() {
       if (!response.ok) throw new Error('Failed to fetch companies');
       
       const result = await response.json();
-      const companyList = result.companies || [];
+      // Normalize: ensure 'ticker' is set (backend may return 'symbol' instead)
+      const companyList = (result.companies || []).map((c: any) => ({
+        ...c,
+        ticker: c.ticker || c.symbol || '',
+      }));
       setCompanies(companyList);
       
       // Fetch real market caps after loading companies
@@ -396,7 +402,7 @@ export default function ExchangeDetailPage() {
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredCompanies.map(company => (
                 <CompanyCard 
-                  key={`${company.exchange}-${company.ticker}`} 
+                  key={`${company.exchange}-${company.ticker || company.symbol}`} 
                   company={company} 
                 />
               ))}
