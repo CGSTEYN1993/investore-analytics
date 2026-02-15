@@ -31,6 +31,12 @@ interface AnalystResponse {
   confidence: string;
   confidence_reason: string;
   query_type: string;
+  investment_outlook?: {
+    lassonde_stage?: string;
+    short_term?: string;
+    medium_term?: string;
+    long_term?: string;
+  };
 }
 
 interface ChatResponse {
@@ -58,9 +64,14 @@ interface Capability {
 // Suggested questions
 const suggestedQuestions = [
   { 
-    text: "What are the recent announcements for NEM?",
-    icon: FileText,
-    category: "Announcements"
+    text: "Is DEG a good investment right now?",
+    icon: TrendingUp,
+    category: "Investment"
+  },
+  {
+    text: "Where is PLS on the Lassonde Curve?",
+    icon: BarChart3,
+    category: "Lassonde"
   },
   {
     text: "Compare BHP and RIO on risk metrics",
@@ -68,14 +79,9 @@ const suggestedQuestions = [
     category: "Comparison"
   },
   {
-    text: "Detect risk flags for FMG",
-    icon: AlertTriangle,
-    category: "Risk Detection"
-  },
-  {
-    text: "Show me gold explorers on ASX",
-    icon: MessageSquare,
-    category: "Search"
+    text: "Analyze NST for short-term trading",
+    icon: Zap,
+    category: "Trading"
   }
 ];
 
@@ -420,6 +426,62 @@ export default function AIAnalystPage() {
                                     </h4>
                                     <p className="text-sm text-metallic-300">{message.response.why_it_matters}</p>
                                   </div>
+
+                                  {/* Investment Outlook */}
+                                  {message.response.investment_outlook && (
+                                    <div className="bg-gradient-to-br from-metallic-900/80 to-metallic-800/50 rounded-lg p-4 border border-metallic-700/30">
+                                      <h4 className="text-xs font-semibold text-amber-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                                        <TrendingUp className="w-4 h-4" />
+                                        Investment Analysis
+                                      </h4>
+                                      
+                                      {/* Lassonde Curve Stage */}
+                                      {message.response.investment_outlook.lassonde_stage && (
+                                        <div className="mb-3 p-2 bg-metallic-950/50 rounded-lg">
+                                          <span className="text-xs text-metallic-500">Lassonde Curve:</span>
+                                          <span className="ml-2 px-2 py-0.5 text-xs font-medium rounded bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                                            {message.response.investment_outlook.lassonde_stage}
+                                          </span>
+                                        </div>
+                                      )}
+                                      
+                                      {/* Investment Horizons */}
+                                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                        {/* Short Term */}
+                                        {message.response.investment_outlook.short_term && (
+                                          <div className="p-2 bg-metallic-950/50 rounded-lg">
+                                            <div className="flex items-center gap-1.5 mb-1">
+                                              <Zap className="w-3 h-3 text-emerald-400" />
+                                              <span className="text-xs font-semibold text-emerald-400">Short-Term (0-6mo)</span>
+                                            </div>
+                                            <p className="text-xs text-metallic-300">{message.response.investment_outlook.short_term}</p>
+                                          </div>
+                                        )}
+                                        
+                                        {/* Medium Term */}
+                                        {message.response.investment_outlook.medium_term && (
+                                          <div className="p-2 bg-metallic-950/50 rounded-lg">
+                                            <div className="flex items-center gap-1.5 mb-1">
+                                              <BarChart3 className="w-3 h-3 text-blue-400" />
+                                              <span className="text-xs font-semibold text-blue-400">Medium-Term (6-18mo)</span>
+                                            </div>
+                                            <p className="text-xs text-metallic-300">{message.response.investment_outlook.medium_term}</p>
+                                          </div>
+                                        )}
+                                        
+                                        {/* Long Term */}
+                                        {message.response.investment_outlook.long_term && (
+                                          <div className="p-2 bg-metallic-950/50 rounded-lg">
+                                            <div className="flex items-center gap-1.5 mb-1">
+                                              <Shield className="w-3 h-3 text-purple-400" />
+                                              <span className="text-xs font-semibold text-purple-400">Long-Term (18mo+)</span>
+                                            </div>
+                                            <p className="text-xs text-metallic-300">{message.response.investment_outlook.long_term}</p>
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+                                  )}
 
                                   {/* Supporting Data */}
                                   {message.response.supporting_data && message.response.supporting_data.length > 0 && (
