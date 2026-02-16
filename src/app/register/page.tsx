@@ -135,7 +135,7 @@ export default function RegisterPage() {
     }
   };
 
-  // Success state - show verification message
+  // Success state - show account created message
   if (success) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-metallic-950 via-metallic-900 to-metallic-950 flex items-center justify-center p-4">
@@ -147,29 +147,28 @@ export default function RegisterPage() {
         <div className="relative w-full max-w-md">
           <div className="bg-metallic-800/50 backdrop-blur-xl border border-metallic-700 rounded-2xl p-8 shadow-2xl text-center">
             <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Mail className="w-8 h-8 text-green-400" />
+              <CheckCircle className="w-8 h-8 text-green-400" />
             </div>
             
-            <h2 className="text-2xl font-bold text-white mb-2">Check Your Email</h2>
+            <h2 className="text-2xl font-bold text-white mb-2">Account Created!</h2>
             <p className="text-slate-400 mb-6">
-              We&apos;ve sent a verification link to <strong className="text-white">{formData.email}</strong>. 
-              Click the link to verify your account.
+              Your account has been successfully created. You can now log in with your email <strong className="text-white">{formData.email}</strong>.
             </p>
 
             <div className="bg-metallic-700/50 rounded-lg p-4 mb-6 text-left">
-              <h3 className="text-sm font-medium text-slate-300 mb-2">What to do next:</h3>
+              <h3 className="text-sm font-medium text-slate-300 mb-2">What&apos;s included in your free account:</h3>
               <ul className="text-sm text-slate-400 space-y-2">
                 <li className="flex items-start gap-2">
                   <CheckCircle className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" />
-                  Check your inbox (and spam folder)
+                  Access to AI Mining Analyst
                 </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" />
-                  Click the verification link
+                  Company analysis and data
                 </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" />
-                  Return here to log in
+                  Real-time market prices
                 </li>
               </ul>
             </div>
@@ -177,17 +176,16 @@ export default function RegisterPage() {
             <div className="space-y-3">
               <Link 
                 href="/login"
-                className="block w-full bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white font-semibold py-3 rounded-lg transition-all shadow-lg shadow-primary-500/25"
+                className="block w-full bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white font-semibold py-3 rounded-lg transition-all shadow-lg shadow-primary-500/25 text-center"
               >
-                Go to Login
+                Continue to Login
               </Link>
-              <button
-                type="button"
-                onClick={() => setSuccess(false)}
-                className="block w-full bg-metallic-700 hover:bg-metallic-600 text-white font-semibold py-3 rounded-lg transition-all"
+              <Link
+                href="/analysis"
+                className="block w-full bg-metallic-700 hover:bg-metallic-600 text-white font-semibold py-3 rounded-lg transition-all text-center"
               >
-                Didn&apos;t receive email? Try again
-              </button>
+                Explore Platform First
+              </Link>
             </div>
           </div>
         </div>
