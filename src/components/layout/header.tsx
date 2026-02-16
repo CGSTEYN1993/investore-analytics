@@ -3,12 +3,12 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { useAuthStore } from '@/lib/store';
-import { Menu, X, User, LogOut, Settings, ChevronDown } from 'lucide-react';
+import { useAuth } from '@/components/providers/AuthProvider';
+import { Menu, X, User, LogOut, Settings, ChevronDown, Shield } from 'lucide-react';
 import { useState } from 'react';
 
 export function Header() {
-  const { isAuthenticated, user, logout } = useAuthStore();
+  const { isAuthenticated, user, logout, isLoading } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const pathname = usePathname();

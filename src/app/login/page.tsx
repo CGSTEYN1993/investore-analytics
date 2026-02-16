@@ -26,6 +26,7 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const returnUrl = searchParams.get("returnUrl") || "/analysis";
   const verified = searchParams.get("verified");
+  const reason = searchParams.get("reason");
   
   const [formData, setFormData] = useState<LoginFormData>({
     email: "",
@@ -102,6 +103,19 @@ function LoginForm() {
 
   return (
     <>
+      {/* Auth required warning */}
+      {reason === "auth_required" && (
+        <div className="mb-6 flex items-start gap-3 bg-amber-500/10 border border-amber-500/30 rounded-lg p-4">
+          <Shield className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="text-amber-300 text-sm font-medium">Authentication Required</p>
+            <p className="text-amber-300/70 text-sm mt-1">
+              Please sign in to access this page. Your data is protected.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Success message for verified email */}
       {verified && (
         <div className="mb-6 flex items-start gap-3 bg-green-500/10 border border-green-500/30 rounded-lg p-4">

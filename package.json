@@ -23,6 +23,7 @@
     "axios": "1.6.5",
     "clsx": "2.1.0",
     "date-fns": "3.2.0",
+    "js-cookie": "^3.0.5",
     "lucide-react": "0.312.0",
     "mapbox-gl": "3.1.2",
     "next": "14.1.0",
@@ -38,6 +39,7 @@
     "zustand": "4.5.0"
   },
   "devDependencies": {
+    "@types/js-cookie": "^3.0.6",
     "@types/mapbox-gl": "3.1.0",
     "@types/node": "20.11.5",
     "@types/react": "18.2.48",
