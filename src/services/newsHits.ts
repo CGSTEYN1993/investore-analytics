@@ -70,6 +70,7 @@ export interface RecentNewsHit {
   event_type: string | null;
   event_significance: string | null;
   stock_impact_prediction: string | null;
+  source_url: string | null;
 }
 
 export interface RecentNewsResponse {

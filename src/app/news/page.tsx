@@ -466,14 +466,18 @@ export default function NewsHitsPage() {
                 </h3>
                 <div className="space-y-2">
                   {stats.top_companies.slice(0, 8).map((company, idx) => (
-                    <div key={company.ticker} className="flex items-center justify-between p-2 bg-slate-800/50 rounded-lg">
+                    <a 
+                      key={company.ticker} 
+                      href={`/company/${company.ticker}`}
+                      className="flex items-center justify-between p-2 bg-slate-800/50 rounded-lg hover:bg-slate-700/50 transition-colors"
+                    >
                       <div className="flex items-center gap-2">
                         <span className="text-slate-500 text-sm w-5">{idx + 1}.</span>
-                        <span className="font-mono font-semibold text-amber-400">{company.ticker}</span>
+                        <span className="font-mono font-semibold text-amber-400 hover:text-amber-300">{company.ticker}</span>
                         <span className="text-slate-500 text-xs">{company.exchange}</span>
                       </div>
                       <span className="text-slate-300 text-sm">{company.hits} hits</span>
-                    </div>
+                    </a>
                   ))}
                 </div>
               </div>
@@ -596,6 +600,19 @@ function NewsHitCard({
 }) {
   const [expanded, setExpanded] = useState(false);
 
+  const handleTickerClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    // Navigate to company page
+    window.location.href = `/company/${news.ticker}`;
+  };
+
+  const handleTitleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (news.source_url) {
+      window.open(news.source_url, '_blank', 'noopener,noreferrer');
+    }
+  };
+
   return (
     <div 
       className={`p-4 hover:bg-slate-800/30 transition-colors cursor-pointer ${
@@ -609,8 +626,13 @@ function NewsHitCard({
         </div>
         
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="font-mono font-bold text-amber-400">{news.ticker}</span>
+          <div className="flex items-center gap-2 mb-1 flex-wrap">
+            <button
+              onClick={handleTickerClick}
+              className="font-mono font-bold text-amber-400 hover:text-amber-300 hover:underline transition-colors"
+            >
+              {news.ticker}
+            </button>
             <span className="text-xs text-slate-500">{news.exchange}</span>
             {news.event_type && (
               <span className="px-2 py-0.5 bg-slate-700 rounded text-xs text-slate-300">
@@ -624,11 +646,19 @@ function NewsHitCard({
             )}
           </div>
           
-          <h3 className="text-white font-medium text-sm leading-tight mb-1 line-clamp-2">
+          <h3 
+            onClick={handleTitleClick}
+            className={`text-white font-medium text-sm leading-tight mb-1 line-clamp-2 ${
+              news.source_url ? 'hover:text-amber-300 hover:underline cursor-pointer' : ''
+            }`}
+          >
             {news.article_title}
+            {news.source_url && (
+              <ExternalLink className="inline-block w-3 h-3 ml-1 opacity-50" />
+            )}
           </h3>
           
-          <div className="flex items-center gap-3 text-xs">
+          <div className="flex items-center gap-3 text-xs flex-wrap">
             <span className="text-slate-500">{formatDate(news.article_date)}</span>
             {news.sentiment_label && (
               <span className={`flex items-center gap-1 ${getSentimentColor(news.sentiment_label)}`}>
@@ -650,15 +680,27 @@ function NewsHitCard({
           </div>
         </div>
         
-        <ChevronRight className={`w-4 h-4 text-slate-500 transition-transform ${expanded ? 'rotate-90' : ''}`} />
+        <ChevronRight className={`w-4 h-4 text-slate-500 transition-transform flex-shrink-0 ${expanded ? 'rotate-90' : ''}`} />
       </div>
       
       {expanded && (
         <div className="mt-3 pt-3 border-t border-slate-700/50 text-sm text-slate-400">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 flex-wrap">
             <span>Source: {news.source_provider.replace(/_/g, ' ')}</span>
             {news.sentiment_score !== null && (
               <span>Sentiment Score: {news.sentiment_score.toFixed(2)}</span>
+            )}
+            {news.source_url && (
+              <a 
+                href={news.source_url} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="flex items-center gap-1 text-amber-400 hover:text-amber-300 hover:underline"
+              >
+                <ExternalLink className="w-3 h-3" />
+                View Source
+              </a>
             )}
           </div>
         </div>
