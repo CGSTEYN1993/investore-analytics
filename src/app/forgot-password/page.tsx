@@ -20,11 +20,9 @@ export default function ForgotPasswordPage() {
 
     try {
       const response = await fetch(
-        `${getPublicApiV1Url()}/auth/forgot-password`,
+        `${getPublicApiV1Url()}/auth/forgot-password?email=${encodeURIComponent(email)}`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email })
         }
       );
 
