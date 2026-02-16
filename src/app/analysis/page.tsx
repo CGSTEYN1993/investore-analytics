@@ -14,11 +14,17 @@ import { RAILWAY_API_URL } from '@/lib/public-api-url';
 const API_BASE = RAILWAY_API_URL;
 
 // Interface for dynamic stats from API
+interface ExchangeDetail {
+  name: string;
+  count: number;
+}
+
 interface SpatialSummary {
   total_companies: number;
   by_exchange: Record<string, number>;
   by_commodity: [string, number][];
   total_countries: number;
+  exchange_details?: ExchangeDetail[];
 }
 
 // Interface for commodity prices
@@ -321,19 +327,31 @@ export default function AnalysisDashboard() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
             <div className="bg-metallic-800/50 rounded-lg p-4 border border-metallic-700/50">
               <div className="text-2xl font-bold text-primary-400">
-                {dynamicStats ? `${dynamicStats.total_companies.toLocaleString()}+` : '2,100+'}
+                {dynamicStats ? dynamicStats.total_companies.toLocaleString() : '1,000+'}
               </div>
               <div className="text-sm text-metallic-400">Companies Tracked</div>
             </div>
-            <div className="bg-metallic-800/50 rounded-lg p-4 border border-metallic-700/50">
+            <div className="bg-metallic-800/50 rounded-lg p-4 border border-metallic-700/50 group relative">
               <div className="text-2xl font-bold text-primary-400">
-                {dynamicStats ? Object.keys(dynamicStats.by_exchange || {}).length : 7}
+                {dynamicStats ? Object.keys(dynamicStats.by_exchange || {}).length : 6}
               </div>
               <div className="text-sm text-metallic-400">Exchanges</div>
+              {/* Exchange breakdown tooltip */}
+              {dynamicStats?.exchange_details && (
+                <div className="absolute bottom-full left-0 mb-2 w-48 bg-metallic-900 border border-metallic-700 rounded-lg p-3 opacity-0 group-hover:opacity-100 transition-opacity shadow-xl z-10 pointer-events-none">
+                  <div className="text-xs font-medium text-metallic-300 mb-2">Exchange Breakdown</div>
+                  {dynamicStats.exchange_details.slice(0, 6).map((ex) => (
+                    <div key={ex.name} className="flex justify-between text-xs py-0.5">
+                      <span className="text-metallic-400">{ex.name}</span>
+                      <span className="text-primary-400 font-medium">{ex.count.toLocaleString()}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
             <div className="bg-metallic-800/50 rounded-lg p-4 border border-metallic-700/50">
               <div className="text-2xl font-bold text-primary-400">
-                {dynamicStats ? `${dynamicStats.total_countries}+` : '50+'}
+                {dynamicStats ? `${dynamicStats.total_countries}+` : '40+'}
               </div>
               <div className="text-sm text-metallic-400">Countries</div>
             </div>
@@ -366,7 +384,7 @@ export default function AnalysisDashboard() {
                   Spatial Explorer
                 </h2>
                 <p className="text-metallic-400 mt-2 text-sm">
-                  Interactive maps with {dynamicStats ? dynamicStats.total_companies.toLocaleString() : '2,100'}+ mining projects. View companies by location, exchange, commodity, or country with real-time filtering.
+                  Interactive maps with {dynamicStats ? dynamicStats.total_companies.toLocaleString() : '1,000'}+ mining projects. View companies by location, exchange, commodity, or country with real-time filtering.
                 </p>
               </div>
             </Link>
