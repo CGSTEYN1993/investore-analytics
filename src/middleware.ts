@@ -12,14 +12,11 @@ import type { NextRequest } from 'next/server';
 
 // Routes that require authentication
 const PROTECTED_ROUTES = [
-  '/analysis',
   '/dashboard',
   '/portfolio',
   '/watchlist',
   '/peers',
   '/subscription',
-  '/company',
-  '/news',
 ];
 
 // Routes that should redirect to dashboard if already authenticated
@@ -47,6 +44,9 @@ const PUBLIC_ROUTES = [
   '/support',
   '/resources',
   '/demo',
+  '/analysis',  // Analysis pages are publicly accessible
+  '/company',   // Company pages are publicly accessible
+  '/news',      // News pages are publicly accessible
 ];
 
 // API routes that should bypass middleware
