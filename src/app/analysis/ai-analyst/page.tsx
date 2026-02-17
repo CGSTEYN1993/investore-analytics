@@ -242,7 +242,7 @@ export default function AIAnalystPage() {
                 <div>
                   <h1 className="text-xl font-bold text-white">AI Research Analyst</h1>
                   <p className="text-xs text-metallic-400">
-                    {llmEnabled ? 'GPT-4o Enhanced' : 'Rule-Based'} • Grounded in Database
+                    {llmEnabled ? 'Claude Enhanced' : 'Rule-Based'} • Grounded in Database
                   </p>
                 </div>
               </div>
