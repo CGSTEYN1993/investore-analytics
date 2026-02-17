@@ -298,9 +298,17 @@ export default function StagesPage() {
         setPhasesData(response.phases);
         setProjects(response.projects);
         setTotalProjects(response.total);
-        setCompanies(response.companies || []);
-        setProjectNames(response.project_names || []);
-        setExchanges(response.exchanges || []);
+        // Handle both nested filters and legacy top-level fields
+        const filters = response.filters;
+        if (filters) {
+          setCompanies(filters.companies?.map(c => c.symbol) || []);
+          setProjectNames(filters.project_names || []);
+          setExchanges(filters.exchanges || []);
+        } else {
+          setCompanies(response.companies || []);
+          setProjectNames(response.project_names || []);
+          setExchanges(response.exchanges || []);
+        }
       } catch (err) {
         console.error("Failed to fetch project phases:", err);
         setError("Failed to load project data. Please try again.");

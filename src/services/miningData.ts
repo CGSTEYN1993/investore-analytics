@@ -206,15 +206,25 @@ export interface ProjectByPhase {
   mine_life_years?: number;
   first_production_year?: number;
   announcement_date?: string;
+  exchange?: string;
+  company_name?: string;
+  funding_status?: string;
+  extraction_confidence?: number;
 }
 
 export interface ProjectPhasesResponse {
   phases: { [phase: string]: number };
   projects: ProjectByPhase[];
   total: number;
-  companies: string[];
-  project_names: string[];
-  exchanges: string[];
+  filters?: {
+    companies: { symbol: string; name: string }[];
+    project_names: string[];
+    exchanges: string[];
+  };
+  // Legacy fields for backwards compatibility
+  companies?: string[];
+  project_names?: string[];
+  exchanges?: string[];
 }
 
 export interface ResourceWithLocation {
