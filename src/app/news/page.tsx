@@ -49,6 +49,7 @@ interface StatDetailRecent {
   sentiment: string | null;
   event_type: string | null;
   is_material: boolean;
+  source_url: string | null;
 }
 
 interface StatDetailResponse {
@@ -207,13 +208,14 @@ export default function NewsHitsPage() {
                       </h3>
                       <div className="bg-slate-800/30 rounded-xl overflow-hidden max-h-80 overflow-y-auto">
                         {modalData.companies.map((company, idx) => (
-                          <div 
+                          <a 
                             key={`${company.ticker}-${company.exchange}`}
-                            className="flex items-center justify-between p-3 border-b border-slate-700/50 hover:bg-slate-700/30"
+                            href={`/company/${company.ticker}`}
+                            className="flex items-center justify-between p-3 border-b border-slate-700/50 hover:bg-slate-700/30 transition-colors"
                           >
                             <div>
                               <div className="flex items-center gap-2">
-                                <span className="font-mono font-bold text-amber-400">{company.ticker}</span>
+                                <span className="font-mono font-bold text-amber-400 hover:text-amber-300">{company.ticker}</span>
                                 <span className="text-xs text-slate-500">{company.exchange}</span>
                               </div>
                               <div className="text-xs text-slate-400 mt-0.5">{company.company_name}</div>
@@ -222,7 +224,7 @@ export default function NewsHitsPage() {
                               <div className="text-white font-semibold">{company.hit_count} hits</div>
                               <div className="text-xs text-slate-500">{company.source_count} sources</div>
                             </div>
-                          </div>
+                          </a>
                         ))}
                       </div>
                     </div>
@@ -268,7 +270,13 @@ export default function NewsHitsPage() {
                           className="p-3 border-b border-slate-700/50 hover:bg-slate-700/30"
                         >
                           <div className="flex items-center gap-2 mb-1">
-                            <span className="font-mono font-bold text-amber-400">{item.ticker}</span>
+                            <a
+                              href={`/company/${item.ticker}`}
+                              onClick={(e) => e.stopPropagation()}
+                              className="font-mono font-bold text-amber-400 hover:text-amber-300 hover:underline transition-colors cursor-pointer"
+                            >
+                              {item.ticker}
+                            </a>
                             <span className="text-xs text-slate-500">{item.exchange}</span>
                             {item.sentiment && (
                               <span className={`text-xs px-2 py-0.5 rounded ${
@@ -285,7 +293,19 @@ export default function NewsHitsPage() {
                               </span>
                             )}
                           </div>
-                          <div className="text-sm text-slate-300 line-clamp-2">{item.title}</div>
+                          {item.source_url ? (
+                            <a
+                              href={item.source_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-sm text-slate-300 line-clamp-2 hover:text-amber-300 hover:underline transition-colors cursor-pointer flex items-center gap-1"
+                            >
+                              {item.title}
+                              <ExternalLink className="inline-block w-3 h-3 flex-shrink-0 opacity-50" />
+                            </a>
+                          ) : (
+                            <div className="text-sm text-slate-300 line-clamp-2">{item.title}</div>
+                          )}
                           <div className="flex items-center gap-3 mt-1 text-xs text-slate-500">
                             <span>{getSourceIcon(item.source)} {item.source.replace(/_/g, ' ')}</span>
                             {item.date && <span>{formatDate(item.date)}</span>}
