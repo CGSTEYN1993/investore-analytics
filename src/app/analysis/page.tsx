@@ -217,6 +217,13 @@ const analyticsCategories = [
     icon: BarChart3,
   },
   {
+    id: 'commodity-breakdown',
+    title: 'Commodity Breakdown',
+    description: 'R&R, AISC, production benchmarking',
+    href: '/analysis/commodity-breakdown',
+    icon: Gem,
+  },
+  {
     id: 'constraints',
     title: 'Legal Constraints',
     description: 'Heritage & environmental',

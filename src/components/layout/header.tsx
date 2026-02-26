@@ -80,6 +80,12 @@ export function Header() {
                   Peer Groups
                 </Link>
                 <Link
+                  href="/analysis/commodity-breakdown"
+                  className="text-metallic-300 hover:text-primary-400 font-medium transition-colors"
+                >
+                  Commodities
+                </Link>
+                <Link
                   href="/map"
                   className="text-metallic-300 hover:text-primary-400 font-medium transition-colors"
                 >
@@ -231,6 +237,13 @@ export function Header() {
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Peer Groups
+                  </Link>
+                  <Link
+                    href="/analysis/commodity-breakdown"
+                    className="text-metallic-300 hover:text-primary-400 font-medium"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Commodities
                   </Link>
                   <Link
                     href="/map"
