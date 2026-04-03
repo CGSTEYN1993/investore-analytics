@@ -97,6 +97,12 @@ export function Header() {
                 >
                   Knowledge
                 </Link>
+                <Link
+                  href="/analysis/sentiment"
+                  className="text-metallic-300 hover:text-primary-400 font-medium transition-colors"
+                >
+                  Signals
+                </Link>
               </>
             )}
           </div>
@@ -258,6 +264,13 @@ export function Header() {
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Mining Knowledge
+                  </Link>
+                  <Link
+                    href="/analysis/sentiment"
+                    className="text-metallic-300 hover:text-primary-400 font-medium"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Signals
                   </Link>
                 </>
               )}

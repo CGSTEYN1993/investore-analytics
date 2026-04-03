@@ -152,3 +152,29 @@ body {
 .stage-badge-development { @apply bg-amber-100 text-amber-800; }
 .stage-badge-production { @apply bg-green-100 text-green-800; }
 .stage-badge-construction { @apply bg-orange-100 text-orange-800; }
+
+/* Signal notification slide-in animation */
+@keyframes slide-in-right {
+  from {
+    transform: translateX(120%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* Signal pulse animation for bell */
+@keyframes signal-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}
+
+.animate-signal-pulse {
+  animation: signal-pulse 2s ease-in-out infinite;
+}

@@ -5,6 +5,7 @@ import { Providers } from '@/components/providers';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Disclaimer } from '@/components/ui/disclaimer';
+import SignalNotifications from '@/components/ui/SignalNotifications';
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -80,6 +81,7 @@ export default function RootLayout({
               {children}
             </main>
             <Footer />
+            <SignalNotifications />
           </div>
         </Providers>
       </body>
