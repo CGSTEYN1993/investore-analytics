@@ -119,85 +119,62 @@ export default function NewsletterSignup({ variant = 'card', className = '' }: N
 
   // Card variant (default)
   return (
-    <div className={`bg-gradient-to-br from-primary-500/20 via-metallic-900 to-amber-500/20 border border-metallic-800 rounded-2xl p-8 ${className}`}>
-      <div className="max-w-xl mx-auto text-center">
-        <div className="w-16 h-16 bg-primary-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-          <Mail className="w-8 h-8 text-primary-400" />
+    <div className={`bg-metallic-900/50 border border-metallic-800/50 rounded-xl p-6 sm:p-8 ${className}`}>
+      <div className="max-w-md mx-auto text-center">
+        <div className="w-10 h-10 bg-primary-500/10 rounded-lg flex items-center justify-center mx-auto mb-4">
+          <Mail className="w-5 h-5 text-primary-400" />
         </div>
-        <h2 className="text-2xl font-bold text-metallic-100 mb-3">
-          Stay Ahead of the Market
+        <h2 className="text-xl font-bold text-metallic-100 mb-2">
+          Weekly Mining Insights
         </h2>
-        <p className="text-metallic-400 mb-6">
-          Get exclusive mining market insights, drilling results, and analysis delivered to your inbox every week. Join 10,000+ investors who trust InvestOre Analytics.
+        <p className="text-sm text-metallic-400 mb-5">
+          Drill results, market analysis, and AI-powered signals — delivered every Monday.
         </p>
 
         {status === 'success' ? (
-          <div className="flex items-center justify-center gap-3 text-green-400 bg-green-500/10 rounded-xl px-6 py-4">
-            <CheckCircle className="w-6 h-6" />
-            <span className="text-lg">You&apos;re subscribed! Check your inbox for confirmation.</span>
+          <div className="flex items-center justify-center gap-2 text-emerald-400 bg-emerald-500/10 rounded-lg px-4 py-3">
+            <CheckCircle className="w-5 h-5" />
+            <span className="text-sm">You&apos;re subscribed! Check your inbox.</span>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="flex flex-col sm:flex-row gap-3">
+          <form onSubmit={handleSubmit} className="space-y-3">
+            <div className="flex flex-col sm:flex-row gap-2">
               <div className="relative flex-1">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-metallic-500" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-metallic-500" />
                 <input
                   type="email"
-                  placeholder="Enter your email address"
+                  placeholder="your@email.com"
                   value={email}
                   onChange={(e) => {
                     setEmail(e.target.value);
                     if (status === 'error') setStatus('idle');
                   }}
                   disabled={status === 'loading'}
-                  className="w-full pl-12 pr-4 py-3.5 bg-metallic-800 border border-metallic-700 rounded-xl text-metallic-100 placeholder-metallic-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:opacity-50 text-lg"
+                  className="w-full pl-10 pr-4 py-2.5 bg-metallic-800/50 border border-metallic-700/50 rounded-lg text-sm text-metallic-100 placeholder-metallic-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500/50 disabled:opacity-50"
                 />
               </div>
               <button
                 type="submit"
                 disabled={status === 'loading'}
-                className="px-8 py-3.5 bg-primary-500 text-white rounded-xl hover:bg-primary-600 transition-all disabled:opacity-50 flex items-center justify-center gap-2 font-semibold text-lg shadow-lg shadow-primary-500/25 hover:shadow-primary-500/40"
+                className="px-5 py-2.5 bg-primary-600 text-white text-sm rounded-lg hover:bg-primary-500 transition-colors disabled:opacity-50 flex items-center justify-center gap-2 font-medium"
               >
                 {status === 'loading' ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    <span className="hidden sm:inline">Subscribing...</span>
-                  </>
+                  <Loader2 className="w-4 h-4 animate-spin" />
                 ) : (
-                  <>
-                    <Send className="w-5 h-5" />
-                    <span>Subscribe</span>
-                  </>
+                  <Send className="w-4 h-4" />
                 )}
+                Subscribe
               </button>
             </div>
             {status === 'error' && (
-              <p className="text-sm text-red-400">{errorMessage}</p>
+              <p className="text-xs text-red-400">{errorMessage}</p>
             )}
           </form>
         )}
 
-        <p className="text-xs text-metallic-500 mt-4">
-          By subscribing, you agree to our Privacy Policy. Unsubscribe anytime.
+        <p className="text-[10px] text-metallic-600 mt-3">
+          Free forever · Unsubscribe anytime
         </p>
-
-        {/* Trust badges */}
-        <div className="flex items-center justify-center gap-6 mt-6 pt-6 border-t border-metallic-800">
-          <div className="text-center">
-            <p className="text-2xl font-bold text-metallic-100">10K+</p>
-            <p className="text-xs text-metallic-500">Subscribers</p>
-          </div>
-          <div className="w-px h-10 bg-metallic-800" />
-          <div className="text-center">
-            <p className="text-2xl font-bold text-metallic-100">Weekly</p>
-            <p className="text-xs text-metallic-500">Updates</p>
-          </div>
-          <div className="w-px h-10 bg-metallic-800" />
-          <div className="text-center">
-            <p className="text-2xl font-bold text-metallic-100">Free</p>
-            <p className="text-xs text-metallic-500">Forever</p>
-          </div>
-        </div>
       </div>
     </div>
   );

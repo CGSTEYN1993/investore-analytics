@@ -14,17 +14,16 @@ const TickerTape = () => {
     { symbol: 'NICKEL', price: '16,400', change: '-0.80%', up: false },
   ];
 
-  // Duplicate items to create seamless loop
   const tickerItems = [...items, ...items, ...items];
 
   return (
-    <div className="w-full bg-slate-900 border-b border-slate-800 overflow-hidden h-10 flex items-center">
+    <div className="w-full bg-metallic-950 border-b border-metallic-800/50 overflow-hidden h-8 flex items-center">
       <div className="animate-ticker flex whitespace-nowrap">
         {tickerItems.map((item, index) => (
-          <div key={index} className="inline-flex items-center mx-6 text-sm font-mono">
-            <span className="text-slate-400 font-bold mr-2">{item.symbol}</span>
-            <span className="text-slate-200 mr-2">${item.price}</span>
-            <span className={`${item.up ? 'text-green-500' : 'text-red-500'} flex items-center`}>
+          <div key={index} className="inline-flex items-center mx-5 text-xs font-mono">
+            <span className="text-metallic-500 font-semibold mr-1.5">{item.symbol}</span>
+            <span className="text-metallic-300 mr-1.5">${item.price}</span>
+            <span className={`${item.up ? 'text-emerald-500' : 'text-red-400'}`}>
               {item.up ? '▲' : '▼'} {item.change}
             </span>
           </div>
@@ -36,7 +35,7 @@ const TickerTape = () => {
           100% { transform: translateX(-33.33%); }
         }
         .animate-ticker {
-          animation: ticker 30s linear infinite;
+          animation: ticker 35s linear infinite;
         }
         .animate-ticker:hover {
           animation-play-state: paused;

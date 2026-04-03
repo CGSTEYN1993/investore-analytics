@@ -48,6 +48,11 @@ export interface CompanySentiment {
   total_hits?: number;
   hits_7d?: number;
   hits_30d?: number;
+  avg_sentiment_7d?: number | null;
+  avg_sentiment_30d?: number | null;
+  positive_count?: number;
+  negative_count?: number;
+  trend?: string;
   sentiment?: {
     avg_7d: number | null;
     avg_30d: number | null;
@@ -63,10 +68,12 @@ export interface CompanySentiment {
     top_event_type: string | null;
     consensus_impact: string | null;
   };
-  investment_signal?: 'bullish' | 'bearish' | 'neutral';
+  investment_signal?: string;
   recent_headlines?: Array<{
     title: string;
+    headline?: string;
     sentiment: string | null;
+    sentiment_label?: string | null;
     score: number | null;
     event_type: string | null;
     significance: string | null;
@@ -89,12 +96,45 @@ export interface TrendingStock {
   exchange: string;
   company_name: string | null;
   hits: number;
+  news_count_7d?: number;
   avg_sentiment: number | null;
   positive: number;
   negative: number;
+  positive_count?: number;
+  negative_count?: number;
   material_events: number;
   bias: 'bullish' | 'bearish' | 'mixed';
+  sentiment_bias?: string;
   latest_date: string | null;
+}
+
+export interface CommoditySentiment {
+  commodity: string;
+  has_data: boolean;
+  total_companies: number;
+  companies_with_news: number;
+  total_hits: number;
+  total_news_hits?: number;
+  sector_bias?: string;
+  avg_sentiment_7d?: number | null;
+  positive_count?: number;
+  negative_count?: number;
+  neutral_count?: number;
+  sentiment: {
+    average: number | null;
+    positive_count: number;
+    negative_count: number;
+    material_events: number;
+    trend: string;
+  };
+  top_movers: Array<{
+    ticker: string;
+    company_name: string | null;
+    avg_sentiment: number | null;
+    hits_7d: number;
+    positive: number;
+    negative: number;
+  }>;
 }
 
 // ── API Functions ──

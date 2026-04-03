@@ -399,8 +399,8 @@ export default function SentimentDashboardPage() {
                       <td className="px-4 py-2 text-right text-white font-medium">{stock.news_count_7d}</td>
                       <td className="px-4 py-2 text-right">
                         <span className={
-                          stock.avg_sentiment > 0 ? 'text-emerald-400' :
-                          stock.avg_sentiment < 0 ? 'text-red-400' : 'text-slate-400'
+                          (stock.avg_sentiment ?? 0) > 0 ? 'text-emerald-400' :
+                          (stock.avg_sentiment ?? 0) < 0 ? 'text-red-400' : 'text-slate-400'
                         }>
                           {stock.avg_sentiment?.toFixed(3)}
                         </span>
