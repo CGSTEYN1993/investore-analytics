@@ -60,9 +60,9 @@ export default function CompanyGeoscienceWidget({
   }
 
   const totalLinkedAssets = 
-    intelligence.operating_mines.length + 
-    intelligence.deposits.length + 
-    intelligence.critical_minerals.length;
+    (intelligence.operating_mines?.length ?? 0) + 
+    (intelligence.deposits?.length ?? 0) + 
+    (intelligence.critical_minerals?.length ?? 0);
 
   return (
     <div className="bg-slate-900/50 rounded-xl border border-slate-800 overflow-hidden">
@@ -93,25 +93,25 @@ export default function CompanyGeoscienceWidget({
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 border-b border-slate-800">
         <div className="text-center">
           <div className="text-2xl font-bold text-white">
-            {intelligence.operating_mines.length}
+            {intelligence.operating_mines?.length ?? 0}
           </div>
           <div className="text-xs text-slate-400">Operating Mines</div>
         </div>
         <div className="text-center">
           <div className="text-2xl font-bold text-white">
-            {intelligence.deposits.length}
+            {intelligence.deposits?.length ?? 0}
           </div>
           <div className="text-xs text-slate-400">Known Deposits</div>
         </div>
         <div className="text-center">
           <div className="text-2xl font-bold text-white">
-            {intelligence.resources.length}
+            {intelligence.resources?.length ?? 0}
           </div>
           <div className="text-xs text-slate-400">Resource Estimates</div>
         </div>
         <div className="text-center">
           <div className="text-2xl font-bold text-white">
-            {intelligence.recent_drilling.length}
+            {intelligence.recent_drilling?.length ?? 0}
           </div>
           <div className="text-xs text-slate-400">Drilling Results</div>
         </div>
@@ -120,7 +120,7 @@ export default function CompanyGeoscienceWidget({
       {/* Content */}
       <div className="p-6 space-y-6">
         {/* Operating Mines */}
-        {intelligence.operating_mines.length > 0 && (
+        {(intelligence.operating_mines?.length ?? 0) > 0 && (
           <div>
             <h4 className="text-sm font-medium text-slate-400 mb-3 flex items-center gap-2">
               <Drill className="w-4 h-4" />
@@ -165,7 +165,7 @@ export default function CompanyGeoscienceWidget({
                   </div>
                 </div>
               ))}
-              {!showFullDetails && intelligence.operating_mines.length > 3 && (
+              {!showFullDetails && (intelligence.operating_mines?.length ?? 0) > 3 && (
                 <div className="text-center text-sm text-slate-400 pt-2">
                   +{intelligence.operating_mines.length - 3} more mines
                 </div>
@@ -175,14 +175,14 @@ export default function CompanyGeoscienceWidget({
         )}
 
         {/* Critical Minerals */}
-        {intelligence.critical_minerals.length > 0 && (
+        {(intelligence.critical_minerals?.length ?? 0) > 0 && (
           <div>
             <h4 className="text-sm font-medium text-slate-400 mb-3 flex items-center gap-2">
               <Gem className="w-4 h-4" />
               Critical Mineral Assets ({intelligence.critical_minerals.length})
             </h4>
             <div className="flex flex-wrap gap-2">
-              {intelligence.critical_minerals.slice(0, showFullDetails ? 10 : 5).map((mineral, index) => (
+              {(intelligence.critical_minerals ?? []).slice(0, showFullDetails ? 10 : 5).map((mineral, index) => (
                 <div 
                   key={`${mineral.ga_id}-${index}`}
                   className="px-3 py-2 bg-purple-500/10 border border-purple-500/20 rounded-lg"
@@ -196,14 +196,14 @@ export default function CompanyGeoscienceWidget({
         )}
 
         {/* Resource Estimates */}
-        {intelligence.resources.length > 0 && (
+        {(intelligence.resources?.length ?? 0) > 0 && (
           <div>
             <h4 className="text-sm font-medium text-slate-400 mb-3 flex items-center gap-2">
               <TrendingUp className="w-4 h-4" />
               Resource Estimates from Announcements
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {intelligence.resources.slice(0, showFullDetails ? 6 : 2).map((resource, index) => (
+              {(intelligence.resources ?? []).slice(0, showFullDetails ? 6 : 2).map((resource, index) => (
                 <div 
                   key={index}
                   className="p-3 bg-slate-800/30 rounded-lg"
@@ -221,11 +221,11 @@ export default function CompanyGeoscienceWidget({
                     </span>
                   </div>
                   <div className="text-white font-bold">
-                    {resource.tonnage_mt.toFixed(1)} Mt @ {resource.grade} {resource.grade_unit}
+                    {(resource.tonnage_mt ?? 0).toFixed(1)} Mt @ {resource.grade ?? 'N/A'} {resource.grade_unit ?? ''}
                   </div>
-                  {resource.contained_metal && (
+                  {resource.contained_metal != null && (
                     <div className="text-sm text-slate-400 mt-1">
-                      {resource.contained_metal.toFixed(1)} {resource.contained_unit} contained
+                      {resource.contained_metal.toFixed(1)} {resource.contained_unit ?? ''} contained
                     </div>
                   )}
                   {resource.effective_date && (
@@ -241,15 +241,15 @@ export default function CompanyGeoscienceWidget({
         )}
 
         {/* Recent Announcements */}
-        {(intelligence.resource_announcements.length > 0 || 
-          intelligence.drilling_announcements.length > 0) && (
+        {((intelligence.resource_announcements?.length ?? 0) > 0 || 
+          (intelligence.drilling_announcements?.length ?? 0) > 0) && (
           <div>
             <h4 className="text-sm font-medium text-slate-400 mb-3 flex items-center gap-2">
               <FileText className="w-4 h-4" />
               Recent Mining Announcements
             </h4>
             <div className="space-y-2">
-              {[...intelligence.resource_announcements, ...intelligence.drilling_announcements]
+              {[...(intelligence.resource_announcements ?? []), ...(intelligence.drilling_announcements ?? [])]
                 .slice(0, showFullDetails ? 10 : 3)
                 .map((ann, index) => (
                   <div 
@@ -281,7 +281,7 @@ export default function CompanyGeoscienceWidget({
         )}
 
         {/* No Data State */}
-        {totalLinkedAssets === 0 && intelligence.resources.length === 0 && (
+        {totalLinkedAssets === 0 && (intelligence.resources?.length ?? 0) === 0 && (
           <div className="text-center py-8 text-slate-400">
             <Mountain className="w-12 h-12 mx-auto mb-4 opacity-50" />
             <p>No geoscience data linked to this company yet.</p>
@@ -297,7 +297,7 @@ export default function CompanyGeoscienceWidget({
             <div className="flex items-center justify-between">
               <span className="text-slate-400">Total Resources</span>
               <span className="text-white font-bold text-lg">
-                {intelligence.total_resources_mt.toFixed(1)} Mt
+                {(intelligence.total_resources_mt ?? 0).toFixed(1)} Mt
               </span>
             </div>
           </div>
@@ -307,7 +307,7 @@ export default function CompanyGeoscienceWidget({
       {/* Footer */}
       <div className="px-6 py-3 border-t border-slate-800 bg-slate-800/30">
         <div className="flex items-center justify-between text-xs text-slate-500">
-          <span>Last updated: {new Date(intelligence.last_updated).toLocaleDateString()}</span>
+          <span>Last updated: {intelligence.last_updated ? new Date(intelligence.last_updated).toLocaleDateString() : 'N/A'}</span>
           <span>Source: Geoscience Australia + ASX Announcements</span>
         </div>
       </div>

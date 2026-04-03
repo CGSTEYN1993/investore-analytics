@@ -128,7 +128,24 @@ export function useCompanyIntelligence(symbol: string): UseCompanyIntelligenceRe
       }
 
       const data = await response.json();
-      setIntelligence(data);
+      // Normalize API response to ensure arrays are never null/undefined
+      setIntelligence({
+        ...data,
+        operating_mines: data.operating_mines ?? [],
+        deposits: data.deposits ?? [],
+        critical_minerals: data.critical_minerals ?? [],
+        resources: (data.resources ?? []).map((r: any) => ({
+          ...r,
+          tonnage_mt: r.tonnage_mt ?? 0,
+          grade: r.grade ?? 0,
+          grade_unit: r.grade_unit ?? '',
+          commodity: r.commodity ?? 'Unknown',
+        })),
+        total_resources_mt: data.total_resources_mt ?? 0,
+        recent_drilling: data.recent_drilling ?? [],
+        resource_announcements: data.resource_announcements ?? [],
+        drilling_announcements: data.drilling_announcements ?? [],
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load company intelligence');
     } finally {

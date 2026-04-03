@@ -285,7 +285,17 @@ export default function CompanyProfile() {
       // Parse announcements
       if (announcementsRes && announcementsRes.ok) {
         const annData = await announcementsRes.json();
-        announcements = annData.announcements || [];
+        // Normalize announcement fields to prevent null access crashes
+        announcements = (annData.announcements || []).map((ann: any) => ({
+          ...ann,
+          id: ann.id || '',
+          title: ann.title || 'Untitled',
+          announcement_type: ann.announcement_type || 'other',
+          sentiment: ann.sentiment || 'neutral',
+          date: ann.date || '',
+          url: ann.url || null,
+          is_price_sensitive: ann.is_price_sensitive || false,
+        }));
       }
 
       // Parse Lassonde curve position
@@ -857,7 +867,7 @@ export default function CompanyProfile() {
                       <div key={cr.id || i} className="flex items-center justify-between text-xs bg-metallic-800/50 rounded px-3 py-2">
                         <div className="flex items-center gap-2">
                           <span className="text-amber-400">▼</span>
-                          <span className="text-metallic-400">{cr.announcement_date.split('T')[0]}</span>
+                          <span className="text-metallic-400">{cr.announcement_date?.split('T')[0] ?? 'N/A'}</span>
                           <span className="text-metallic-300">{cr.raising_type}</span>
                         </div>
                         <div className="flex items-center gap-3">
@@ -971,11 +981,11 @@ export default function CompanyProfile() {
                           <div className="text-sm font-medium text-metallic-200 mb-2">{ann.title}</div>
                           <div className="flex items-center flex-wrap gap-2">
                             <span className="text-xs text-metallic-500">{ann.date}</span>
-                            <span className={`text-xs px-2 py-0.5 rounded ${getTypeColor(ann.announcement_type)}`}>
-                              {ann.announcement_type.replace(/_/g, ' ')}
+                            <span className={`text-xs px-2 py-0.5 rounded ${getTypeColor(ann.announcement_type || 'other')}`}>
+                              {(ann.announcement_type || 'other').replace(/_/g, ' ')}
                             </span>
-                            <span className={`text-xs px-2 py-0.5 rounded ${getSentimentColor(ann.sentiment)}`}>
-                              {ann.sentiment.replace(/_/g, ' ')}
+                            <span className={`text-xs px-2 py-0.5 rounded ${getSentimentColor(ann.sentiment || 'neutral')}`}>
+                              {(ann.sentiment || 'neutral').replace(/_/g, ' ')}
                             </span>
                             {ann.is_price_sensitive && (
                               <span className="text-xs px-2 py-0.5 rounded bg-red-500/20 text-red-400">
@@ -1016,8 +1026,8 @@ export default function CompanyProfile() {
                   </div>
                   <div className="flex items-center flex-wrap gap-2 mb-3">
                     <span className="text-xs text-metallic-400">{announcements[0].date}</span>
-                    <span className={`text-xs px-2 py-0.5 rounded ${getTypeColor(announcements[0].announcement_type)}`}>
-                      {announcements[0].announcement_type.replace(/_/g, ' ')}
+                    <span className={`text-xs px-2 py-0.5 rounded ${getTypeColor(announcements[0].announcement_type || 'other')}`}>
+                      {(announcements[0].announcement_type || 'other').replace(/_/g, ' ')}
                     </span>
                     {announcements[0].is_price_sensitive && (
                       <span className="text-xs px-2 py-0.5 rounded bg-red-500/20 text-red-400">
@@ -1053,8 +1063,8 @@ export default function CompanyProfile() {
                       <div className="text-sm font-medium text-metallic-200 line-clamp-2">{ann.title}</div>
                       <div className="flex items-center gap-2 mt-1">
                         <span className="text-xs text-metallic-500">{ann.date}</span>
-                        <span className={`text-xs px-2 py-0.5 rounded ${getSentimentColor(ann.sentiment)}`}>
-                          {ann.sentiment.replace(/_/g, ' ')}
+                        <span className={`text-xs px-2 py-0.5 rounded ${getSentimentColor(ann.sentiment || 'neutral')}`}>
+                          {(ann.sentiment || 'neutral').replace(/_/g, ' ')}
                         </span>
                       </div>
                     </a>
