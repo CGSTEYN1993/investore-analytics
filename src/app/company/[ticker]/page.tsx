@@ -552,7 +552,7 @@ export default function CompanyProfile() {
             <section className="bg-metallic-900 border border-metallic-800 rounded-xl p-6">
               <h2 className="text-lg font-semibold text-metallic-100 mb-4">About</h2>
               <p className="text-metallic-400 leading-relaxed">
-                {description || `${name} (${ticker}) is an ${exchange}-listed mining company focused on ${commodity} exploration and production.`}
+                {description || `${name} (${ticker}) is an ${exchange}-listed company focused on ${commodity} exploration and development.`}
               </p>
               {/* External Links */}
               <div className="mt-4 flex flex-wrap gap-3">
