@@ -224,6 +224,13 @@ const analyticsCategories = [
     icon: Gem,
   },
   {
+    id: 'cross-exchange-signals',
+    title: 'Cross-Exchange Signals',
+    description: 'Pre-open trend predictions',
+    href: '/analysis/signals',
+    icon: Activity,
+  },
+  {
     id: 'constraints',
     title: 'Legal Constraints',
     description: 'Heritage & environmental',
