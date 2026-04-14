@@ -10,6 +10,7 @@ import {
   RefreshCw, DollarSign, Fuel, Zap
 } from 'lucide-react';
 import { RAILWAY_API_URL } from '@/lib/public-api-url';
+import NewsTicker from '@/components/ui/NewsTicker';
 
 const API_BASE = RAILWAY_API_URL;
 
@@ -681,6 +682,10 @@ export default function AnalysisDashboard() {
           </div>
         </div>
       </div>
+      {/* News Ticker at bottom */}
+      <NewsTicker />
+      {/* Spacer for fixed ticker */}
+      <div className="h-10" />
     </div>
   );
 }

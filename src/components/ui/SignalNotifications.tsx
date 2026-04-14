@@ -85,17 +85,18 @@ export default function SignalNotifications() {
   // Auto-remove toasts after 8 seconds
   useEffect(() => {
     const timers: ReturnType<typeof setTimeout>[] = [];
-    toasts.forEach((t, idx) => {
+    toasts.forEach((t) => {
       if (t.visible && !t.removing) {
+        const toastId = t.signal.id;
         const timer = setTimeout(() => {
           setToasts(prev =>
-            prev.map((toast, i) =>
-              i === idx ? { ...toast, removing: true } : toast,
+            prev.map((toast) =>
+              toast.signal.id === toastId ? { ...toast, removing: true } : toast,
             ),
           );
           // Remove from DOM after animation
           const removeTimer = setTimeout(() => {
-            setToasts(prev => prev.filter((_, i) => i !== idx));
+            setToasts(prev => prev.filter((toast) => toast.signal.id !== toastId));
           }, 400);
           timers.push(removeTimer);
         }, 8000);
@@ -113,12 +114,12 @@ export default function SignalNotifications() {
     } catch { /* ignore */ }
   };
 
-  const handleDismissToast = (idx: number) => {
+  const handleDismissToast = (signalId: number) => {
     setToasts(prev =>
-      prev.map((t, i) => (i === idx ? { ...t, removing: true } : t)),
+      prev.map((t) => (t.signal.id === signalId ? { ...t, removing: true } : t)),
     );
     setTimeout(() => {
-      setToasts(prev => prev.filter((_, i) => i !== idx));
+      setToasts(prev => prev.filter((t) => t.signal.id !== signalId));
     }, 400);
   };
 
@@ -152,17 +153,21 @@ export default function SignalNotifications() {
       <div className="fixed bottom-6 right-6 z-[60] flex flex-col items-end gap-3">
         {/* Toast stack */}
         <div className="flex flex-col gap-2 mb-2 max-w-sm w-80">
-          {toasts.slice(-3).map((toast, idx) => (
+          {toasts.slice(-3).map((toast) => (
             <div
-              key={`toast-${toast.signal.id}-${idx}`}
+              key={`toast-${toast.signal.id}`}
               className={`
                 border rounded-xl p-3 shadow-2xl backdrop-blur-md
-                transform transition-all duration-400
+                transform transition-all duration-400 cursor-pointer
                 ${getSignalBgColor(toast.signal.signal_type)}
                 ${toast.removing
                   ? 'translate-x-full opacity-0'
                   : 'translate-x-0 opacity-100 animate-slide-in-right'}
               `}
+              onClick={() => {
+                handleDismissToast(toast.signal.id);
+                setPanelOpen(true);
+              }}
             >
               <div className="flex items-start gap-2">
                 {getIcon(toast.signal.signal_type)}
@@ -177,6 +182,7 @@ export default function SignalNotifications() {
                     <a
                       href={`/company/${toast.signal.ticker}`}
                       className="text-xs text-amber-400 hover:text-amber-300 font-mono"
+                      onClick={(e) => e.stopPropagation()}
                     >
                       {toast.signal.ticker} →
                     </a>
@@ -186,7 +192,7 @@ export default function SignalNotifications() {
                   </div>
                 </div>
                 <button
-                  onClick={() => handleDismissToast(idx)}
+                  onClick={(e) => { e.stopPropagation(); handleDismissToast(toast.signal.id); }}
                   className="p-1 hover:bg-white/10 rounded transition-colors"
                 >
                   <X className="w-3 h-3 text-slate-400" />
@@ -216,7 +222,13 @@ export default function SignalNotifications() {
 
       {/* ── Signal Panel (slide-up from bottom-right) ── */}
       {panelOpen && (
-        <div className="fixed bottom-20 right-6 z-[59] w-96 max-h-[70vh] bg-slate-900/95 backdrop-blur-xl border border-slate-700 rounded-2xl shadow-2xl overflow-hidden">
+        <>
+          {/* Click-outside overlay to close panel */}
+          <div
+            className="fixed inset-0 z-[58]"
+            onClick={() => setPanelOpen(false)}
+          />
+          <div className="fixed bottom-20 right-6 z-[59] w-96 max-h-[70vh] bg-slate-900/95 backdrop-blur-xl border border-slate-700 rounded-2xl shadow-2xl overflow-hidden">
           {/* Panel Header */}
           <div className="flex items-center justify-between p-4 border-b border-slate-700">
             <div>
@@ -265,20 +277,18 @@ export default function SignalNotifications() {
               </div>
             ) : (
               signals.map(sig => (
-                <div
+                <a
                   key={sig.id}
-                  className={`p-3 hover:bg-slate-800/50 transition-colors ${getSignalBgColor(sig.signal_type).replace('border-', 'border-l-2 border-l-')}`}
+                  href={`/company/${sig.ticker}`}
+                  className={`block p-3 hover:bg-slate-800/50 transition-colors cursor-pointer ${getSignalBgColor(sig.signal_type).replace('border-', 'border-l-2 border-l-')}`}
                 >
                   <div className="flex items-start gap-2">
                     {getIcon(sig.signal_type)}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <a
-                          href={`/company/${sig.ticker}`}
-                          className="font-mono font-bold text-amber-400 hover:text-amber-300 text-sm"
-                        >
+                        <span className="font-mono font-bold text-amber-400 text-sm">
                           {sig.ticker}
-                        </a>
+                        </span>
                         <span className="text-xs text-slate-500">{sig.exchange}</span>
                         <span className={`text-xs px-1.5 py-0.5 rounded ${
                           sig.signal_type === 'invest'
@@ -316,15 +326,9 @@ export default function SignalNotifications() {
                       </div>
                     </div>
                     <div className="flex flex-col gap-1">
-                      <a
-                        href={`/company/${sig.ticker}`}
-                        className="p-1 hover:bg-slate-700 rounded transition-colors"
-                        title="View company"
-                      >
-                        <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
-                      </a>
+                      <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
                       <button
-                        onClick={() => handleDismiss(sig.id)}
+                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleDismiss(sig.id); }}
                         className="p-1 hover:bg-slate-700 rounded transition-colors"
                         title="Dismiss"
                       >
@@ -332,11 +336,12 @@ export default function SignalNotifications() {
                       </button>
                     </div>
                   </div>
-                </div>
+                </a>
               ))
             )}
           </div>
         </div>
+        </>
       )}
     </>
   );
