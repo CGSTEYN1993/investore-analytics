@@ -81,7 +81,7 @@ export default function HomePage() {
           <div className="absolute inset-0 bg-gradient-to-t from-metallic-950 via-transparent to-transparent" />
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28">
+        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28">
           <div className="flex flex-col items-center text-center max-w-3xl mx-auto mb-16">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-900/30 border border-primary-700/50 text-primary-400 text-xs font-medium mb-6">
               <span className="relative flex h-1.5 w-1.5">
@@ -140,7 +140,7 @@ export default function HomePage() {
 
       {/* ─── Platform Snapshots ─── */}
       <section className="py-20 border-t border-metallic-800/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <span className="text-primary-400 font-medium text-xs tracking-widest uppercase mb-3 block">What You Get</span>
             <h2 className="text-3xl font-bold text-metallic-100 mb-3">Every Tool a Mining Investor Needs</h2>
@@ -204,7 +204,7 @@ export default function HomePage() {
 
       {/* ─── How It Works ─── */}
       <section className="py-20 bg-metallic-900/20 border-t border-metallic-800/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-2xl mb-12">
             <span className="text-primary-400 font-medium text-xs tracking-widest uppercase mb-3 block">How It Works</span>
             <h2 className="text-3xl font-bold text-metallic-100 mb-4">
@@ -222,7 +222,7 @@ export default function HomePage() {
 
       {/* ─── Video Walkthrough ─── */}
       <section id="walkthrough" className="py-20 border-t border-metallic-800/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-5 gap-10 items-center">
             <div className="lg:col-span-2">
               <span className="text-primary-400 font-medium text-xs tracking-widest uppercase mb-3 block">See It In Action</span>
@@ -258,7 +258,7 @@ export default function HomePage() {
 
       {/* ─── Trust Bar ─── */}
       <section className="py-10 border-t border-metallic-800/50 bg-metallic-900/20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-wrap justify-center items-center gap-8 text-metallic-500 text-sm">
             {[
               { label: 'ASX', sub: 'Australia' },
@@ -281,7 +281,7 @@ export default function HomePage() {
       <section className="py-20 border-t border-metallic-800/50 relative overflow-hidden">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-primary-500/5 rounded-full blur-3xl" />
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-900/30 border border-emerald-700/40 text-emerald-400 text-xs font-medium mb-4">
               <Sparkles className="w-3.5 h-3.5" />

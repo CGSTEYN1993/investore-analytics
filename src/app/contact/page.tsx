@@ -37,7 +37,7 @@ export default function ContactPage() {
       {/* Hero Section */}
       <section className="relative py-20 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-metallic-900 via-metallic-950 to-metallic-950" />
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="relative max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto">
             <h1 className="text-4xl sm:text-5xl font-bold text-metallic-100 mb-6">
               Get in <span className="text-primary-400">Touch</span>
@@ -51,7 +51,7 @@ export default function ContactPage() {
 
       {/* Contact Content */}
       <section className="py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-3 gap-12">
             {/* Contact Info */}
             <div className="lg:col-span-1 space-y-8">
@@ -228,7 +228,7 @@ export default function ContactPage() {
 
       {/* Additional Help */}
       <section className="py-16 bg-metallic-900/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-2xl font-bold text-metallic-100 mb-4">Need Quick Answers?</h2>
             <p className="text-metallic-400">Check out our resources for immediate help</p>

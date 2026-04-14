@@ -348,7 +348,7 @@ export default function AnnouncementsPage() {
     <div className="min-h-screen bg-metallic-950">
       {/* Header */}
       <div className="bg-metallic-900/50 border-b border-metallic-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <Link
             href="/analysis"
             className="flex items-center gap-1.5 px-3 py-1.5 bg-metallic-800/80 hover:bg-metallic-700 border border-metallic-700 rounded-md text-sm text-metallic-300 hover:text-metallic-100 transition-colors mb-4 w-fit"
@@ -436,7 +436,7 @@ export default function AnnouncementsPage() {
       </div>
 
       {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Type Filter Tabs */}
         <div className="flex gap-2 overflow-x-auto pb-4 mb-4 scrollbar-hide">
           {announcementTypes.map((type) => (

@@ -71,7 +71,7 @@ export default function ExtractedDataOverviewPage() {
     <div className="min-h-screen bg-metallic-950">
       {/* Header */}
       <div className="border-b border-metallic-800 bg-metallic-900/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center gap-4 mb-4">
             <Link
               href="/analysis"
@@ -96,7 +96,7 @@ export default function ExtractedDataOverviewPage() {
       </div>
 
       {/* Stats Summary */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-metallic-900/50 border border-metallic-800 rounded-xl p-6 mb-8">
           <h2 className="text-lg font-semibold text-metallic-100 mb-4 flex items-center gap-2">
             <TrendingUp className="w-5 h-5 text-accent-gold" />

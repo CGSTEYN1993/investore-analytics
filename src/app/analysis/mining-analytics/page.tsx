@@ -356,7 +356,7 @@ export default function AnalyticsDashboardPage() {
     <div className="min-h-screen bg-metallic-950">
       {/* Header */}
       <div className="bg-metallic-900/50 border-b border-metallic-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center gap-4 mb-4">
             <Link
               href="/analysis"
@@ -391,7 +391,7 @@ export default function AnalyticsDashboardPage() {
       </div>
 
       {/* Dashboard Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {isLoading ? (
           <div className="flex items-center justify-center h-96">
             <div className="flex flex-col items-center gap-4">

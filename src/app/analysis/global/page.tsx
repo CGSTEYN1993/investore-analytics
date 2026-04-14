@@ -403,7 +403,7 @@ function GlobalSpatialContent() {
     <div className="min-h-screen bg-metallic-950">
       {/* Header */}
       <div className="bg-metallic-900/50 border-b border-metallic-800">
-        <div className="max-w-7xl mx-auto px-4 py-6">
+        <div className="max-w-[1800px] mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Link
@@ -454,7 +454,7 @@ function GlobalSpatialContent() {
       </div>
 
       {/* Exchange Summary Cards */}
-      <div className="max-w-7xl mx-auto px-4 py-4">
+      <div className="max-w-[1800px] mx-auto px-4 py-4">
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
           {exchangeSummary.map((exchange) => (
             <button
@@ -479,7 +479,7 @@ function GlobalSpatialContent() {
       </div>
 
       {/* Filters */}
-      <div className="max-w-7xl mx-auto px-4 py-4">
+      <div className="max-w-[1800px] mx-auto px-4 py-4">
         <div className="bg-metallic-900/50 rounded-lg border border-metallic-800 p-4">
           <div className="flex items-center gap-2 mb-4">
             <Filter className="h-5 w-5 text-metallic-400" />
@@ -572,7 +572,7 @@ function GlobalSpatialContent() {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 py-4">
+      <div className="max-w-[1800px] mx-auto px-4 py-4">
         {loading ? (
           <div className="flex items-center justify-center h-96">
             <Loader2 className="h-8 w-8 animate-spin text-primary-500" />

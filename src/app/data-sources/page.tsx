@@ -45,7 +45,7 @@ const dataSources = [
 export default function DataSourcesPage() {
   return (
     <div className="min-h-screen bg-metallic-950">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <Link
           href="/"
           className="flex items-center gap-2 text-metallic-400 hover:text-primary-400 transition-colors mb-8"

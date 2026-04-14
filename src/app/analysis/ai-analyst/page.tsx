@@ -224,7 +224,7 @@ export default function AIAnalystPage() {
     <div className="min-h-screen bg-gradient-to-br from-metallic-950 via-metallic-900 to-metallic-950">
       {/* Header */}
       <header className="border-b border-metallic-800 bg-metallic-950/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Link
@@ -257,7 +257,7 @@ export default function AIAnalystPage() {
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="grid lg:grid-cols-4 gap-6">
           {/* Sidebar - Capabilities */}
           <div className="lg:col-span-1 space-y-4">

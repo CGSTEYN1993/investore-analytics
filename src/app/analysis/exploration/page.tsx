@@ -552,7 +552,7 @@ export default function ExplorationPage() {
     <div className="min-h-screen bg-metallic-950 text-metallic-100">
       {/* Header */}
       <div className="border-b border-metallic-800 bg-metallic-900/95 backdrop-blur sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 py-4">
+        <div className="max-w-[1800px] mx-auto px-4 py-4">
           <Link
             href="/analysis"
             className="inline-flex items-center gap-2 text-metallic-400 hover:text-metallic-100 mb-4 transition-colors"
@@ -579,7 +579,7 @@ export default function ExplorationPage() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-6">
+      <div className="max-w-[1800px] mx-auto px-4 py-6">
         {/* Summary Stats */}
         {summary && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">

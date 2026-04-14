@@ -103,7 +103,7 @@ export default function PeersPage() {
     <div className="min-h-screen bg-gradient-to-br from-metallic-950 via-metallic-900 to-metallic-950">
       {/* Header */}
       <header className="border-b border-metallic-800 bg-metallic-950/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Link
@@ -138,7 +138,7 @@ export default function PeersPage() {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Search */}
         <div className="mb-6">
           <div className="relative">

@@ -7,7 +7,7 @@ export default function AboutPage() {
       {/* Hero Section */}
       <section className="relative py-20 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-metallic-900 via-metallic-950 to-metallic-950" />
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="relative max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto">
             <h1 className="text-4xl sm:text-5xl font-bold text-metallic-100 mb-6">
               About <span className="text-primary-400">InvestOre</span> Analytics
@@ -21,7 +21,7 @@ export default function AboutPage() {
 
       {/* Mission Section */}
       <section className="py-16 bg-metallic-900/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
               <h2 className="text-3xl font-bold text-metallic-100 mb-6">Our Mission</h2>
@@ -56,7 +56,7 @@ export default function AboutPage() {
 
       {/* Values Section */}
       <section className="py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold text-metallic-100 text-center mb-12">Our Values</h2>
           <div className="grid md:grid-cols-3 gap-8">
             <div className="bg-metallic-900 border border-metallic-800 rounded-xl p-8 text-center">
@@ -92,7 +92,7 @@ export default function AboutPage() {
 
       {/* Team Section */}
       <section className="py-16 bg-metallic-900/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-12">
             <h2 className="text-3xl font-bold text-metallic-100 mb-4">Built by Industry Experts</h2>
             <p className="text-metallic-400">

@@ -314,7 +314,7 @@ export default function AnalysisDashboard() {
     <div className="min-h-screen bg-metallic-950">
       {/* Header */}
       <div className="bg-metallic-900/50 border-b border-metallic-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
               <h1 className="text-3xl font-bold text-metallic-100">Analysis Dashboard</h1>
@@ -379,7 +379,7 @@ export default function AnalysisDashboard() {
       </div>
 
       {/* Main Content - Four Main Modals */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid md:grid-cols-2 gap-8">
           
           {/* Modal 1: Spatial Explorer (renamed from Global Spatial View) */}

@@ -423,7 +423,7 @@ export default function CompanyProfile() {
     <div className="min-h-screen bg-metallic-950">
       {/* Header */}
       <div className="bg-metallic-900/50 border-b border-metallic-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
           {/* Breadcrumb */}
           <div className="flex items-center gap-2 text-sm text-metallic-500 mb-4">
             <Link href="/analysis" className="hover:text-primary-400">Analysis</Link>
@@ -544,7 +544,7 @@ export default function CompanyProfile() {
       </div>
 
       {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">

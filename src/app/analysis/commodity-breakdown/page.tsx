@@ -410,7 +410,7 @@ export default function CommodityBreakdownPage() {
     <div className="min-h-screen bg-metallic-950">
       {/* ---- Header ---- */}
       <div className="bg-metallic-900/50 border-b border-metallic-800">
-        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-5">
+        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 py-5">
           <Link
             href="/analysis"
             className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-metallic-800/80 hover:bg-metallic-700 border border-metallic-700 rounded-md text-sm text-metallic-300 hover:text-metallic-100 transition-colors mb-4"
@@ -560,7 +560,7 @@ export default function CommodityBreakdownPage() {
 
       {/* ---- Stats bar ---- */}
       <div className="bg-metallic-900/30 border-b border-metallic-800/50">
-        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-3 flex gap-6 text-xs text-metallic-400 overflow-x-auto">
+        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 py-3 flex gap-6 text-xs text-metallic-400 overflow-x-auto">
           <div className="flex items-center gap-1.5">
             <Building2 className="w-3.5 h-3.5" />
             <span className="text-metallic-100 font-semibold">{stats.total}</span> Companies
@@ -586,7 +586,7 @@ export default function CommodityBreakdownPage() {
       </div>
 
       {/* ---- Main Content ---- */}
-      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20">
             <Loader2 className="w-8 h-8 text-primary-500 animate-spin mb-4" />

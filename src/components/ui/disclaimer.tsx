@@ -10,7 +10,7 @@ export function Disclaimer() {
 
   return (
     <div className="bg-amber-900/20 border-b border-amber-700/30">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-1.5">
+      <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 py-1.5">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-2 text-xs text-amber-400/80">
             <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" />

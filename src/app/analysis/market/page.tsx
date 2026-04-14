@@ -331,7 +331,7 @@ export default function MarketPage() {
   if (error) {
     return (
       <div className="min-h-screen bg-metallic-950 p-6">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-[1800px] mx-auto">
           <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-6 text-center">
             <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
             <h2 className="text-xl font-semibold text-red-400 mb-2">Error Loading Market Data</h2>
@@ -352,7 +352,7 @@ export default function MarketPage() {
     <div className="min-h-screen bg-metallic-950">
       {/* Header */}
       <div className="border-b border-metallic-800 bg-metallic-950/80 backdrop-blur-sm sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-6 py-4">
+        <div className="max-w-[1800px] mx-auto px-6 py-4">
           <Link
             href="/analysis"
             className="flex items-center gap-1.5 px-3 py-1.5 bg-metallic-800/80 hover:bg-metallic-700 border border-metallic-700 rounded-md text-sm text-metallic-300 hover:text-metallic-100 transition-colors mb-4 w-fit"
@@ -414,7 +414,7 @@ export default function MarketPage() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-6">
+      <div className="max-w-[1800px] mx-auto px-6 py-6">
         {isLoading ? (
           <div className="flex items-center justify-center h-96">
             <div className="text-center">

@@ -100,7 +100,7 @@ export default function SentimentDashboardPage() {
     <div className="min-h-screen bg-slate-950 pb-12">
       {/* Header */}
       <div className="border-b border-slate-800 bg-slate-900/50">
-        <div className="max-w-7xl mx-auto px-4 py-6">
+        <div className="max-w-[1800px] mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold text-white flex items-center gap-3">
@@ -123,7 +123,7 @@ export default function SentimentDashboardPage() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 mt-6 space-y-6">
+      <div className="max-w-[1800px] mx-auto px-4 mt-6 space-y-6">
         {/* ── Summary Cards ── */}
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
           <div className="bg-slate-900 border border-slate-800 rounded-xl p-4">

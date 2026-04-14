@@ -112,7 +112,7 @@ export default function MiningEconomicsPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
       {/* Header */}
       <div className="bg-slate-800/50 border-b border-gray-700">
-        <div className="max-w-7xl mx-auto px-4 py-6">
+        <div className="max-w-[1800px] mx-auto px-4 py-6">
           <Link href="/" className="text-amber-400 hover:underline text-sm mb-4 inline-block">
             ← Back to Dashboard
           </Link>
@@ -121,7 +121,7 @@ export default function MiningEconomicsPage() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-[1800px] mx-auto px-4 py-8">
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Sidebar Navigation */}
           <div className="lg:w-64 flex-shrink-0">
