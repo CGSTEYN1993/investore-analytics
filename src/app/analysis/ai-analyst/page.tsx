@@ -159,6 +159,98 @@ interface SnapshotData {
   }[];
 }
 
+// ─── Commodity Snapshot Types ──────────────────────────────────────────
+interface CommoditySnapshotData {
+  commodity: string;
+  commodity_code: string;
+  commodity_enum: string;
+  spot_price?: {
+    price_usd: number | null;
+    unit: string;
+    change_1d_pct: number | null;
+    change_7d_pct: number | null;
+    high_52w: number | null;
+    low_52w: number | null;
+    price_date: string | null;
+  };
+  company_count: number;
+  companies: {
+    ticker: string; name: string; exchange: string; type: string; country: string;
+  }[];
+  sector_sentiment?: {
+    signal: string;
+    trend: string;
+    avg_sentiment_7d: number | null;
+    avg_sentiment_30d: number | null;
+    positive_articles_30d: number;
+    negative_articles_30d: number;
+    material_events_30d: number;
+    total_news_hits: number;
+    news_hits_7d: number;
+    news_hits_30d: number;
+  };
+  top_intercepts?: {
+    symbol: string; company: string; commodity: string;
+    grade: number | null; grade_unit: string;
+    width_m: number | null; significant: boolean;
+  }[];
+  resource_totals?: {
+    estimate_count: number; companies_with_resources: number;
+    mi_tonnage_mt: number | null; mi_contained: number | null;
+    inf_tonnage_mt: number | null; inf_contained: number | null;
+    contained_unit: string;
+  };
+  sector_signals?: {
+    invest_count: number; divest_count: number; watch_count: number;
+    total_active: number;
+    signals: {
+      ticker: string; signal_type: string; signal_strength: string;
+      headline: string; reasoning: string;
+      sentiment_score: number | null; confidence: number | null; date: string | null;
+    }[];
+  };
+  recent_news?: {
+    ticker: string; company: string; headline: string;
+    event_type: string; significance: string;
+    sentiment: string; impact: string; date: string | null;
+  }[];
+  top_resource_holders?: {
+    ticker: string; name: string; contained: number | null;
+    unit: string; tonnage_mt: number | null;
+  }[];
+}
+
+// Commodity search detection
+const KNOWN_COMMODITIES: Record<string, string> = {
+  GOLD: 'gold', AU: 'gold',
+  SILVER: 'silver', AG: 'silver',
+  COPPER: 'copper', CU: 'copper',
+  LITHIUM: 'lithium', LI: 'lithium',
+  NICKEL: 'nickel', NI: 'nickel',
+  ZINC: 'zinc', ZN: 'zinc',
+  URANIUM: 'uranium', U3O8: 'uranium',
+  IRON: 'iron-ore', 'IRON ORE': 'iron-ore', FE: 'iron-ore',
+  PLATINUM: 'platinum', PT: 'platinum',
+  PALLADIUM: 'palladium', PD: 'palladium',
+  COBALT: 'cobalt', CO: 'cobalt',
+  MANGANESE: 'manganese', MN: 'manganese',
+  COAL: 'coal',
+  DIAMONDS: 'diamonds',
+  GRAPHITE: 'graphite',
+  POTASH: 'potash',
+  TIN: 'tin', SN: 'tin',
+  LEAD: 'lead', PB: 'lead',
+  ALUMINUM: 'aluminum', ALUMINIUM: 'aluminum', AL: 'aluminum',
+  TUNGSTEN: 'tungsten', W: 'tungsten',
+  MOLYBDENUM: 'molybdenum', MO: 'molybdenum',
+  ANTIMONY: 'antimony', SB: 'antimony',
+  'RARE EARTHS': 'rare-earths', REE: 'rare-earths',
+  VANADIUM: 'vanadium',
+  CHROME: 'chrome', CR: 'chrome',
+  PHOSPHATE: 'phosphate',
+  SILICA: 'silica',
+};
+
 // ─── Helpers ───────────────────────────────────────────────────────────
 const confidenceColors: Record<string, string> = {
   high: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
@@ -220,6 +312,20 @@ const suggestedQuestions = [
   { text: "What's happening in the lithium sector? Any new discoveries?", icon: Zap, category: 'Sector' },
   { text: "Analyze NST - is it undervalued compared to peers?", icon: DollarSign, category: 'Valuation' },
   { text: "What are the most significant drilling intersections this week?", icon: Hammer, category: 'Exploration' },
+  { text: "Best gold companies to invest in for long-term growth?", icon: Star, category: 'Commodity' },
+  { text: "Which copper stocks should I buy based on recent sentiment?", icon: Activity, category: 'Sentiment' },
+  { text: "Uranium sector outlook — which companies benefit from the nuclear renaissance?", icon: Zap, category: 'Sector' },
+];
+
+const commodityAnalysisTemplates = [
+  { label: 'Sector Outlook', icon: TrendingUp, prompt: (c: string) => `What is the current outlook for the ${c} sector? Include price trends, supply/demand dynamics, and top picks for investors.` },
+  { label: 'Top Picks', icon: Star, prompt: (c: string) => `Which ${c} companies are the best investment opportunities right now? Rank by short-term, medium-term, and long-term potential.` },
+  { label: 'Sentiment', icon: Activity, prompt: (c: string) => `What is the current market sentiment across ${c} companies? Which have the most bullish news flow and strongest buy signals?` },
+  { label: 'New Discoveries', icon: Hammer, prompt: (c: string) => `What are the most significant recent ${c} drill results and discoveries? Which companies are making new finds?` },
+  { label: 'Invest Now', icon: DollarSign, prompt: (c: string) => `Should I invest in ${c} right now? Give me your top 3 picks with clear buy/hold recommendations and price targets.` },
+  { label: 'Risks', icon: AlertTriangle, prompt: (c: string) => `What are the key risks facing ${c} investors? Include commodity price risk, oversupply, and company-specific risks.` },
+  { label: 'Resource Leaders', icon: Database, prompt: (c: string) => `Which companies have the largest ${c} resources? Compare them on EV/oz or EV/lb, grade, and development stage.` },
+  { label: 'Short vs Long', icon: BarChart3, prompt: (c: string) => `Compare short-term trading opportunities vs long-term investment plays in the ${c} sector. Which companies for each?` },
 ];
 
 // ─── Component ─────────────────────────────────────────────────────────
@@ -236,6 +342,12 @@ export default function AIAnalystPage() {
   const [snapshotLoading, setSnapshotLoading] = useState(false);
   const [snapshotError, setSnapshotError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'chat' | 'overview' | 'news' | 'resources'>('chat');
+
+  // Commodity snapshot
+  const [commoditySnapshot, setCommoditySnapshot] = useState<CommoditySnapshotData | null>(null);
+  const [commodityLoading, setCommodityLoading] = useState(false);
+  const [commodityError, setCommodityError] = useState<string | null>(null);
+  const [commodityTab, setCommodityTab] = useState<'chat' | 'overview' | 'signals' | 'intercepts'>('overview');
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -258,11 +370,32 @@ export default function AIAnalystPage() {
       }
       const data: SnapshotData = await res.json();
       setSnapshot(data);
+      setCommoditySnapshot(null);
       setActiveTab('overview');
     } catch {
       setSnapshotError('Failed to load company data.');
     } finally {
       setSnapshotLoading(false);
+    }
+  }, []);
+
+  const fetchCommoditySnapshot = useCallback(async (code: string) => {
+    setCommodityLoading(true);
+    setCommodityError(null);
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/ai-analyst/snapshot/commodity/${code}`);
+      if (!res.ok) {
+        if (res.status === 404) { setCommodityError(`Commodity "${code}" not found`); setCommoditySnapshot(null); return; }
+        throw new Error(`API ${res.status}`);
+      }
+      const data: CommoditySnapshotData = await res.json();
+      setCommoditySnapshot(data);
+      setSnapshot(null);
+      setCommodityTab('overview');
+    } catch {
+      setCommodityError('Failed to load commodity data.');
+    } finally {
+      setCommodityLoading(false);
     }
   }, []);
 
@@ -310,7 +443,18 @@ export default function AIAnalystPage() {
   };
   const copyToClipboard = (text: string, id: string) => { navigator.clipboard.writeText(text); setCopiedId(id); setTimeout(() => setCopiedId(null), 2000); };
   const handleKeyPress = (e: React.KeyboardEvent) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } };
-  const handleTickerSubmit = (e: React.FormEvent) => { e.preventDefault(); if (tickerSearch.trim()) fetchSnapshot(tickerSearch); };
+  const handleTickerSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const q = tickerSearch.trim().toUpperCase();
+    if (!q) return;
+    // Check if it's a commodity
+    const commodityCode = KNOWN_COMMODITIES[q];
+    if (commodityCode) {
+      fetchCommoditySnapshot(commodityCode);
+    } else {
+      fetchSnapshot(q);
+    }
+  };
 
   const s = snapshot; // shorthand
 
@@ -342,13 +486,13 @@ export default function AIAnalystPage() {
                   type="text"
                   value={tickerSearch}
                   onChange={(e) => setTickerSearch(e.target.value.toUpperCase())}
-                  placeholder="Ticker (BHP, NST...)"
+                  placeholder="Ticker or commodity (BHP, Gold...)"
                   className="w-44 sm:w-56 pl-9 pr-3 py-2 bg-metallic-800/80 border border-metallic-700 rounded-lg text-sm text-white placeholder-metallic-500 focus:outline-none focus:border-emerald-500/50"
                   maxLength={10}
                 />
               </div>
-              <button type="submit" disabled={!tickerSearch.trim() || snapshotLoading} className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white text-sm font-medium rounded-lg hover:from-emerald-600 hover:to-teal-700 disabled:opacity-50 transition-all flex items-center gap-1.5">
-                {snapshotLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
+              <button type="submit" disabled={!tickerSearch.trim() || snapshotLoading || commodityLoading} className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white text-sm font-medium rounded-lg hover:from-emerald-600 hover:to-teal-700 disabled:opacity-50 transition-all flex items-center gap-1.5">
+                {(snapshotLoading || commodityLoading) ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
                 Analyze
               </button>
             </form>
@@ -357,7 +501,7 @@ export default function AIAnalystPage() {
       </header>
 
       <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        {/* ═══ Snapshot Dashboard ═══ */}
+        {/* ═══ Snapshot Dashboard (Ticker) ═══ */}
         {(snapshot || snapshotLoading || snapshotError) && (
           <div className="mb-4">
             {snapshotError && (
@@ -480,9 +624,122 @@ export default function AIAnalystPage() {
           </div>
         )}
 
+        {/* ═══ Commodity Dashboard ═══ */}
+        {(commoditySnapshot || commodityLoading || commodityError) && !snapshot && (
+          <div className="mb-4">
+            {commodityError && (
+              <div className="bg-red-900/20 border border-red-800/40 rounded-xl p-4 flex items-center gap-3">
+                <AlertTriangle className="w-5 h-5 text-red-400 flex-shrink-0" />
+                <span className="text-red-300 text-sm">{commodityError}</span>
+                <button onClick={() => { setCommodityError(null); setCommoditySnapshot(null); }} className="ml-auto text-metallic-400 hover:text-white"><X className="w-4 h-4" /></button>
+              </div>
+            )}
+            {commodityLoading && (
+              <div className="bg-metallic-900/50 border border-metallic-800 rounded-xl p-8 flex items-center justify-center gap-3">
+                <Loader2 className="w-6 h-6 animate-spin text-amber-400" />
+                <span className="text-metallic-400">Loading commodity intelligence...</span>
+              </div>
+            )}
+
+            {commoditySnapshot && !commodityLoading && (() => { const cs = commoditySnapshot; return (
+              <>
+                {/* Commodity header */}
+                <div className="bg-metallic-900/50 border border-metallic-800 rounded-xl p-4 mb-3">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-amber-500/20 flex items-center justify-center">
+                        <DollarSign className="w-5 h-5 text-amber-400" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h2 className="text-xl font-bold text-white">{cs.commodity}</h2>
+                          <span className="px-2 py-0.5 text-xs font-mono rounded bg-metallic-800 text-metallic-300 border border-metallic-700">{cs.commodity_code}</span>
+                          <span className="px-2 py-0.5 text-xs rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">{cs.company_count} companies</span>
+                        </div>
+                        {cs.sector_sentiment && (
+                          <div className="flex items-center gap-3 text-xs mt-0.5">
+                            <span className={`font-semibold ${cs.sector_sentiment.signal === 'BULLISH' ? 'text-emerald-400' : cs.sector_sentiment.signal === 'BEARISH' ? 'text-red-400' : 'text-amber-400'}`}>
+                              Sector: {cs.sector_sentiment.signal}
+                            </span>
+                            <span className={`${cs.sector_sentiment.trend === 'improving' ? 'text-emerald-400' : cs.sector_sentiment.trend === 'deteriorating' ? 'text-red-400' : 'text-metallic-400'}`}>
+                              Trend: {cs.sector_sentiment.trend}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {cs.spot_price && cs.spot_price.price_usd != null && (
+                      <div className="text-right">
+                        <div className="text-2xl font-bold text-white">${cs.spot_price.price_usd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}<span className="text-sm text-metallic-400 ml-1">/{cs.spot_price.unit}</span></div>
+                        <div className="flex items-center gap-3 text-xs mt-0.5">
+                          <span className="text-metallic-500">1D:</span><PctBadge val={cs.spot_price.change_1d_pct} />
+                          <span className="text-metallic-500">7D:</span><PctBadge val={cs.spot_price.change_7d_pct} />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* KPI Cards */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2 mb-3">
+                  <KpiCard icon={Building2} label="Companies" value={String(cs.company_count)} color="text-emerald-400" />
+                  <KpiCard icon={DollarSign} label="Spot Price" value={cs.spot_price?.price_usd != null ? `$${cs.spot_price.price_usd.toLocaleString()}` : '—'} color="text-amber-400" />
+                  <KpiCard icon={Activity} label="Sentiment (7d)" value={cs.sector_sentiment?.avg_sentiment_7d != null ? cs.sector_sentiment.avg_sentiment_7d.toFixed(2) : '—'} color="text-blue-400" />
+                  <KpiCard icon={Newspaper} label="News (7d)" value={String(cs.sector_sentiment?.news_hits_7d || 0)} color="text-cyan-400" />
+                  <KpiCard icon={TrendingUp} label="Invest Signals" value={String(cs.sector_signals?.invest_count || 0)} color="text-green-400" />
+                  <KpiCard icon={AlertTriangle} label="Divest Signals" value={String(cs.sector_signals?.divest_count || 0)} color="text-red-400" />
+                  <KpiCard icon={CircleDot} label="Top Intercepts" value={String(cs.top_intercepts?.length || 0)} color="text-purple-400" />
+                  <KpiCard icon={Database} label="Resource Cos" value={String(cs.resource_totals?.companies_with_resources || 0)} color="text-pink-400" />
+                </div>
+
+                {/* Tab bar */}
+                <div className="flex items-center gap-1 mb-3 border-b border-metallic-800 pb-1">
+                  {([
+                    { id: 'chat' as const, label: 'AI Chat', icon: MessageSquare },
+                    { id: 'overview' as const, label: 'Sector Overview', icon: PieChart },
+                    { id: 'signals' as const, label: 'Signals & News', icon: Activity },
+                    { id: 'intercepts' as const, label: 'Discoveries & Resources', icon: Hammer },
+                  ]).map(tab => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setCommodityTab(tab.id)}
+                      className={`flex items-center gap-1.5 px-4 py-2 text-sm rounded-t-lg transition-colors ${
+                        commodityTab === tab.id
+                          ? 'bg-metallic-800/60 text-white border border-metallic-700 border-b-0'
+                          : 'text-metallic-400 hover:text-metallic-200 hover:bg-metallic-800/30'
+                      }`}
+                    >
+                      <tab.icon className="w-4 h-4" />
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Quick analysis buttons for commodity */}
+                {commodityTab === 'chat' && (
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {commodityAnalysisTemplates.map(tmpl => (
+                      <button key={tmpl.label} onClick={() => handleSend(tmpl.prompt(cs.commodity))} disabled={isLoading}
+                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-metallic-800/50 border border-metallic-700/50 text-metallic-300 hover:text-white hover:border-amber-500/30 disabled:opacity-50 transition-colors">
+                        <tmpl.icon className="w-3.5 h-3.5" />{tmpl.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {/* Tab content */}
+                {commodityTab === 'overview' && <CommodityOverviewTab data={cs} />}
+                {commodityTab === 'signals' && <CommoditySignalsTab data={cs} />}
+                {commodityTab === 'intercepts' && <CommodityInterceptsTab data={cs} />}
+              </>
+            ); })()}
+          </div>
+        )}
+
         {/* ═══ Main Chat ═══ */}
-        {(activeTab === 'chat' || !snapshot) && (
-          <div className="bg-metallic-900/50 border border-metallic-800 rounded-xl flex flex-col" style={{ height: snapshot ? 'calc(100vh - 520px)' : 'calc(100vh - 160px)', minHeight: '400px' }}>
+        {((commoditySnapshot ? commodityTab === 'chat' : activeTab === 'chat') || (!snapshot && !commoditySnapshot)) && (
+          <div className="bg-metallic-900/50 border border-metallic-800 rounded-xl flex flex-col" style={{ height: (snapshot || commoditySnapshot) ? 'calc(100vh - 520px)' : 'calc(100vh - 160px)', minHeight: '400px' }}>
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
               {messages.length === 0 ? (
                 <EmptyState onSend={handleSend} />
@@ -519,7 +776,7 @@ export default function AIAnalystPage() {
             <div className="border-t border-metallic-700/50 p-3">
               <div className="flex items-end gap-2">
                 <textarea ref={inputRef} value={input} onChange={e => setInput(e.target.value)} onKeyDown={handleKeyPress}
-                  placeholder={snapshot ? `Ask about ${snapshot.ticker}...` : 'Ask about any mining company, commodity, or market trend...'}
+                  placeholder={commoditySnapshot ? `Ask about ${commoditySnapshot.commodity}...` : snapshot ? `Ask about ${snapshot.ticker}...` : 'Ask about any mining company, commodity, or market trend...'}
                   className="flex-1 px-4 py-2.5 bg-metallic-800 border border-metallic-700 rounded-xl text-white placeholder-metallic-500 focus:outline-none focus:border-emerald-500/50 resize-none text-sm"
                   rows={2} disabled={isLoading} />
                 <button onClick={() => handleSend()} disabled={!input.trim() || isLoading}
@@ -811,6 +1068,205 @@ function ResourcesTab({ snapshot: s }: { snapshot: SnapshotData }) {
         <div className="bg-metallic-900/50 border border-metallic-800 rounded-xl p-8 text-center">
           <Database className="w-8 h-8 text-metallic-600 mx-auto mb-2" />
           <p className="text-sm text-metallic-500">No resource estimates or economics data available for {s.ticker}.</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Commodity Overview Tab ─────────────────────────────────────────────
+function CommodityOverviewTab({ data: cs }: { data: CommoditySnapshotData }) {
+  return (
+    <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-3 mb-3">
+      {cs.spot_price && (
+        <DataCard title="Spot Price" icon={DollarSign} color="text-amber-400">
+          <Row label="Price (USD)" value={cs.spot_price.price_usd != null ? `$${cs.spot_price.price_usd.toLocaleString(undefined, { maximumFractionDigits: 2 })}/${cs.spot_price.unit}` : '—'} />
+          <Row label="1-Day Change" value={cs.spot_price.change_1d_pct != null ? `${cs.spot_price.change_1d_pct >= 0 ? '+' : ''}${cs.spot_price.change_1d_pct.toFixed(2)}%` : '—'}
+            valueClass={(cs.spot_price.change_1d_pct || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'} />
+          <Row label="7-Day Change" value={cs.spot_price.change_7d_pct != null ? `${cs.spot_price.change_7d_pct >= 0 ? '+' : ''}${cs.spot_price.change_7d_pct.toFixed(2)}%` : '—'}
+            valueClass={(cs.spot_price.change_7d_pct || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'} />
+          <Row label="52W High" value={cs.spot_price.high_52w != null ? `$${cs.spot_price.high_52w.toLocaleString()}` : '—'} />
+          <Row label="52W Low" value={cs.spot_price.low_52w != null ? `$${cs.spot_price.low_52w.toLocaleString()}` : '—'} />
+        </DataCard>
+      )}
+
+      {cs.sector_sentiment && (
+        <DataCard title="Sector Sentiment" icon={Activity} color="text-blue-400">
+          <Row label="Signal" value={cs.sector_sentiment.signal}
+            valueClass={cs.sector_sentiment.signal === 'BULLISH' ? 'text-emerald-400' : cs.sector_sentiment.signal === 'BEARISH' ? 'text-red-400' : 'text-amber-400'} />
+          <Row label="Trend" value={cs.sector_sentiment.trend}
+            valueClass={cs.sector_sentiment.trend === 'improving' ? 'text-emerald-400' : cs.sector_sentiment.trend === 'deteriorating' ? 'text-red-400' : undefined} />
+          <Row label="Avg Sentiment (7d)" value={cs.sector_sentiment.avg_sentiment_7d?.toFixed(3) || '—'}
+            valueClass={(cs.sector_sentiment.avg_sentiment_7d || 0) > 0 ? 'text-emerald-400' : (cs.sector_sentiment.avg_sentiment_7d || 0) < 0 ? 'text-red-400' : undefined} />
+          <Row label="Positive / Negative" value={`${cs.sector_sentiment.positive_articles_30d} / ${cs.sector_sentiment.negative_articles_30d}`} />
+          <Row label="Material Events" value={String(cs.sector_sentiment.material_events_30d)} valueClass="text-amber-400" />
+          <Row label="Total Coverage (30d)" value={`${cs.sector_sentiment.news_hits_30d} articles`} />
+        </DataCard>
+      )}
+
+      {cs.resource_totals && (
+        <DataCard title="Sector Resources" icon={Database} color="text-purple-400">
+          <Row label="Companies w/ Resources" value={String(cs.resource_totals.companies_with_resources)} />
+          <Row label="M+I Tonnage" value={cs.resource_totals.mi_tonnage_mt != null ? `${cs.resource_totals.mi_tonnage_mt.toFixed(1)} Mt` : '—'} />
+          <Row label="M+I Contained" value={cs.resource_totals.mi_contained != null ? `${cs.resource_totals.mi_contained.toLocaleString()} ${cs.resource_totals.contained_unit}` : '—'} />
+          <Row label="Inferred Tonnage" value={cs.resource_totals.inf_tonnage_mt != null ? `${cs.resource_totals.inf_tonnage_mt.toFixed(1)} Mt` : '—'} />
+          <Row label="Inferred Contained" value={cs.resource_totals.inf_contained != null ? `${cs.resource_totals.inf_contained.toLocaleString()} ${cs.resource_totals.contained_unit}` : '—'} />
+        </DataCard>
+      )}
+
+      {cs.top_resource_holders && cs.top_resource_holders.length > 0 && (
+        <DataCard title="Top Resource Holders" icon={Star} color="text-pink-400" className="col-span-full xl:col-span-1">
+          {cs.top_resource_holders.map((h, i) => (
+            <div key={i} className="flex items-center justify-between text-sm">
+              <div className="flex items-center gap-2">
+                <span className="text-metallic-500 text-xs font-mono w-4">{i + 1}.</span>
+                <span className="font-mono text-xs text-metallic-300">{h.ticker}</span>
+                <span className="text-metallic-400 truncate max-w-[120px] text-xs">{h.name}</span>
+              </div>
+              <span className="text-white font-medium text-xs">{h.contained != null ? `${h.contained.toLocaleString()} ${h.unit}` : '—'}</span>
+            </div>
+          ))}
+        </DataCard>
+      )}
+
+      {cs.companies && cs.companies.length > 0 && (
+        <DataCard title={`Companies (${cs.companies.length})`} icon={Building2} color="text-cyan-400" className="col-span-full xl:col-span-2">
+          <div className="max-h-60 overflow-y-auto space-y-1">
+            {cs.companies.map((c, i) => (
+              <div key={i} className="flex items-center justify-between text-sm">
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-xs text-amber-400">{c.ticker}</span>
+                  <span className="text-metallic-200 truncate max-w-[200px]">{c.name}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-metallic-500">{c.exchange}</span>
+                  <span className="px-1.5 py-0.5 text-[10px] rounded bg-metallic-800 text-metallic-400 border border-metallic-700">{c.type}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </DataCard>
+      )}
+    </div>
+  );
+}
+
+// ─── Commodity Signals & News Tab ──────────────────────────────────────
+function CommoditySignalsTab({ data: cs }: { data: CommoditySnapshotData }) {
+  const signals = cs.sector_signals?.signals || [];
+  const news = cs.recent_news || [];
+
+  return (
+    <div className="grid md:grid-cols-2 gap-3 mb-3">
+      <div className="bg-metallic-900/50 border border-metallic-800 rounded-xl p-4">
+        <h3 className="text-xs font-semibold text-emerald-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+          <TrendingUp className="w-3.5 h-3.5" /> Investment Signals ({signals.length})
+        </h3>
+        <div className="space-y-2 max-h-96 overflow-y-auto">
+          {signals.length === 0 && <p className="text-sm text-metallic-500">No active signals.</p>}
+          {signals.map((sig, i) => {
+            const sc = signalColors[sig.signal_type] || signalColors.watch;
+            return (
+              <div key={i} className={`${sc.bg} border ${sc.border} rounded-lg p-3`}>
+                <div className="flex items-center justify-between mb-1">
+                  <span className="font-mono text-xs text-amber-400">{sig.ticker}</span>
+                  <div className="flex items-center gap-2">
+                    <span className={`text-[10px] font-bold uppercase ${sc.text}`}>{sig.signal_type}</span>
+                    <span className="text-[10px] text-metallic-400">{sig.signal_strength}</span>
+                  </div>
+                </div>
+                <p className="text-sm text-metallic-200">{sig.headline}</p>
+                {sig.reasoning && <p className="text-xs text-metallic-400 mt-1">{sig.reasoning}</p>}
+                <div className="flex gap-3 text-xs text-metallic-500 mt-1">
+                  {sig.sentiment_score != null && (
+                    <span className={sig.sentiment_score > 0 ? 'text-emerald-400' : sig.sentiment_score < 0 ? 'text-red-400' : ''}>
+                      Sentiment: {sig.sentiment_score.toFixed(2)}
+                    </span>
+                  )}
+                  {sig.date && <span>{new Date(sig.date).toLocaleDateString()}</span>}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="bg-metallic-900/50 border border-metallic-800 rounded-xl p-4">
+        <h3 className="text-xs font-semibold text-blue-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+          <Newspaper className="w-3.5 h-3.5" /> Recent Sector News ({news.length})
+        </h3>
+        <div className="space-y-2 max-h-96 overflow-y-auto">
+          {news.length === 0 && <p className="text-sm text-metallic-500">No recent news.</p>}
+          {news.map((n, i) => (
+            <div key={i} className="border-b border-metallic-800/50 pb-2 last:border-0">
+              <div className="flex items-center gap-2 mb-0.5">
+                <span className="font-mono text-xs text-amber-400">{n.ticker}</span>
+                <span className="text-xs text-metallic-500 truncate">{n.company}</span>
+              </div>
+              <p className="text-sm text-metallic-200">{n.headline}</p>
+              <div className="flex flex-wrap gap-2 text-xs text-metallic-500 mt-0.5">
+                {n.date && <span>{new Date(n.date).toLocaleDateString()}</span>}
+                {n.event_type && <span className="capitalize">{n.event_type}</span>}
+                {n.significance && <span className={n.significance === 'high' ? 'text-amber-400 font-medium' : ''}>{n.significance}</span>}
+                {n.sentiment && (
+                  <span className={`font-medium ${n.sentiment.includes('positive') || n.sentiment.includes('bullish') ? 'text-emerald-400' : n.sentiment.includes('negative') || n.sentiment.includes('bearish') ? 'text-red-400' : 'text-metallic-400'}`}>{n.sentiment}</span>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Commodity Intercepts & Resources Tab ──────────────────────────────
+function CommodityInterceptsTab({ data: cs }: { data: CommoditySnapshotData }) {
+  const intercepts = cs.top_intercepts || [];
+
+  return (
+    <div className="space-y-3 mb-3">
+      {intercepts.length > 0 && (
+        <div className="bg-metallic-900/50 border border-metallic-800 rounded-xl p-4 overflow-hidden">
+          <h3 className="text-xs font-semibold text-purple-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+            <Hammer className="w-3.5 h-3.5" /> Top Intercepts ({intercepts.length})
+          </h3>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-metallic-400 border-b border-metallic-700/50 text-xs">
+                  <th className="text-left py-2 pr-3">Company</th>
+                  <th className="text-left py-2 pr-3">Commodity</th>
+                  <th className="text-right py-2 pr-3">Grade</th>
+                  <th className="text-right py-2 pr-3">Width (m)</th>
+                  <th className="text-center py-2">Significant</th>
+                </tr>
+              </thead>
+              <tbody>
+                {intercepts.map((ic, i) => (
+                  <tr key={i} className={`text-metallic-200 border-b border-metallic-800/30 ${ic.significant ? 'bg-amber-500/5' : ''}`}>
+                    <td className="py-1.5 pr-3 truncate max-w-[160px]">
+                      <span className="font-mono text-xs text-amber-400 mr-2">{ic.symbol}</span>
+                      <span className="text-metallic-300">{ic.company}</span>
+                    </td>
+                    <td className="py-1.5 pr-3 text-xs">{ic.commodity}</td>
+                    <td className="py-1.5 pr-3 text-right font-mono text-xs">{ic.grade != null ? `${ic.grade.toFixed(2)} ${ic.grade_unit}` : '—'}</td>
+                    <td className="py-1.5 pr-3 text-right font-mono text-xs">{ic.width_m != null ? ic.width_m.toFixed(1) : '—'}</td>
+                    <td className="py-1.5 text-center">
+                      {ic.significant && <Star className="w-3.5 h-3.5 text-amber-400 mx-auto" />}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {intercepts.length === 0 && (
+        <div className="bg-metallic-900/50 border border-metallic-800 rounded-xl p-8 text-center">
+          <Hammer className="w-8 h-8 text-metallic-600 mx-auto mb-2" />
+          <p className="text-sm text-metallic-500">No drill intercepts found for {cs.commodity}.</p>
         </div>
       )}
     </div>
