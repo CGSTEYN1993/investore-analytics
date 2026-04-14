@@ -3,6 +3,7 @@
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Loader2, CheckCircle, XCircle } from "lucide-react";
+import Cookies from "js-cookie";
 
 function AuthCallbackContent() {
   const searchParams = useSearchParams();
@@ -28,7 +29,7 @@ function AuthCallbackContent() {
       return;
     }
 
-    // Store tokens
+    // Store tokens in both localStorage (for api.ts) and cookies (for AuthProvider)
     try {
       localStorage.setItem("access_token", accessToken);
       if (refreshToken) {
@@ -37,6 +38,23 @@ function AuthCallbackContent() {
       if (expiresIn) {
         const expiryTime = Date.now() + parseInt(expiresIn) * 1000;
         localStorage.setItem("token_expiry", expiryTime.toString());
+      }
+
+      // Also set cookies for AuthProvider compatibility
+      const cookieOptions: Cookies.CookieAttributes = {
+        secure: window.location.protocol === 'https:',
+        sameSite: 'strict',
+        path: '/',
+      };
+      Cookies.set('access_token', accessToken, {
+        ...cookieOptions,
+        expires: expiresIn ? parseInt(expiresIn) / 86400 : 1,
+      });
+      if (refreshToken) {
+        Cookies.set('refresh_token', refreshToken, {
+          ...cookieOptions,
+          expires: 30,
+        });
       }
 
       setStatus("success");
