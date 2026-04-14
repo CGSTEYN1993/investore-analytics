@@ -32,7 +32,8 @@ interface USGSDeposit {
 }
 
 interface CompanyContext {
-  company: string;
+  name: string;
+  ticker: string;
   belts: string[];
   operations: string[];
   deposits: string;
@@ -437,7 +438,10 @@ export default function GeoscienceCountryPage() {
                 <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
                   {companyContexts.map((ctx, i) => (
                     <div key={i} className="bg-metallic-900/50 border border-metallic-800 rounded-xl p-5">
-                      <h3 className="font-semibold text-metallic-100 text-lg mb-2">{ctx.company}</h3>
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="font-semibold text-metallic-100 text-lg">{ctx.name}</h3>
+                        <span className="text-xs text-metallic-500 font-mono">JSE:{ctx.ticker}</span>
+                      </div>
                       <p className="text-sm text-metallic-400 mb-3 line-clamp-3">{ctx.deposits}</p>
                       <div className="space-y-1 text-xs text-metallic-500">
                         <div><strong className="text-metallic-400">Belts:</strong> {ctx.belts.join(', ')}</div>
