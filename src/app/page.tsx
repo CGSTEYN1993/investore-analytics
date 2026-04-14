@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   ArrowRight, BarChart3, Globe, Zap, TrendingUp, Activity,
   Brain, Sparkles, Target, Map, Users, Newspaper,
@@ -55,154 +56,15 @@ function FeatureShowcase({
   );
 }
 
-/* ─── Mockup: AI Analyst Chat ─── */
-function AiAnalystMockup() {
+/* ─── Screenshot Preview (replaces CSS mockups with real app screenshots) ─── */
+function ScreenshotPreview({ src, alt }: { src: string; alt: string }) {
   return (
     <div className="bg-metallic-900/80 border border-metallic-700/50 rounded-xl overflow-hidden shadow-2xl shadow-black/30">
       <div className="flex items-center gap-2 px-4 py-2.5 border-b border-metallic-800 bg-metallic-900/50">
         <div className="flex gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-red-400/60" /><span className="w-2.5 h-2.5 rounded-full bg-yellow-400/60" /><span className="w-2.5 h-2.5 rounded-full bg-green-400/60" /></div>
-        <span className="ml-2 text-[11px] text-metallic-500 font-mono">AI Analyst</span>
-        <div className="ml-auto flex items-center gap-1.5"><Brain className="w-3.5 h-3.5 text-emerald-400" /><span className="text-[10px] text-emerald-400">Live</span></div>
+        <span className="ml-2 text-[11px] text-metallic-500 font-mono">{alt}</span>
       </div>
-      <div className="p-4 space-y-3">
-        <div className="flex justify-end"><div className="bg-primary-600/20 border border-primary-500/30 rounded-lg rounded-br-sm px-3 py-2 max-w-[80%]"><p className="text-sm text-metallic-200">Which gold explorers in Western Australia have drill results above 5 g/t?</p></div></div>
-        <div className="flex justify-start"><div className="bg-metallic-800/60 border border-metallic-700/50 rounded-lg rounded-bl-sm px-3 py-2 max-w-[90%]">
-          <div className="flex items-center gap-1.5 mb-2"><Sparkles className="w-3.5 h-3.5 text-emerald-400" /><span className="text-xs font-semibold text-emerald-400">AI Analyst</span><span className="px-1.5 py-0.5 text-[9px] rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">HIGH confidence</span></div>
-          <p className="text-sm text-metallic-200 mb-2">Based on drill intercept data, here are <strong className="text-white">12 WA gold explorers</strong> with results exceeding 5 g/t:</p>
-          <div className="bg-metallic-900/80 rounded p-2 space-y-1 text-xs font-mono">
-            <div className="flex justify-between text-metallic-300"><span className="text-amber-400">DEG</span><span>9.2m @ 12.4 g/t Au</span><span className="text-emerald-400">STRONG BUY</span></div>
-            <div className="flex justify-between text-metallic-300"><span className="text-amber-400">SLR</span><span>15.0m @ 8.7 g/t Au</span><span className="text-emerald-400">BUY</span></div>
-            <div className="flex justify-between text-metallic-300"><span className="text-amber-400">RXL</span><span>6.5m @ 22.1 g/t Au</span><span className="text-amber-400">ACCUMULATE</span></div>
-          </div>
-          <p className="text-xs text-metallic-500 mt-2">Analysed 367 gold companies, 6,200+ drill intercepts</p>
-        </div></div>
-      </div>
-    </div>
-  );
-}
-
-/* ─── Mockup: Peer Comparison Table ─── */
-function PeerComparisonMockup() {
-  const rows = [
-    { ticker: 'NST', name: 'Northern Star', mcap: '$15.2B', evRes: '0.42x', pnav: '0.85x', change: '+2.4%', up: true },
-    { ticker: 'EVN', name: 'Evolution Mining', mcap: '$7.8B', evRes: '0.38x', pnav: '0.72x', change: '-0.8%', up: false },
-    { ticker: 'GOR', name: 'Gold Road', mcap: '$2.9B', evRes: '0.29x', pnav: '0.61x', change: '+1.2%', up: true },
-    { ticker: 'CMM', name: 'Capricorn Metals', mcap: '$2.1B', evRes: '0.35x', pnav: '0.68x', change: '+3.1%', up: true },
-    { ticker: 'RED', name: 'Red 5', mcap: '$1.4B', evRes: '0.22x', pnav: '0.54x', change: '+0.5%', up: true },
-  ];
-  return (
-    <div className="bg-metallic-900/80 border border-metallic-700/50 rounded-xl overflow-hidden shadow-2xl shadow-black/30">
-      <div className="flex items-center gap-2 px-4 py-2.5 border-b border-metallic-800 bg-metallic-900/50">
-        <div className="flex gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-red-400/60" /><span className="w-2.5 h-2.5 rounded-full bg-yellow-400/60" /><span className="w-2.5 h-2.5 rounded-full bg-green-400/60" /></div>
-        <span className="ml-2 text-[11px] text-metallic-500 font-mono">Peer Analytics</span>
-      </div>
-      <div className="p-3 overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead><tr className="text-metallic-500 text-xs border-b border-metallic-800">
-            <th className="text-left py-2 pr-3">Ticker</th><th className="text-left py-2 pr-3">Company</th>
-            <th className="text-right py-2 pr-3">Market Cap</th><th className="text-right py-2 pr-3">EV/Resource</th>
-            <th className="text-right py-2 pr-3">P/NAV</th><th className="text-right py-2">1D</th>
-          </tr></thead>
-          <tbody>{rows.map(r => (
-            <tr key={r.ticker} className="border-b border-metallic-800/40 hover:bg-metallic-800/20">
-              <td className="py-2 pr-3 font-mono text-amber-400 text-xs font-bold">{r.ticker}</td>
-              <td className="py-2 pr-3 text-metallic-200">{r.name}</td>
-              <td className="py-2 pr-3 text-right text-metallic-300">{r.mcap}</td>
-              <td className="py-2 pr-3 text-right font-mono text-metallic-200">{r.evRes}</td>
-              <td className="py-2 pr-3 text-right font-mono text-metallic-200">{r.pnav}</td>
-              <td className={`py-2 text-right font-mono text-xs ${r.up ? 'text-emerald-400' : 'text-red-400'}`}>{r.change}</td>
-            </tr>
-          ))}</tbody>
-        </table>
-      </div>
-    </div>
-  );
-}
-
-/* ─── Mockup: Sentiment Signals ─── */
-function SentimentMockup() {
-  const signals = [
-    { ticker: 'DEG', type: 'INVEST', strength: 'STRONG', headline: 'Record quarterly production, costs below guidance', sentiment: 0.82, date: 'Today' },
-    { ticker: 'PLS', type: 'WATCH', strength: 'MODERATE', headline: 'Lithium price recovery, offtake renegotiations', sentiment: 0.34, date: 'Yesterday' },
-    { ticker: 'S32', type: 'DIVEST', strength: 'MODERATE', headline: 'Manganese operations suspended after cyclone damage', sentiment: -0.65, date: '2d ago' },
-  ];
-  const colors: Record<string, { bg: string; text: string; border: string }> = {
-    INVEST: { bg: 'bg-emerald-500/15', text: 'text-emerald-400', border: 'border-emerald-500/30' },
-    WATCH: { bg: 'bg-amber-500/15', text: 'text-amber-400', border: 'border-amber-500/30' },
-    DIVEST: { bg: 'bg-red-500/15', text: 'text-red-400', border: 'border-red-500/30' },
-  };
-  return (
-    <div className="bg-metallic-900/80 border border-metallic-700/50 rounded-xl overflow-hidden shadow-2xl shadow-black/30">
-      <div className="flex items-center gap-2 px-4 py-2.5 border-b border-metallic-800 bg-metallic-900/50">
-        <div className="flex gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-red-400/60" /><span className="w-2.5 h-2.5 rounded-full bg-yellow-400/60" /><span className="w-2.5 h-2.5 rounded-full bg-green-400/60" /></div>
-        <span className="ml-2 text-[11px] text-metallic-500 font-mono">Sentiment Signals</span>
-      </div>
-      <div className="p-3 space-y-2">
-        {signals.map(s => {
-          const c = colors[s.type];
-          return (
-            <div key={s.ticker} className={`${c.bg} border ${c.border} rounded-lg p-3`}>
-              <div className="flex items-center justify-between mb-1">
-                <div className="flex items-center gap-2">
-                  <span className="font-mono text-xs font-bold text-amber-400">{s.ticker}</span>
-                  <span className={`text-[10px] font-bold uppercase ${c.text}`}>{s.type}</span>
-                  <span className="text-[10px] text-metallic-500">{s.strength}</span>
-                </div>
-                <span className="text-[10px] text-metallic-500">{s.date}</span>
-              </div>
-              <p className="text-xs text-metallic-300">{s.headline}</p>
-              <div className="flex items-center gap-2 mt-1">
-                <div className="flex-1 h-1 bg-metallic-800 rounded-full">
-                  <div className={`h-1 rounded-full ${s.sentiment > 0 ? 'bg-emerald-500' : 'bg-red-500'}`} style={{ width: `${Math.abs(s.sentiment) * 100}%` }} />
-                </div>
-                <span className={`text-[10px] font-mono ${s.sentiment > 0 ? 'text-emerald-400' : 'text-red-400'}`}>{s.sentiment > 0 ? '+' : ''}{s.sentiment.toFixed(2)}</span>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-/* ─── Mockup: Map Preview ─── */
-function MapMockup() {
-  return (
-    <div className="bg-metallic-900/80 border border-metallic-700/50 rounded-xl overflow-hidden shadow-2xl shadow-black/30">
-      <div className="flex items-center gap-2 px-4 py-2.5 border-b border-metallic-800 bg-metallic-900/50">
-        <div className="flex gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-red-400/60" /><span className="w-2.5 h-2.5 rounded-full bg-yellow-400/60" /><span className="w-2.5 h-2.5 rounded-full bg-green-400/60" /></div>
-        <span className="ml-2 text-[11px] text-metallic-500 font-mono">Global Mining Map</span>
-      </div>
-      <div className="relative h-64 bg-gradient-to-br from-metallic-900 via-[#0a1628] to-metallic-900 overflow-hidden">
-        {/* Grid overlay */}
-        <div className="absolute inset-0" style={{ backgroundImage: 'linear-gradient(rgba(20,184,166,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(20,184,166,0.05) 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
-        {/* Project dots */}
-        {[
-          { x: '22%', y: '65%', color: 'bg-amber-400', label: 'WA Gold Belt', size: 'w-3 h-3' },
-          { x: '35%', y: '30%', color: 'bg-cyan-400', label: 'DRC Copper', size: 'w-2 h-2' },
-          { x: '70%', y: '42%', color: 'bg-emerald-400', label: 'Ontario Lithium', size: 'w-2.5 h-2.5' },
-          { x: '82%', y: '58%', color: 'bg-purple-400', label: 'Chile Copper', size: 'w-2 h-2' },
-          { x: '28%', y: '50%', color: 'bg-rose-400', label: 'SA PGMs', size: 'w-2.5 h-2.5' },
-          { x: '48%', y: '25%', color: 'bg-amber-400', label: 'Nevada Gold', size: 'w-2 h-2' },
-          { x: '15%', y: '72%', color: 'bg-blue-400', label: 'NSW Coal', size: 'w-1.5 h-1.5' },
-          { x: '55%', y: '50%', color: 'bg-emerald-400', label: 'Zambia Cu', size: 'w-2 h-2' },
-        ].map((dot, i) => (
-          <div key={i} className="absolute group" style={{ left: dot.x, top: dot.y }}>
-            <span className={`block ${dot.size} ${dot.color} rounded-full animate-pulse`} />
-            <span className={`absolute -top-6 left-1/2 -translate-x-1/2 text-[9px] text-metallic-400 whitespace-nowrap bg-metallic-900/90 px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity`}>{dot.label}</span>
-          </div>
-        ))}
-        {/* Legend */}
-        <div className="absolute bottom-3 left-3 flex items-center gap-3 bg-metallic-900/80 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-metallic-700/40 text-[9px] text-metallic-400">
-          <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-amber-400" />Gold</span>
-          <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />Copper</span>
-          <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />Lithium</span>
-          <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-purple-400" />PGMs</span>
-        </div>
-        <div className="absolute bottom-3 right-3 bg-metallic-900/80 backdrop-blur-sm px-2.5 py-1.5 rounded-lg border border-metallic-700/40 text-[10px] text-metallic-300 font-mono">
-          2,000+ projects · 50+ countries
-        </div>
-      </div>
+      <Image src={src} alt={alt} width={800} height={600} className="w-full h-auto" quality={90} />
     </div>
   );
 }
@@ -386,7 +248,7 @@ export default function HomePage() {
             ]}
             ctaText="Try the AI Analyst"
             ctaHref="/analysis/ai-analyst"
-            mockup={<AiAnalystMockup />}
+            mockup={<ScreenshotPreview src="/screenshots/ai-analyst.png" alt="AI Research Analyst" />}
           />
         </div>
       </section>
@@ -407,7 +269,7 @@ export default function HomePage() {
             ]}
             ctaText="Explore Signals"
             ctaHref="/analysis/sentiment"
-            mockup={<SentimentMockup />}
+            mockup={<ScreenshotPreview src="/screenshots/cross-exchange.png" alt="Cross-Exchange Intelligence" />}
             reverse
           />
         </div>
@@ -429,12 +291,12 @@ export default function HomePage() {
             ]}
             ctaText="Compare Companies"
             ctaHref="/analysis/compare"
-            mockup={<PeerComparisonMockup />}
+            mockup={<ScreenshotPreview src="/screenshots/commodity-breakdown.png" alt="Commodity Breakdown" />}
           />
         </div>
       </section>
 
-      {/* ═══ FEATURE 4: GLOBAL MAP ═══ */}
+      {/* ═══ FEATURE 4: COMMODITY PRICES ═══ */}
       <section className="py-20 border-b border-metallic-800/50 bg-metallic-900/20 relative overflow-hidden">
         <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-blue-500/5 rounded-full blur-3xl" />
         <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -450,8 +312,29 @@ export default function HomePage() {
             ]}
             ctaText="Explore the Map"
             ctaHref="/map"
-            mockup={<MapMockup />}
+            mockup={<ScreenshotPreview src="/screenshots/commodity-prices.png" alt="Commodity Spot Prices" />}
             reverse
+          />
+        </div>
+      </section>
+
+      {/* ═══ FEATURE 5: NEWS & SENTIMENT ═══ */}
+      <section className="py-20 border-b border-metallic-800/50 relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-[400px] h-[400px] bg-amber-500/5 rounded-full blur-3xl" />
+        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <FeatureShowcase
+            badge="News Intelligence"
+            title="AI-Scored Mining News From Every Exchange"
+            description="3,500+ news articles aggregated from ASX, TSX, JSE, NYSE and LSE — each scored for sentiment by AI. Spot material events, trading halts, and production updates instantly."
+            features={[
+              { icon: Newspaper, text: 'Real-time news feed from 5 exchanges with category tags: Corporate, Exploration, Production, Trading Halt' },
+              { icon: Activity, text: 'AI sentiment scoring on every article — positive, negative, or neutral — with confidence levels' },
+              { icon: AlertTriangle, text: 'Material event detection: drilling results, resource upgrades, capital raisings, management changes' },
+              { icon: Search, text: 'Filter by exchange, ticker, date range — find any company\'s news history in seconds' },
+            ]}
+            ctaText="Browse News"
+            ctaHref="/news"
+            mockup={<ScreenshotPreview src="/screenshots/news-hits.png" alt="News Hits" />}
           />
         </div>
       </section>
