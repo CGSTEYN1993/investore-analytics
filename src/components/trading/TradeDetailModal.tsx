@@ -243,7 +243,7 @@ export default function TradeDetailModal({ positionId, onClose }: TradeDetailMod
                   interval={Math.max(Math.floor(chartData.length / 8), 1)}
                   tickFormatter={(v: string) => { const d = new Date(v); return `${d.getDate()}/${d.getMonth()+1}`; }} />
                 <YAxis domain={[yMin, yMax]} tick={{ fill: '#64748b', fontSize: 10 }} tickLine={false}
-                  width={60} tickFormatter={(v: number) => v.toFixed(2)} />
+                  width={65} tickFormatter={(v: number) => v >= 1000 ? `${(v/1000).toFixed(1)}k` : v.toFixed(2)} />
                 <Tooltip content={<ChartTooltip />} />
 
                 {/* Price area + line */}
