@@ -138,6 +138,7 @@ export default function ExchangeDetailPage() {
   const params = useParams();
   const exchange = params.exchange as string;
   const [companies, setCompanies] = useState<Company[]>([]);
+  const [totalCompanies, setTotalCompanies] = useState<number>(0);
   const [loading, setLoading] = useState(true);
   const [loadingMarketCaps, setLoadingMarketCaps] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -197,7 +198,7 @@ export default function ExchangeDetailPage() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`${API_URL}/api/v1/spatial/exchanges/${exchange.toUpperCase()}/companies?limit=500`);
+      const response = await fetch(`${API_URL}/api/v1/spatial/exchanges/${exchange.toUpperCase()}/companies?limit=2000`);
       if (!response.ok) throw new Error('Failed to fetch companies');
       
       const result = await response.json();
@@ -207,6 +208,7 @@ export default function ExchangeDetailPage() {
         ticker: c.ticker || c.symbol || '',
       }));
       setCompanies(companyList);
+      setTotalCompanies(result.total || companyList.length);
       
       // Fetch real market caps after loading companies
       fetchMarketCaps(companyList);
@@ -273,7 +275,7 @@ export default function ExchangeDetailPage() {
               <div>
                 <h1 className="text-2xl font-bold text-metallic-100">{info.name}</h1>
                 <p className="text-metallic-400 text-sm">
-                  {companies.length.toLocaleString()} mining companies • {info.country}
+                  {totalCompanies.toLocaleString()} mining companies • {info.country}
                 </p>
               </div>
             </div>
@@ -354,7 +356,7 @@ export default function ExchangeDetailPage() {
                   <Building2 className="w-4 h-4" />
                   Total Companies
                 </div>
-                <p className="text-2xl font-bold text-metallic-100">{companies.length.toLocaleString()}</p>
+                <p className="text-2xl font-bold text-metallic-100">{totalCompanies.toLocaleString()}</p>
               </div>
               <div className="bg-metallic-900 border border-metallic-800 rounded-xl p-4">
                 <div className="flex items-center gap-2 text-green-400 text-sm mb-1">
@@ -385,7 +387,7 @@ export default function ExchangeDetailPage() {
             {/* Results info */}
             <div className="flex items-center justify-between mb-4">
               <p className="text-sm text-metallic-400">
-                Showing {filteredCompanies.length} of {companies.length} companies
+                Showing {filteredCompanies.length} of {totalCompanies.toLocaleString()} companies
                 {loadingMarketCaps && (
                   <span className="ml-2 text-primary-400">
                     <Loader2 className="w-3 h-3 inline animate-spin mr-1" />
