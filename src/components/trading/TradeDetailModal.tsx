@@ -134,15 +134,29 @@ export default function TradeDetailModal({ positionId, onClose }: TradeDetailMod
     date: c.date.slice(0, 10),
   }));
 
-  // Calculate Y axis domain to include TP/SL lines
+  // Calculate Y axis domain – only extend for TP/SL if they are in a similar price range as chart data
   const closes = chartData.map(c => c.close).filter((v): v is number => v != null);
-  let yMin = Math.min(...closes, detail.entry_price);
-  let yMax = Math.max(...closes, detail.entry_price);
-  if (detail.stop_loss) yMin = Math.min(yMin, detail.stop_loss);
-  if (detail.take_profit) yMax = Math.max(yMax, detail.take_profit);
+  const chartMin = Math.min(...closes);
+  const chartMax = Math.max(...closes);
+  const chartRange = chartMax - chartMin || chartMax * 0.1;
+  // A level is "in range" if it's within 3x the chart range from the chart edges
+  const inRange = (v: number | null | undefined): v is number =>
+    v != null && v > chartMin - chartRange * 3 && v < chartMax + chartRange * 3;
+  let yMin = chartMin;
+  let yMax = chartMax;
+  if (inRange(detail.entry_price)) { yMin = Math.min(yMin, detail.entry_price); yMax = Math.max(yMax, detail.entry_price); }
+  if (inRange(detail.stop_loss)) yMin = Math.min(yMin, detail.stop_loss);
+  if (inRange(detail.take_profit)) yMax = Math.max(yMax, detail.take_profit);
+  if (inRange(detail.current_price)) { yMin = Math.min(yMin, detail.current_price); yMax = Math.max(yMax, detail.current_price); }
   const yPad = (yMax - yMin) * 0.08;
   yMin = Math.floor((yMin - yPad) * 100) / 100;
   yMax = Math.ceil((yMax + yPad) * 100) / 100;
+
+  // Hide reference lines that would be far outside the visible chart area
+  const showEntry = inRange(detail.entry_price);
+  const showSL = inRange(detail.stop_loss);
+  const showTP = inRange(detail.take_profit);
+  const showCurrent = inRange(detail.current_price);
 
   return (
     <Overlay onClose={onClose}>
@@ -237,24 +251,28 @@ export default function TradeDetailModal({ positionId, onClose }: TradeDetailMod
                   fill="url(#priceGradient)" dot={false} />
 
                 {/* Entry price line */}
+                {showEntry && (
                 <ReferenceLine y={detail.entry_price} stroke="#a78bfa" strokeDasharray="6 4" strokeWidth={1.5}
                   label={{ value: `Entry ${formatCurrency(detail.entry_price)}`, fill: '#a78bfa', fontSize: 10, position: 'right' }} />
+                )}
 
                 {/* Stop Loss line */}
-                {detail.stop_loss && (
-                  <ReferenceLine y={detail.stop_loss} stroke="#f87171" strokeDasharray="4 4" strokeWidth={1.5}
+                {showSL && (
+                  <ReferenceLine y={detail.stop_loss!} stroke="#f87171" strokeDasharray="4 4" strokeWidth={1.5}
                     label={{ value: `SL ${formatCurrency(detail.stop_loss)}`, fill: '#f87171', fontSize: 10, position: 'right' }} />
                 )}
 
                 {/* Take Profit line */}
-                {detail.take_profit && (
-                  <ReferenceLine y={detail.take_profit} stroke="#34d399" strokeDasharray="4 4" strokeWidth={1.5}
+                {showTP && (
+                  <ReferenceLine y={detail.take_profit!} stroke="#34d399" strokeDasharray="4 4" strokeWidth={1.5}
                     label={{ value: `TP ${formatCurrency(detail.take_profit)}`, fill: '#34d399', fontSize: 10, position: 'right' }} />
                 )}
 
                 {/* Current price line */}
+                {showCurrent && (
                 <ReferenceLine y={detail.current_price} stroke="#fbbf24" strokeDasharray="2 2" strokeWidth={1}
                   label={{ value: `Now ${formatCurrency(detail.current_price)}`, fill: '#fbbf24', fontSize: 10, position: 'left' }} />
+                )}
               </ComposedChart>
             ) : (
               <ComposedChart data={chartData} margin={{ top: 5, right: 5, bottom: 5, left: 5 }}>
