@@ -39,14 +39,18 @@ async function authFetch<T>(url: string, init?: RequestInit): Promise<T> {
 export interface TradingAccount {
   id: number;
   user_id: number;
-  name: string;
+  account_name: string;
   broker: string;
-  mode: 'paper' | 'live';
+  is_paper: boolean;
   initial_balance: number;
   current_balance: number;
-  currency: string;
+  base_currency: string;
   is_active: boolean;
-  connection_status: string;
+  is_connected: boolean;
+  max_position_pct: number;
+  max_total_exposure_pct: number;
+  max_daily_loss_pct: number;
+  max_positions: number;
   created_at: string;
 }
 
@@ -201,11 +205,11 @@ export async function fetchAccounts(): Promise<TradingAccount[]> {
 }
 
 export async function createAccount(data: {
-  name: string;
+  account_name: string;
   broker?: string;
-  mode?: 'paper' | 'live';
+  is_paper?: boolean;
   initial_balance?: number;
-  currency?: string;
+  base_currency?: string;
 }): Promise<TradingAccount> {
   return authFetch<TradingAccount>(`${API}/api/v1/trading/accounts`, {
     method: 'POST',

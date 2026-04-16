@@ -62,10 +62,10 @@ export default function AccountsPage() {
     setError(null);
     try {
       await createAccount({
-        name: formName,
-        mode: formMode,
+        account_name: formName,
+        is_paper: formMode === 'paper',
         initial_balance: formBalance,
-        currency: formCurrency,
+        base_currency: formCurrency,
       });
       setShowCreate(false);
       setFormName('');
@@ -208,12 +208,12 @@ export default function AccountsPage() {
               <div key={acct.id} className="bg-metallic-900/80 backdrop-blur-sm border border-metallic-700/50 rounded-xl p-5">
                 <div className="flex items-start justify-between mb-4">
                   <div>
-                    <h3 className="text-base font-semibold text-metallic-100">{acct.name}</h3>
+                    <h3 className="text-base font-semibold text-metallic-100">{acct.account_name}</h3>
                     <div className="flex items-center gap-2 mt-1">
                       <span className={`px-2 py-0.5 rounded text-xs font-medium ${
-                        acct.mode === 'paper' ? 'bg-amber-500/15 text-amber-400' : 'bg-emerald-500/15 text-emerald-400'
+                        acct.is_paper ? 'bg-amber-500/15 text-amber-400' : 'bg-emerald-500/15 text-emerald-400'
                       }`}>
-                        {acct.mode.toUpperCase()}
+                        {acct.is_paper ? 'PAPER' : 'LIVE'}
                       </span>
                       <span className="text-xs text-metallic-500">{acct.broker}</span>
                     </div>
@@ -243,7 +243,7 @@ export default function AccountsPage() {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-metallic-400">Currency</span>
-                    <span className="text-sm text-metallic-200">{acct.currency}</span>
+                    <span className="text-sm text-metallic-200">{acct.base_currency}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-metallic-400">Status</span>

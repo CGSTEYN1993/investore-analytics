@@ -426,16 +426,16 @@ export default function TradingDashboardPage() {
                   {dashboard?.accounts.map((acct) => (
                     <div key={acct.id} className="p-4 rounded-lg bg-metallic-800/50 border border-metallic-700/30">
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-semibold text-metallic-100">{acct.name}</span>
+                        <span className="text-sm font-semibold text-metallic-100">{acct.account_name}</span>
                         <span className={`px-2 py-0.5 rounded text-xs font-medium ${
-                          acct.mode === 'paper'
+                          acct.is_paper
                             ? 'bg-amber-500/15 text-amber-400'
                             : 'bg-emerald-500/15 text-emerald-400'
                         }`}>
-                          {acct.mode.toUpperCase()}
+                          {acct.is_paper ? 'PAPER' : 'LIVE'}
                         </span>
                       </div>
-                      <div className="text-xs text-metallic-500 mb-3">{acct.broker} · {acct.currency}</div>
+                      <div className="text-xs text-metallic-500 mb-3">{acct.broker} · {acct.base_currency}</div>
                       <div className="flex justify-between">
                         <div>
                           <p className="text-xs text-metallic-500">Balance</p>
