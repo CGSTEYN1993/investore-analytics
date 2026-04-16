@@ -17,6 +17,11 @@ import {
 } from '@/services/tradingService';
 import TradeDetailModal from '@/components/trading/TradeDetailModal';
 
+const EXCHANGE_CURRENCY: Record<string, string> = {
+  JSE: 'R', ASX: 'A$', TSX: 'C$', TSXV: 'C$', LSE: '£', NYSE: '$', NASDAQ: '$', HKEX: 'HK$',
+};
+function ccy(exchange: string): string { return EXCHANGE_CURRENCY[exchange] || '$'; }
+
 function TabBar() {
   return (
     <div className="flex items-center gap-1 mt-6 -mb-px overflow-x-auto">
@@ -178,21 +183,21 @@ export default function PositionsPage() {
                           </span>
                         </td>
                         <td className="px-5 py-3 text-metallic-300">{pos.quantity}</td>
-                        <td className="px-5 py-3 text-metallic-300">${pos.entry_price.toFixed(2)}</td>
+                        <td className="px-5 py-3 text-metallic-300">{ccy(pos.exchange)}{pos.entry_price.toFixed(2)}</td>
                         <td className="px-5 py-3 text-metallic-200 font-medium">
-                          {pos.current_price ? `$${pos.current_price.toFixed(2)}` : '—'}
+                          {pos.current_price ? `${ccy(pos.exchange)}${pos.current_price.toFixed(2)}` : '—'}
                         </td>
                         <td className="px-5 py-3 text-red-400/70 text-xs">
-                          {pos.stop_loss ? `$${pos.stop_loss.toFixed(2)}` : '—'}
+                          {pos.stop_loss ? `${ccy(pos.exchange)}${pos.stop_loss.toFixed(2)}` : '—'}
                         </td>
                         <td className="px-5 py-3 text-emerald-400/70 text-xs">
-                          {pos.take_profit ? `$${pos.take_profit.toFixed(2)}` : '—'}
+                          {pos.take_profit ? `${ccy(pos.exchange)}${pos.take_profit.toFixed(2)}` : '—'}
                         </td>
                         <td className={`px-5 py-3 text-right font-semibold ${isProfit ? 'text-emerald-400' : 'text-red-400'}`}>
                           {pos.status === 'open' ? (
                             <span className="flex items-center justify-end gap-1">
                               {isProfit ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
-                              {isProfit ? '+' : ''}${pnl.toFixed(2)}
+                              {isProfit ? '+' : ''}{ccy(pos.exchange)}{Math.abs(pnl).toFixed(2)}
                             </span>
                           ) : '—'}
                         </td>

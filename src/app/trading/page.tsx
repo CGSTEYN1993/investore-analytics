@@ -18,6 +18,11 @@ import {
 } from '@/services/tradingService';
 import TradeDetailModal from '@/components/trading/TradeDetailModal';
 
+const EXCHANGE_CURRENCY: Record<string, string> = {
+  JSE: 'R', ASX: 'A$', TSX: 'C$', TSXV: 'C$', LSE: '£', NYSE: '$', NASDAQ: '$', HKEX: 'HK$',
+};
+function ccy(exchange: string): string { return EXCHANGE_CURRENCY[exchange] || '$'; }
+
 function StatCard({ label, value, icon, change, positive }: {
   label: string;
   value: string;
@@ -253,16 +258,16 @@ export default function TradingDashboardPage() {
                               <span className="text-xs text-metallic-500 ml-2">{pos.exchange}</span>
                               <span className="text-metallic-600 ml-1 text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">View &#8599;</span>
                               <div className="text-xs text-metallic-400 mt-0.5">
-                                {pos.quantity} shares @ ${pos.entry_price.toFixed(2)}
+                                {pos.quantity} shares @ {ccy(pos.exchange)}{pos.entry_price.toFixed(2)}
                               </div>
                             </div>
                             <div className="text-right">
                               <div className={`text-sm font-semibold ${isProfit ? 'text-emerald-400' : 'text-red-400'}`}>
-                                {isProfit ? '+' : ''}${pnl.toFixed(2)}
+                                {isProfit ? '+' : ''}{ccy(pos.exchange)}{Math.abs(pnl).toFixed(2)}
                               </div>
                               {pos.current_price && (
                                 <div className="text-xs text-metallic-500">
-                                  ${pos.current_price.toFixed(2)}
+                                  {ccy(pos.exchange)}{pos.current_price.toFixed(2)}
                                 </div>
                               )}
                             </div>
