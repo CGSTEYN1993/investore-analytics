@@ -119,7 +119,7 @@ export default function PositionsPage() {
               className="px-3 py-2 text-xs rounded-lg bg-metallic-800 border border-metallic-700 text-metallic-200 focus:border-primary-500 focus:outline-none"
             >
               <option value="">All Accounts</option>
-              {accounts.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
+              {accounts.map(a => <option key={a.id} value={a.id}>{a.account_name}</option>)}
             </select>
           )}
           <span className="text-xs text-metallic-500">{positions.length} position{positions.length !== 1 ? 's' : ''}</span>

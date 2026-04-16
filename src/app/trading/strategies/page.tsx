@@ -325,7 +325,7 @@ export default function StrategiesPage() {
                     className="w-full px-3 py-2 rounded-lg bg-metallic-800 border border-metallic-700 text-metallic-200 text-sm focus:border-primary-500 focus:outline-none"
                   >
                     {accounts.map(a => (
-                      <option key={a.id} value={a.id}>{a.name} ({a.mode})</option>
+                      <option key={a.id} value={a.id}>{a.account_name} ({a.is_paper ? 'Paper' : 'Live'})</option>
                     ))}
                   </select>
                 </div>
