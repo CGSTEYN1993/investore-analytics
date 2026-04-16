@@ -58,9 +58,9 @@ function SentimentBar({ value, label }: { value: number | null; label: string })
 }
 
 // Custom tooltip for the chart
-function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number; dataKey: string }>; label?: string }) {
+function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: Record<string, unknown>[]; label?: string }) {
   if (!active || !payload?.length) return null;
-  const d = payload[0]?.payload as ChartCandle;
+  const d = (payload[0] as Record<string, unknown>)?.payload as ChartCandle;
   if (!d) return null;
   return (
     <div className="bg-metallic-900 border border-metallic-700 rounded-lg p-3 shadow-xl text-xs">
