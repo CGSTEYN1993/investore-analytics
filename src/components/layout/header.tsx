@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/components/providers/AuthProvider';
-import { Menu, X, User, LogOut, Settings, ChevronDown, BarChart3, Map, Newspaper, Brain, TrendingUp, BookOpen, Users, Gem } from 'lucide-react';
+import { Menu, X, User, LogOut, Settings, ChevronDown, BarChart3, Map, Newspaper, Brain, TrendingUp, BookOpen, Users, Gem, Bot } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 
 function NavDropdown({ label, items, pathname, onNavigate }: {
@@ -64,6 +64,7 @@ const platformLinks = [
   { href: '/map', label: 'Global Map', icon: <Map className="w-4 h-4" /> },
   { href: '/analysis/commodity-breakdown', label: 'Commodities', icon: <Gem className="w-4 h-4" /> },
   { href: '/analysis/sentiment', label: 'Signals', icon: <TrendingUp className="w-4 h-4" /> },
+  { href: '/trading', label: 'Trading Bot', icon: <Bot className="w-4 h-4" /> },
 ];
 
 const researchLinks = [

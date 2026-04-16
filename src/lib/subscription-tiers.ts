@@ -248,6 +248,36 @@ export const FEATURE_ACCESS: Record<string, FeatureAccess> = {
     analyst: 50,   // 50/day
     enterprise: true, // Unlimited
   },
+
+  // Trading Platform
+  trading_platform: {
+    name: 'Trading Platform',
+    description: 'Automated mining stock trading bot',
+    free: false,
+    analyst: false,
+    enterprise: true,
+  },
+  trading_strategies: {
+    name: 'Trading Strategies',
+    description: 'Rule-based automated trading strategies',
+    free: false,
+    analyst: false,
+    enterprise: true,
+  },
+  trading_paper: {
+    name: 'Paper Trading',
+    description: 'Simulated trading with virtual funds',
+    free: false,
+    analyst: false,
+    enterprise: true,
+  },
+  trading_live: {
+    name: 'Live Trading',
+    description: 'Live trading via Interactive Brokers',
+    free: false,
+    analyst: false,
+    enterprise: true,
+  },
 };
 
 // Helper function to check feature access
