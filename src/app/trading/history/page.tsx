@@ -50,12 +50,9 @@ export default function TradeHistoryPage() {
   const [accountFilter, setAccountFilter] = useState<number | undefined>(undefined);
   const [tickerFilter, setTickerFilter] = useState('');
 
-  const isEnterprise = user?.subscription_tier === 'enterprise';
-
   useEffect(() => {
-    if (!isAuthenticated || !isEnterprise) { setLoading(false); return; }
     loadData();
-  }, [isAuthenticated, isEnterprise, accountFilter]);
+  }, [accountFilter]);
 
   const loadData = async () => {
     setLoading(true);
@@ -71,16 +68,6 @@ export default function TradeHistoryPage() {
     } catch { /* ignore */ }
     setLoading(false);
   };
-
-  if (!isAuthenticated || !isEnterprise) {
-    return (
-      <div className="min-h-screen bg-metallic-950 p-4 md:p-8">
-        <div className="max-w-2xl mx-auto mt-16">
-          <UpgradePrompt feature="Trade History" description="View complete trade history and performance analytics. Enterprise plan required." />
-        </div>
-      </div>
-    );
-  }
 
   const filteredTrades = tickerFilter
     ? trades.filter(t => t.ticker.toLowerCase().includes(tickerFilter.toLowerCase()))

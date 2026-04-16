@@ -59,12 +59,9 @@ export default function AlertsPage() {
   const [formThreshold, setFormThreshold] = useState('');
   const [creating, setCreating] = useState(false);
 
-  const isEnterprise = user?.subscription_tier === 'enterprise';
-
   useEffect(() => {
-    if (!isAuthenticated || !isEnterprise) { setLoading(false); return; }
     loadData();
-  }, [isAuthenticated, isEnterprise]);
+  }, []);
 
   const loadData = async () => {
     setLoading(true);
@@ -95,16 +92,6 @@ export default function AlertsPage() {
       setAlerts(prev => prev.filter(a => a.id !== id));
     } catch { /* ignore */ }
   };
-
-  if (!isAuthenticated || !isEnterprise) {
-    return (
-      <div className="min-h-screen bg-metallic-950 p-4 md:p-8">
-        <div className="max-w-2xl mx-auto mt-16">
-          <UpgradePrompt feature="Trading Alerts" description="Set up custom trading alerts for price movements, positions, and signals. Enterprise plan required." />
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-metallic-950 pb-12">

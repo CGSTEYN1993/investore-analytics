@@ -49,12 +49,9 @@ export default function PositionsPage() {
   const [accountFilter, setAccountFilter] = useState<number | undefined>(undefined);
   const [closingId, setClosingId] = useState<number | null>(null);
 
-  const isEnterprise = user?.subscription_tier === 'enterprise';
-
   useEffect(() => {
-    if (!isAuthenticated || !isEnterprise) { setLoading(false); return; }
     loadData();
-  }, [isAuthenticated, isEnterprise, filter, accountFilter]);
+  }, [filter, accountFilter]);
 
   const loadData = async () => {
     setLoading(true);
@@ -78,16 +75,6 @@ export default function PositionsPage() {
     } catch { /* ignore */ }
     setClosingId(null);
   };
-
-  if (!isAuthenticated || !isEnterprise) {
-    return (
-      <div className="min-h-screen bg-metallic-950 p-4 md:p-8">
-        <div className="max-w-2xl mx-auto mt-16">
-          <UpgradePrompt feature="Trading Positions" description="Monitor and manage open and closed trading positions. Enterprise plan required." />
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-metallic-950 pb-12">

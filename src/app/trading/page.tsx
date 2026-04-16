@@ -66,15 +66,9 @@ export default function TradingDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const isEnterprise = user?.subscription_tier === 'enterprise';
-
   useEffect(() => {
-    if (!isAuthenticated || !isEnterprise) {
-      setLoading(false);
-      return;
-    }
     loadData();
-  }, [isAuthenticated, isEnterprise]);
+  }, []);
 
   const loadData = async () => {
     setLoading(true);
@@ -87,43 +81,11 @@ export default function TradingDashboardPage() {
       setDashboard(dash);
       setEngineStatus(engine);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load trading data');
+      // If not authenticated, just show empty state
+      console.log('Trading API:', err instanceof Error ? err.message : 'Failed to load');
     }
     setLoading(false);
   };
-
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-metallic-950 flex items-center justify-center p-4">
-        <div className="text-center">
-          <Shield className="w-12 h-12 text-metallic-500 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-metallic-100 mb-2">Authentication Required</h2>
-          <p className="text-metallic-400 mb-4">Sign in to access the trading platform.</p>
-          <Link href="/login?returnUrl=/trading" className="px-5 py-2.5 bg-primary-500 hover:bg-primary-600 text-white text-sm font-medium rounded-lg transition-colors">
-            Sign In
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
-  if (!isEnterprise) {
-    return (
-      <div className="min-h-screen bg-metallic-950 p-4 md:p-8">
-        <div className="max-w-2xl mx-auto mt-16">
-          <div className="text-center mb-8">
-            <Bot className="w-16 h-16 text-amber-400 mx-auto mb-4" />
-            <h1 className="text-3xl font-bold text-metallic-100 mb-2">Automated Trading Platform</h1>
-            <p className="text-metallic-400">AI-powered mining stock trading with rule-based strategies</p>
-          </div>
-          <UpgradePrompt
-            feature="Automated Trading Platform"
-            description="Access the full automated trading platform with rule-based strategies, paper trading, Interactive Brokers integration, and real-time position management. Enterprise plan required."
-          />
-        </div>
-      </div>
-    );
-  }
 
   if (loading) {
     return (

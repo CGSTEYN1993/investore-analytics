@@ -46,12 +46,9 @@ export default function AccountsPage() {
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const isEnterprise = user?.subscription_tier === 'enterprise';
-
   useEffect(() => {
-    if (!isAuthenticated || !isEnterprise) { setLoading(false); return; }
     loadData();
-  }, [isAuthenticated, isEnterprise]);
+  }, []);
 
   const loadData = async () => {
     setLoading(true);
@@ -86,16 +83,6 @@ export default function AccountsPage() {
       setAccounts(prev => prev.filter(a => a.id !== id));
     } catch { /* ignore */ }
   };
-
-  if (!isAuthenticated || !isEnterprise) {
-    return (
-      <div className="min-h-screen bg-metallic-950 p-4 md:p-8">
-        <div className="max-w-2xl mx-auto mt-16">
-          <UpgradePrompt feature="Trading Accounts" description="Create and manage trading accounts. Enterprise plan required." />
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-metallic-950 pb-12">
