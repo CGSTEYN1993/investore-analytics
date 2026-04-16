@@ -16,6 +16,7 @@ import {
   TradingDashboard,
   EngineStatus,
 } from '@/services/tradingService';
+import TradeDetailModal from '@/components/trading/TradeDetailModal';
 
 function StatCard({ label, value, icon, change, positive }: {
   label: string;
@@ -65,6 +66,7 @@ export default function TradingDashboardPage() {
   const [engineStatus, setEngineStatus] = useState<EngineStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedPositionId, setSelectedPositionId] = useState<number | null>(null);
 
   useEffect(() => {
     loadData();
@@ -241,10 +243,15 @@ export default function TradingDashboardPage() {
                         const pnl = pos.unrealised_pnl ?? 0;
                         const isProfit = pnl >= 0;
                         return (
-                          <div key={pos.id} className="flex items-center justify-between py-2 px-3 rounded-lg bg-metallic-800/50">
+                          <button
+                            key={pos.id}
+                            onClick={() => setSelectedPositionId(pos.id)}
+                            className="w-full flex items-center justify-between py-2 px-3 rounded-lg bg-metallic-800/50 hover:bg-metallic-700/50 transition-colors text-left group"
+                          >
                             <div>
-                              <span className="text-sm font-semibold text-metallic-100">{pos.ticker}</span>
+                              <span className="text-sm font-semibold text-metallic-100 group-hover:text-primary-400 transition-colors">{pos.ticker}</span>
                               <span className="text-xs text-metallic-500 ml-2">{pos.exchange}</span>
+                              <span className="text-metallic-600 ml-1 text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">View &#8599;</span>
                               <div className="text-xs text-metallic-400 mt-0.5">
                                 {pos.quantity} shares @ ${pos.entry_price.toFixed(2)}
                               </div>
@@ -259,7 +266,7 @@ export default function TradingDashboardPage() {
                                 </div>
                               )}
                             </div>
-                          </div>
+                          </button>
                         );
                       })}
                     </div>
@@ -458,6 +465,14 @@ export default function TradingDashboardPage() {
           </>
         )}
       </div>
+
+      {/* Trade Detail Modal */}
+      {selectedPositionId && (
+        <TradeDetailModal
+          positionId={selectedPositionId}
+          onClose={() => setSelectedPositionId(null)}
+        />
+      )}
     </div>
   );
 }

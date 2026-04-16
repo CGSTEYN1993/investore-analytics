@@ -384,3 +384,75 @@ export async function deleteAlert(alertId: number): Promise<void> {
 export async function fetchRuleTemplates(): Promise<RuleTemplatesResponse> {
   return authFetch<RuleTemplatesResponse>(`${API}/api/v1/trading/rule-templates`);
 }
+
+// ── Position Detail ──
+
+export interface ChartCandle {
+  date: string;
+  open: number | null;
+  high: number | null;
+  low: number | null;
+  close: number | null;
+  volume: number;
+}
+
+export interface PositionDetailOrder {
+  id: number;
+  side: string;
+  type: string;
+  quantity: number;
+  fill_price: number | null;
+  status: string;
+  created_at: string;
+}
+
+export interface PositionSignal {
+  id: number;
+  type: string;
+  strength: number | null;
+  triggered_rules: Record<string, unknown>[] | null;
+  created_at: string;
+}
+
+export interface PositionDetail {
+  id: number;
+  ticker: string;
+  exchange: string;
+  side: 'long' | 'short';
+  status: string;
+  quantity: number;
+  entry_price: number;
+  current_price: number;
+  stop_loss: number | null;
+  take_profit: number | null;
+  trailing_stop_pct: number | null;
+  strategy_name: string | null;
+  account_name: string | null;
+  currency: string;
+  opened_at: string | null;
+  closed_at: string | null;
+  chart: ChartCandle[];
+  data_source: string;
+  unrealised_pnl: number;
+  pnl_pct: number;
+  position_value: number;
+  cost_basis: number;
+  day_change: number;
+  day_change_pct: number;
+  sl_distance_pct: number | null;
+  tp_distance_pct: number | null;
+  risk_reward_ratio: number | null;
+  hold_hours: number | null;
+  orders: PositionDetailOrder[];
+  signal: PositionSignal | null;
+  sentiment: {
+    count_7d: number;
+    avg: number | null;
+    max: number | null;
+    min: number | null;
+  };
+}
+
+export async function fetchPositionDetail(positionId: number): Promise<PositionDetail> {
+  return authFetch<PositionDetail>(`${API}/api/v1/trading/positions/${positionId}/detail`);
+}

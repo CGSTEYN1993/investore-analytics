@@ -15,6 +15,7 @@ import {
   TradingPosition,
   TradingAccount,
 } from '@/services/tradingService';
+import TradeDetailModal from '@/components/trading/TradeDetailModal';
 
 function TabBar() {
   return (
@@ -48,6 +49,7 @@ export default function PositionsPage() {
   const [filter, setFilter] = useState<'open' | 'closed' | 'all'>('open');
   const [accountFilter, setAccountFilter] = useState<number | undefined>(undefined);
   const [closingId, setClosingId] = useState<number | null>(null);
+  const [selectedPositionId, setSelectedPositionId] = useState<number | null>(null);
 
   useEffect(() => {
     loadData();
@@ -159,8 +161,14 @@ export default function PositionsPage() {
                     return (
                       <tr key={pos.id} className="border-t border-metallic-800/50 hover:bg-metallic-800/30 transition-colors">
                         <td className="px-5 py-3">
-                          <span className="font-semibold text-metallic-100">{pos.ticker}</span>
-                          <span className="text-metallic-500 ml-1.5 text-xs">{pos.exchange}</span>
+                          <button
+                            onClick={() => setSelectedPositionId(pos.id)}
+                            className="text-left group"
+                          >
+                            <span className="font-semibold text-metallic-100 group-hover:text-primary-400 transition-colors">{pos.ticker}</span>
+                            <span className="text-metallic-500 ml-1.5 text-xs">{pos.exchange}</span>
+                            <span className="text-metallic-600 ml-1 text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">View &#8599;</span>
+                          </button>
                         </td>
                         <td className="px-5 py-3">
                           <span className={`px-2 py-0.5 rounded text-xs font-medium ${
@@ -220,6 +228,14 @@ export default function PositionsPage() {
           </div>
         )}
       </div>
+
+      {/* Trade Detail Modal */}
+      {selectedPositionId && (
+        <TradeDetailModal
+          positionId={selectedPositionId}
+          onClose={() => setSelectedPositionId(null)}
+        />
+      )}
     </div>
   );
 }
