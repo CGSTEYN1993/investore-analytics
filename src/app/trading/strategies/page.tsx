@@ -20,6 +20,7 @@ import {
   TradingStrategy,
   TradingAccount,
   RuleTemplate,
+  RuleTemplatesResponse,
   RuleConfig,
 } from '@/services/tradingService';
 
@@ -62,8 +63,6 @@ function RuleSelector({ templates, selected, onChange, category }: {
   onChange: (rules: RuleConfig[]) => void;
   category: string;
 }) {
-  const filtered = templates.filter(t => t.category === category);
-
   const addRule = (template: RuleTemplate) => {
     const defaults: Record<string, unknown> = {};
     for (const [key, spec] of Object.entries(template.params)) {
@@ -89,7 +88,7 @@ function RuleSelector({ templates, selected, onChange, category }: {
         return (
           <div key={i} className="p-3 rounded-lg bg-metallic-800/50 border border-metallic-700/30">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-metallic-200">{tmpl?.name || rule.type}</span>
+              <span className="text-sm font-medium text-metallic-200">{tmpl?.label || rule.type}</span>
               <button onClick={() => removeRule(i)} className="p-1 hover:bg-red-500/20 rounded text-red-400 transition-colors">
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -124,13 +123,13 @@ function RuleSelector({ templates, selected, onChange, category }: {
           Add {category === 'entry' ? 'Entry' : 'Exit'} Rule
         </button>
         <div className="hidden group-hover:block absolute top-full left-0 right-0 mt-1 bg-metallic-800/95 backdrop-blur-md rounded-lg border border-metallic-700/50 shadow-xl z-20 max-h-60 overflow-y-auto">
-          {filtered.map((t) => (
+          {templates.map((t) => (
             <button
               key={t.type}
               onClick={() => addRule(t)}
               className="w-full text-left px-3 py-2 text-xs hover:bg-metallic-700/50 transition-colors"
             >
-              <span className="text-metallic-200 font-medium">{t.name}</span>
+              <span className="text-metallic-200 font-medium">{t.label}</span>
               <span className="text-metallic-500 block">{t.description}</span>
             </button>
           ))}
@@ -144,7 +143,9 @@ export default function StrategiesPage() {
   const { user, isAuthenticated } = useAuth();
   const [strategies, setStrategies] = useState<TradingStrategy[]>([]);
   const [accounts, setAccounts] = useState<TradingAccount[]>([]);
-  const [templates, setTemplates] = useState<RuleTemplate[]>([]);
+  const [entryTemplates, setEntryTemplates] = useState<RuleTemplate[]>([]);
+  const [exitTemplates, setExitTemplates] = useState<RuleTemplate[]>([]);
+  const allTemplates = [...entryTemplates, ...exitTemplates];
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
   const [runningId, setRunningId] = useState<number | null>(null);
@@ -178,7 +179,8 @@ export default function StrategiesPage() {
       ]);
       setStrategies(strats);
       setAccounts(accts);
-      setTemplates(tmpls);
+      setEntryTemplates(tmpls.entry_rules);
+      setExitTemplates(tmpls.exit_rules);
       if (accts.length > 0 && !formAccountId) setFormAccountId(accts[0].id);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load');
@@ -414,13 +416,13 @@ export default function StrategiesPage() {
                   <h4 className="text-sm font-semibold text-metallic-200 uppercase tracking-wider mb-3 flex items-center gap-2">
                     <Zap className="w-4 h-4 text-emerald-400" /> Entry Rules
                   </h4>
-                  <RuleSelector templates={templates} selected={formEntryRules} onChange={setFormEntryRules} category="entry" />
+                  <RuleSelector templates={entryTemplates} selected={formEntryRules} onChange={setFormEntryRules} category="entry" />
                 </div>
                 <div>
                   <h4 className="text-sm font-semibold text-metallic-200 uppercase tracking-wider mb-3 flex items-center gap-2">
                     <Shield className="w-4 h-4 text-red-400" /> Exit Rules
                   </h4>
-                  <RuleSelector templates={templates} selected={formExitRules} onChange={setFormExitRules} category="exit" />
+                  <RuleSelector templates={exitTemplates} selected={formExitRules} onChange={setFormExitRules} category="exit" />
                   {formExitRules.length === 0 && (
                     <p className="text-xs text-metallic-500 mt-2">Default: 8% stop loss + 20% take profit</p>
                   )}
@@ -488,7 +490,7 @@ export default function StrategiesPage() {
                       <span>{strat.exit_rules.length} exit rules</span>
                       <span>·</span>
                       <span>{strat.exchanges.join(', ')}</span>
-                      {strat.commodities.length > 0 && (
+                      {strat.commodities && strat.commodities.length > 0 && (
                         <>
                           <span>·</span>
                           <span>{strat.commodities.join(', ')}</span>

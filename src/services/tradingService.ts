@@ -192,9 +192,14 @@ export interface EngineStatus {
 export interface RuleTemplate {
   type: string;
   category: string;
-  name: string;
+  label: string;
   description: string;
-  params: Record<string, { type: string; default: unknown; description: string }>;
+  params: Record<string, { type: string; default: unknown; description?: string; min?: number; max?: number; options?: string[] }>;
+}
+
+export interface RuleTemplatesResponse {
+  entry_rules: RuleTemplate[];
+  exit_rules: RuleTemplate[];
 }
 
 // ── API Functions ──
@@ -376,6 +381,6 @@ export async function deleteAlert(alertId: number): Promise<void> {
 }
 
 // Rule Templates
-export async function fetchRuleTemplates(): Promise<RuleTemplate[]> {
-  return authFetch<RuleTemplate[]>(`${API}/api/v1/trading/rule-templates`);
+export async function fetchRuleTemplates(): Promise<RuleTemplatesResponse> {
+  return authFetch<RuleTemplatesResponse>(`${API}/api/v1/trading/rule-templates`);
 }
