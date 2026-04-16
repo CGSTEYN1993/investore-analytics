@@ -115,6 +115,14 @@ export function Header() {
                   About
                 </Link>
                 <Link
+                  href="/trading"
+                  className={`text-sm font-medium transition-colors ${
+                    pathname.startsWith('/trading') ? 'text-primary-400' : 'text-metallic-300 hover:text-metallic-100'
+                  }`}
+                >
+                  Trading
+                </Link>
+                <Link
                   href="/pricing"
                   className={`text-sm font-medium transition-colors ${
                     pathname === '/pricing' ? 'text-primary-400' : 'text-metallic-300 hover:text-metallic-100'
