@@ -454,5 +454,5 @@ export interface PositionDetail {
 }
 
 export async function fetchPositionDetail(positionId: number): Promise<PositionDetail> {
-  return authFetch<PositionDetail>(`${API}/api/v1/trading/positions/${positionId}/detail`);
+  return authFetch<PositionDetail>(`${API}/api/v1/trading/position-detail/${positionId}`);
 }
