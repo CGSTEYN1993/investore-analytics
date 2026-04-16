@@ -25,6 +25,7 @@ interface SpatialSummary {
   by_exchange: Record<string, number>;
   by_commodity: [string, number][];
   total_countries: number;
+  total_commodities?: number;
   exchange_details?: ExchangeDetail[];
 }
 
@@ -371,8 +372,12 @@ export default function AnalysisDashboard() {
               <div className="text-sm text-metallic-400">Countries</div>
             </div>
             <div className="bg-metallic-800/50 rounded-lg p-4 border border-metallic-700/50">
-              <div className="text-2xl font-bold text-primary-400">24/7</div>
-              <div className="text-sm text-metallic-400">Data Updates</div>
+              <div className="text-2xl font-bold text-primary-400">
+                {dynamicStats?.by_commodity?.length
+                  ? `${dynamicStats.by_commodity.length}+`
+                  : <span className="text-metallic-500">N/A</span>}
+              </div>
+              <div className="text-sm text-metallic-400">Commodities Tracked</div>
             </div>
           </div>
         </div>

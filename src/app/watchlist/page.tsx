@@ -2,55 +2,57 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { 
-  Plus, Trash2, Bell, BellOff, MoreVertical, Search, Filter,
-  TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, Eye, Star
+import {
+  Plus, Trash2, Bell, BellOff, MoreVertical, Search,
+  ArrowUpRight, ArrowDownRight, Eye, Star
 } from 'lucide-react';
 import { getCommodityColor } from '@/lib/subscription-tiers';
 
-// Mock watchlist data
-const mockWatchlists = [
-  {
-    id: 1,
-    name: 'Gold Explorers',
-    companies: [
-      { ticker: 'NGD', name: 'New Gold Inc', commodity: 'Au', price: 1.85, change: 5.71, alertSet: true },
-      { ticker: 'EQX', name: 'Equinox Gold', commodity: 'Au', price: 5.42, change: -2.34, alertSet: false },
-      { ticker: 'KGC', name: 'Kinross Gold', commodity: 'Au', price: 8.15, change: 3.18, alertSet: true },
-    ],
-  },
-  {
-    id: 2,
-    name: 'Battery Metals',
-    companies: [
-      { ticker: 'LAC', name: 'Lithium Americas', commodity: 'Li', price: 4.28, change: -4.25, alertSet: true },
-      { ticker: 'SGML', name: 'Sigma Lithium', commodity: 'Li', price: 12.35, change: 8.42, alertSet: false },
-      { ticker: 'ERO', name: 'Ero Copper', commodity: 'Cu', price: 18.92, change: 1.85, alertSet: false },
-    ],
-  },
-  {
-    id: 3,
-    name: 'Uranium Plays',
-    companies: [
-      { ticker: 'CCJ', name: 'Cameco Corp', commodity: 'U', price: 44.03, change: 4.31, alertSet: true },
-      { ticker: 'NXE', name: 'NexGen Energy', commodity: 'U', price: 7.85, change: 6.23, alertSet: true },
-      { ticker: 'DNN', name: 'Denison Mines', commodity: 'U', price: 2.15, change: 3.87, alertSet: false },
-    ],
-  },
-];
+// Watchlist data will be loaded from the `/api/v1/trading/watchlists` endpoint once
+// the API is available. Until then we show an empty state rather than mock data.
+interface WatchlistCompany {
+  ticker: string;
+  name: string;
+  commodity: string;
+  price: number | null;
+  change: number | null;
+  alertSet: boolean;
+}
 
-function WatchlistCompanyRow({ company, onRemove }: { 
-  company: typeof mockWatchlists[0]['companies'][0];
+interface Watchlist {
+  id: number;
+  name: string;
+  companies: WatchlistCompany[];
+}
+
+const NA = <span className="text-metallic-500">N/A</span>;
+
+function formatPrice(p: number | null) {
+  return p == null ? NA : <>${p.toFixed(2)}</>;
+}
+
+function formatChange(c: number | null) {
+  if (c == null) return <span className="text-sm text-metallic-500">N/A</span>;
+  const isPositive = c >= 0;
+  return (
+    <div className={`flex items-center gap-1 text-sm ${isPositive ? 'text-green-400' : 'text-red-400'}`}>
+      {isPositive ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+      {isPositive ? '+' : ''}{c.toFixed(2)}%
+    </div>
+  );
+}
+
+function WatchlistCompanyRow({ company, onRemove }: {
+  company: WatchlistCompany;
   onRemove: () => void;
 }) {
   const [alertEnabled, setAlertEnabled] = useState(company.alertSet);
-  const isPositive = company.change >= 0;
   const commodityColor = getCommodityColor(company.commodity);
 
   return (
     <div className="flex items-center justify-between p-4 border-b border-metallic-800 last:border-b-0 hover:bg-metallic-800/30 transition-colors">
       <Link href={`/company/${company.ticker}`} className="flex items-center gap-3 flex-1">
-        <div 
+        <div
           className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold text-sm"
           style={{ backgroundColor: commodityColor }}
         >
@@ -61,22 +63,19 @@ function WatchlistCompanyRow({ company, onRemove }: {
           <div className="text-xs text-metallic-500">{company.name}</div>
         </div>
       </Link>
-      
+
       <div className="flex items-center gap-6">
         <div className="text-right">
-          <div className="font-medium text-metallic-100">${company.price.toFixed(2)}</div>
-          <div className={`flex items-center gap-1 text-sm ${isPositive ? 'text-green-400' : 'text-red-400'}`}>
-            {isPositive ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
-            {isPositive ? '+' : ''}{company.change.toFixed(2)}%
-          </div>
+          <div className="font-medium text-metallic-100">{formatPrice(company.price)}</div>
+          {formatChange(company.change)}
         </div>
-        
+
         <div className="flex items-center gap-2">
           <button
             onClick={() => setAlertEnabled(!alertEnabled)}
             className={`p-2 rounded-lg transition-colors ${
-              alertEnabled 
-                ? 'bg-primary-500/20 text-primary-400' 
+              alertEnabled
+                ? 'bg-primary-500/20 text-primary-400'
                 : 'bg-metallic-800 text-metallic-500 hover:bg-metallic-700'
             }`}
             title={alertEnabled ? 'Alerts enabled' : 'Enable alerts'}
@@ -96,18 +95,17 @@ function WatchlistCompanyRow({ company, onRemove }: {
   );
 }
 
-function WatchlistCard({ watchlist, onDelete }: { 
-  watchlist: typeof mockWatchlists[0];
+function WatchlistCard({ watchlist, onDelete }: {
+  watchlist: Watchlist;
   onDelete: () => void;
 }) {
   const [isExpanded, setIsExpanded] = useState(true);
-  const gainers = watchlist.companies.filter(c => c.change >= 0).length;
-  const losers = watchlist.companies.length - gainers;
+  const gainers = watchlist.companies.filter(c => (c.change ?? 0) >= 0).length;
+  const losers = watchlist.companies.filter(c => (c.change ?? 0) < 0).length;
 
   return (
     <div className="bg-metallic-900 border border-metallic-800 rounded-xl overflow-hidden">
-      {/* Header */}
-      <div 
+      <div
         className="flex items-center justify-between p-4 cursor-pointer hover:bg-metallic-800/30 transition-colors"
         onClick={() => setIsExpanded(!isExpanded)}
       >
@@ -124,10 +122,7 @@ function WatchlistCard({ watchlist, onDelete }: {
         </div>
         <div className="flex items-center gap-2">
           <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onDelete();
-            }}
+            onClick={(e) => { e.stopPropagation(); onDelete(); }}
             className="p-2 rounded-lg hover:bg-metallic-700 text-metallic-500 hover:text-red-400 transition-colors"
           >
             <Trash2 className="w-4 h-4" />
@@ -138,16 +133,21 @@ function WatchlistCard({ watchlist, onDelete }: {
         </div>
       </div>
 
-      {/* Companies */}
       {isExpanded && (
         <div className="border-t border-metallic-800">
-          {watchlist.companies.map((company) => (
-            <WatchlistCompanyRow 
-              key={company.ticker} 
-              company={company}
-              onRemove={() => {}}
-            />
-          ))}
+          {watchlist.companies.length === 0 ? (
+            <div className="p-6 text-center text-sm text-metallic-500">
+              No companies yet. Click <span className="text-primary-400">Add company</span> below to start tracking.
+            </div>
+          ) : (
+            watchlist.companies.map((company) => (
+              <WatchlistCompanyRow
+                key={company.ticker}
+                company={company}
+                onRemove={() => {}}
+              />
+            ))
+          )}
           <div className="p-3 border-t border-metallic-800">
             <button className="w-full flex items-center justify-center gap-2 py-2 text-sm text-primary-400 hover:text-primary-300 transition-colors">
               <Plus className="w-4 h-4" />
@@ -162,11 +162,11 @@ function WatchlistCard({ watchlist, onDelete }: {
 
 export default function WatchlistPage() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [watchlists, setWatchlists] = useState(mockWatchlists);
+  // Start with no watchlists — user creates their own.
+  // TODO: replace with fetch('/api/v1/trading/watchlists') when the endpoint is live.
+  const [watchlists, setWatchlists] = useState<Watchlist[]>([]);
 
   const allCompanies = watchlists.flatMap(w => w.companies);
-  const topGainers = [...allCompanies].sort((a, b) => b.change - a.change).slice(0, 3);
-  const topLosers = [...allCompanies].sort((a, b) => a.change - b.change).slice(0, 3);
 
   return (
     <div className="min-h-screen bg-metallic-950">
@@ -203,11 +203,10 @@ export default function WatchlistPage() {
       {/* Content */}
       <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid lg:grid-cols-3 gap-8">
-          {/* Watchlists Column */}
           <div className="lg:col-span-2 space-y-6">
             {watchlists.map((watchlist) => (
-              <WatchlistCard 
-                key={watchlist.id} 
+              <WatchlistCard
+                key={watchlist.id}
                 watchlist={watchlist}
                 onDelete={() => setWatchlists(w => w.filter(wl => wl.id !== watchlist.id))}
               />
@@ -217,7 +216,7 @@ export default function WatchlistPage() {
               <div className="bg-metallic-900 border border-metallic-800 rounded-xl p-12 text-center">
                 <Eye className="w-12 h-12 text-metallic-600 mx-auto mb-4" />
                 <h3 className="text-lg font-semibold text-metallic-100 mb-2">No watchlists yet</h3>
-                <p className="text-metallic-400 mb-6">Create your first watchlist to start tracking companies</p>
+                <p className="text-metallic-400 mb-6">Create your first watchlist to start tracking companies. Live price data will appear here once you add tickers.</p>
                 <button className="px-6 py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors">
                   Create Watchlist
                 </button>
@@ -225,9 +224,7 @@ export default function WatchlistPage() {
             )}
           </div>
 
-          {/* Summary Sidebar */}
           <div className="space-y-6">
-            {/* Quick Stats */}
             <div className="bg-metallic-900 border border-metallic-800 rounded-xl p-6">
               <h3 className="font-semibold text-metallic-100 mb-4">Summary</h3>
               <div className="space-y-3">
@@ -248,53 +245,14 @@ export default function WatchlistPage() {
               </div>
             </div>
 
-            {/* Top Movers */}
             <div className="bg-metallic-900 border border-metallic-800 rounded-xl p-6">
               <h3 className="font-semibold text-metallic-100 mb-4">Top Gainers</h3>
-              <div className="space-y-3">
-                {topGainers.map((company) => (
-                  <Link
-                    key={company.ticker}
-                    href={`/company/${company.ticker}`}
-                    className="flex items-center justify-between hover:bg-metallic-800/50 -mx-2 px-2 py-1 rounded transition-colors"
-                  >
-                    <div className="flex items-center gap-2">
-                      <div 
-                        className="w-6 h-6 rounded flex items-center justify-center text-white text-xs font-bold"
-                        style={{ backgroundColor: getCommodityColor(company.commodity) }}
-                      >
-                        {company.commodity}
-                      </div>
-                      <span className="text-sm text-metallic-300">{company.ticker}</span>
-                    </div>
-                    <span className="text-sm text-green-400">+{company.change.toFixed(2)}%</span>
-                  </Link>
-                ))}
-              </div>
+              <p className="text-sm text-metallic-500">N/A — add companies to your watchlist to see the biggest daily gainers.</p>
             </div>
 
             <div className="bg-metallic-900 border border-metallic-800 rounded-xl p-6">
               <h3 className="font-semibold text-metallic-100 mb-4">Top Losers</h3>
-              <div className="space-y-3">
-                {topLosers.map((company) => (
-                  <Link
-                    key={company.ticker}
-                    href={`/company/${company.ticker}`}
-                    className="flex items-center justify-between hover:bg-metallic-800/50 -mx-2 px-2 py-1 rounded transition-colors"
-                  >
-                    <div className="flex items-center gap-2">
-                      <div 
-                        className="w-6 h-6 rounded flex items-center justify-center text-white text-xs font-bold"
-                        style={{ backgroundColor: getCommodityColor(company.commodity) }}
-                      >
-                        {company.commodity}
-                      </div>
-                      <span className="text-sm text-metallic-300">{company.ticker}</span>
-                    </div>
-                    <span className="text-sm text-red-400">{company.change.toFixed(2)}%</span>
-                  </Link>
-                ))}
-              </div>
+              <p className="text-sm text-metallic-500">N/A — add companies to your watchlist to see the biggest daily losers.</p>
             </div>
           </div>
         </div>

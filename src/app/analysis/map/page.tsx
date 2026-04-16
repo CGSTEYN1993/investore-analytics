@@ -661,6 +661,16 @@ export default function MapPage() {
 
   return (
     <div className="min-h-screen bg-metallic-950">
+      {/* N/A demo-data banner */}
+      <div className="bg-amber-500/10 border-b border-amber-500/30">
+        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-start gap-3">
+          <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+          <div className="text-sm text-amber-200">
+            <span className="font-semibold">Demo data — N/A.</span> Project and constraint coordinates shown on this map are illustrative samples.
+            Real-time project spatial data is not yet connected to this page.
+          </div>
+        </div>
+      </div>
       {/* Header */}
       <div className="bg-metallic-900/50 border-b border-metallic-800">
         <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 py-6">

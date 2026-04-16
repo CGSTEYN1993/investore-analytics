@@ -538,6 +538,16 @@ export default function ConstraintsPage() {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
+      {/* N/A demo-data banner */}
+      <div className="bg-amber-500/10 border-b border-amber-500/30">
+        <div className="max-w-[1800px] mx-auto px-4 py-3 flex items-start gap-3">
+          <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+          <div className="text-sm text-amber-200">
+            <span className="font-semibold">Demo data — N/A.</span> The constraint areas listed below are illustrative samples.
+            A live integration with environmental / heritage / tenure data sources is not yet available.
+          </div>
+        </div>
+      </div>
       {/* Header */}
       <div className="border-b border-gray-800 bg-gray-900/95 backdrop-blur sticky top-0 z-10">
         <div className="max-w-[1800px] mx-auto px-4 py-4">

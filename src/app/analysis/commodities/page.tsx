@@ -11,8 +11,8 @@ const API_URL = RAILWAY_API_URL;
 interface Commodity {
   symbol: string;
   name: string;
-  companies: number;
-  change: number;
+  companies: number | null;
+  change: number | null;
 }
 
 interface CommodityCategory {
@@ -20,85 +20,85 @@ interface CommodityCategory {
   commodities: Commodity[];
 }
 
-// Fallback static data (used when API unavailable)
+// Fallback static data (used when API unavailable). Values are null so the UI
+// renders "N/A" rather than misleading zeros until the API responds.
 const fallbackCategories: CommodityCategory[] = [
   {
     name: 'Precious Metals',
     commodities: [
-      { symbol: 'Au', name: 'Gold', companies: 0, change: 0 },
-      { symbol: 'Ag', name: 'Silver', companies: 0, change: 0 },
-      { symbol: 'Pt', name: 'Platinum', companies: 0, change: 0 },
-      { symbol: 'Pd', name: 'Palladium', companies: 0, change: 0 },
+      { symbol: 'Au', name: 'Gold', companies: null, change: null },
+      { symbol: 'Ag', name: 'Silver', companies: null, change: null },
+      { symbol: 'Pt', name: 'Platinum', companies: null, change: null },
+      { symbol: 'Pd', name: 'Palladium', companies: null, change: null },
     ],
   },
   {
     name: 'Base Metals',
     commodities: [
-      { symbol: 'Cu', name: 'Copper', companies: 0, change: 0 },
-      { symbol: 'Zn', name: 'Zinc', companies: 0, change: 0 },
-      { symbol: 'Ni', name: 'Nickel', companies: 0, change: 0 },
-      { symbol: 'Pb', name: 'Lead', companies: 0, change: 0 },
-      { symbol: 'Sn', name: 'Tin', companies: 0, change: 0 },
+      { symbol: 'Cu', name: 'Copper', companies: null, change: null },
+      { symbol: 'Zn', name: 'Zinc', companies: null, change: null },
+      { symbol: 'Ni', name: 'Nickel', companies: null, change: null },
+      { symbol: 'Pb', name: 'Lead', companies: null, change: null },
+      { symbol: 'Sn', name: 'Tin', companies: null, change: null },
     ],
   },
   {
     name: 'Battery Metals',
     commodities: [
-      { symbol: 'Li', name: 'Lithium', companies: 0, change: 0 },
-      { symbol: 'Co', name: 'Cobalt', companies: 0, change: 0 },
-      { symbol: 'C', name: 'Graphite', companies: 0, change: 0 },
-      { symbol: 'Mn', name: 'Manganese', companies: 0, change: 0 },
-      { symbol: 'V', name: 'Vanadium', companies: 0, change: 0 },
+      { symbol: 'Li', name: 'Lithium', companies: null, change: null },
+      { symbol: 'Co', name: 'Cobalt', companies: null, change: null },
+      { symbol: 'C', name: 'Graphite', companies: null, change: null },
+      { symbol: 'Mn', name: 'Manganese', companies: null, change: null },
+      { symbol: 'V', name: 'Vanadium', companies: null, change: null },
     ],
   },
   {
     name: 'Bulk Commodities',
     commodities: [
-      { symbol: 'Fe', name: 'Iron Ore', companies: 0, change: 0 },
-      { symbol: 'Coal', name: 'Coal', companies: 0, change: 0 },
-      { symbol: 'K', name: 'Potash', companies: 0, change: 0 },
+      { symbol: 'Fe', name: 'Iron Ore', companies: null, change: null },
+      { symbol: 'Coal', name: 'Coal', companies: null, change: null },
+      { symbol: 'K', name: 'Potash', companies: null, change: null },
     ],
   },
   {
     name: 'Specialty & Critical',
     commodities: [
-      { symbol: 'U', name: 'Uranium', companies: 0, change: 0 },
-      { symbol: 'REE', name: 'Rare Earths', companies: 0, change: 0 },
-      { symbol: 'W', name: 'Tungsten', companies: 0, change: 0 },
-      { symbol: 'Mo', name: 'Molybdenum', companies: 0, change: 0 },
+      { symbol: 'U', name: 'Uranium', companies: null, change: null },
+      { symbol: 'REE', name: 'Rare Earths', companies: null, change: null },
+      { symbol: 'W', name: 'Tungsten', companies: null, change: null },
+      { symbol: 'Mo', name: 'Molybdenum', companies: null, change: null },
     ],
   },
   {
     name: 'Gems & Industrial',
     commodities: [
-      { symbol: '💎', name: 'Diamonds', companies: 0, change: 0 },
-      { symbol: 'Ti', name: 'Titanium', companies: 0, change: 0 },
-      { symbol: 'Cr', name: 'Chromium', companies: 0, change: 0 },
+      { symbol: '💎', name: 'Diamonds', companies: null, change: null },
+      { symbol: 'Ti', name: 'Titanium', companies: null, change: null },
+      { symbol: 'Cr', name: 'Chromium', companies: null, change: null },
     ],
   },
 ];
 
 function CommodityCard({ commodity }: { commodity: Commodity }) {
-  const color = getCommodityColor(commodity.symbol);
-  const isPositive = commodity.change >= 0;
-  
+  const change = commodity.change;
+  const isPositive = (change ?? 0) >= 0;
+
   // URL-safe commodity name for routing
   const commoditySlug = commodity.name.toLowerCase().replace(/\s+/g, '-');
-  
+
   return (
     <Link
       href={`/analysis/commodities/${commoditySlug}`}
       className="group relative bg-metallic-900 border border-metallic-800 rounded-xl p-5 hover:border-primary-500/50 transition-all hover:bg-metallic-800/50"
     >
-      {/* Commodity color indicator */}
-      <div 
+      <div
         className="absolute top-0 left-0 w-full h-1 rounded-t-xl opacity-60 group-hover:opacity-100 transition-opacity"
         style={{ backgroundColor: color }}
       />
-      
+
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-3">
-          <div 
+          <div
             className="w-10 h-10 rounded-lg flex items-center justify-center font-bold text-white"
             style={{ backgroundColor: color }}
           >
@@ -110,35 +110,27 @@ function CommodityCard({ commodity }: { commodity: Commodity }) {
             </h3>
             <div className="flex items-center gap-1 text-xs text-metallic-500">
               <Building2 className="w-3 h-3" />
-              {commodity.companies.toLocaleString()} companies
+              {commodity.companies == null
+                ? <span className="text-metallic-500">N/A</span>
+                : <>{commodity.companies.toLocaleString()} companies</>}
             </div>
           </div>
         </div>
-        {commodity.change !== 0 && (
+        {change != null && change !== 0 && (
           <div className={`flex items-center gap-1 text-sm font-medium ${isPositive ? 'text-green-400' : 'text-red-400'}`}>
             {isPositive ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
-            {isPositive ? '+' : ''}{commodity.change}%
+            {isPositive ? '+' : ''}{change}%
           </div>
         )}
       </div>
-      
-      {/* Mini chart placeholder - would be actual data */}
-      <div className="h-12 flex items-end gap-0.5">
-        {[...Array(20)].map((_, i) => {
-          const height = Math.random() * 100;
-          return (
-            <div
-              key={i}
-              className="flex-1 rounded-t transition-all group-hover:opacity-80"
-              style={{ 
-                height: `${height}%`, 
-                backgroundColor: color,
-                opacity: 0.3 + (i / 30)
-              }}
-            />
-          );
-        })}
+
+      {/* Intentionally no mini chart — the previous sparkline used Math.random()
+          which was misleading. A real price history chart can be added here once
+          commodity price history is wired up. */}
+      <div className="h-12 flex items-center justify-center text-[10px] text-metallic-600">
+        Price history: N/A
       </div>
+</div>
       
       <ChevronRight className="absolute bottom-5 right-5 w-4 h-4 text-metallic-600 group-hover:text-primary-400 group-hover:translate-x-1 transition-all" />
     </Link>
@@ -165,8 +157,8 @@ export default function CommoditiesAnalysis() {
       if (data.categories && data.categories.length > 0) {
         setCommodityCategories(data.categories);
         // Calculate total companies
-        const total = data.categories.reduce((sum: number, cat: CommodityCategory) => 
-          sum + cat.commodities.reduce((catSum: number, comm: Commodity) => catSum + comm.companies, 0), 0
+        const total = data.categories.reduce((sum: number, cat: CommodityCategory) =>
+          sum + cat.commodities.reduce((catSum: number, comm: Commodity) => catSum + (comm.companies ?? 0), 0), 0
         );
         setTotalCompanies(total);
       }
@@ -289,7 +281,7 @@ export default function CommoditiesAnalysis() {
                 <h2 className="text-lg font-semibold text-metallic-100 mb-4 flex items-center gap-2">
                   {category.name}
                   <span className="text-sm font-normal text-metallic-500">
-                    ({category.commodities.length} commodities, {category.commodities.reduce((sum, c) => sum + c.companies, 0).toLocaleString()} companies)
+                    ({category.commodities.length} commodities, {category.commodities.reduce((sum, c) => sum + (c.companies ?? 0), 0).toLocaleString()} companies)
                   </span>
                 </h2>
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
