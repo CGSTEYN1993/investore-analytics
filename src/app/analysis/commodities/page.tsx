@@ -82,6 +82,7 @@ const fallbackCategories: CommodityCategory[] = [
 function CommodityCard({ commodity }: { commodity: Commodity }) {
   const change = commodity.change;
   const isPositive = (change ?? 0) >= 0;
+  const color = getCommodityColor(commodity.name);
 
   // URL-safe commodity name for routing
   const commoditySlug = commodity.name.toLowerCase().replace(/\s+/g, '-');
@@ -130,7 +131,6 @@ function CommodityCard({ commodity }: { commodity: Commodity }) {
       <div className="h-12 flex items-center justify-center text-[10px] text-metallic-600">
         Price history: N/A
       </div>
-</div>
       
       <ChevronRight className="absolute bottom-5 right-5 w-4 h-4 text-metallic-600 group-hover:text-primary-400 group-hover:translate-x-1 transition-all" />
     </Link>
