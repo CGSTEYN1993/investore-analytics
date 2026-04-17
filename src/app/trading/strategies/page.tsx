@@ -7,7 +7,7 @@ import UpgradePrompt from '@/components/ui/UpgradePrompt';
 import {
   Target, Plus, Trash2, Play, Pause, Settings, AlertTriangle, Activity,
   BarChart3, Crosshair, History, Bell, Bot, ChevronDown, ChevronUp,
-  Zap, Shield, RefreshCw, Check, X
+  Zap, Shield, RefreshCw, Check, X, Sparkles, Loader2
 } from 'lucide-react';
 import {
   fetchStrategies,
@@ -17,6 +17,7 @@ import {
   runStrategy,
   deleteStrategy,
   fetchRuleTemplates,
+  designStrategyWithAI,
   TradingStrategy,
   TradingAccount,
   RuleTemplate,
@@ -165,6 +166,14 @@ export default function StrategiesPage() {
   const [formMaxPositions, setFormMaxPositions] = useState(20);
   const [creating, setCreating] = useState(false);
 
+  // AI Strategy Architect state
+  const [aiPrompt, setAiPrompt] = useState('');
+  const [aiRisk, setAiRisk] = useState<'conservative' | 'balanced' | 'aggressive'>('balanced');
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiRationale, setAiRationale] = useState<string | null>(null);
+  const [aiModel, setAiModel] = useState<string | null>(null);
+  const [aiError, setAiError] = useState<string | null>(null);
+
   useEffect(() => {
     loadData();
   }, []);
@@ -251,6 +260,38 @@ export default function StrategiesPage() {
     } catch { /* ignore */ }
   };
 
+  const handleAIDesign = async () => {
+    if (!aiPrompt.trim() || !formAccountId) return;
+    setAiLoading(true);
+    setAiError(null);
+    setAiRationale(null);
+    try {
+      const res = await designStrategyWithAI({
+        account_id: formAccountId,
+        prompt: aiPrompt.trim(),
+        preferred_exchanges: formExchanges.length > 0 ? formExchanges : undefined,
+        preferred_commodities: formCommodities.length > 0 ? formCommodities : undefined,
+        risk_profile: aiRisk,
+      });
+      const s = res.strategy;
+      setFormName(s.name || '');
+      setFormDesc(s.description || '');
+      setFormEntryRules(s.entry_rules || []);
+      setFormExitRules(s.exit_rules || []);
+      setFormEntryLogic((s.entry_logic as 'AND' | 'OR') || 'OR');
+      setFormExchanges(s.exchanges || ['ASX']);
+      setFormCommodities(s.commodities || []);
+      setFormSizing(s.position_sizing || 'fixed_pct');
+      setFormMaxPosPct(s.position_size_pct || 5);
+      setFormMaxPositions(s.max_positions || 20);
+      setAiRationale(res.rationale);
+      setAiModel(res.model);
+    } catch (err) {
+      setAiError(err instanceof Error ? err.message : 'AI design failed');
+    }
+    setAiLoading(false);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-metallic-950 flex items-center justify-center">
@@ -297,6 +338,67 @@ export default function StrategiesPage() {
         {showCreate && (
           <div className="mb-6 bg-metallic-900/80 backdrop-blur-sm border border-metallic-700/50 rounded-xl p-6">
             <h3 className="text-lg font-semibold text-metallic-100 mb-4">Create New Strategy</h3>
+
+            {/* AI Strategy Architect */}
+            <div className="mb-6 p-4 rounded-xl border border-primary-500/30 bg-gradient-to-br from-primary-500/5 to-metallic-800/40">
+              <div className="flex items-center gap-2 mb-3">
+                <Sparkles className="w-4 h-4 text-primary-400" />
+                <h4 className="text-sm font-semibold text-metallic-100">Design with AI (Claude)</h4>
+                {aiModel && (
+                  <span className="ml-auto text-[10px] uppercase tracking-wider text-metallic-500">
+                    {aiModel}
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-metallic-400 mb-3">
+                Describe the thesis in plain English. Claude will translate it into
+                entry rules, exit rules, sizing and cadence using only the signals
+                and exchanges this platform actually supports.
+              </p>
+              <textarea
+                value={aiPrompt}
+                onChange={e => setAiPrompt(e.target.value)}
+                rows={3}
+                placeholder="e.g. Buy ASX-listed gold explorers after a positive news-sentiment spike combined with a fresh drill intercept, take profit at 25%, cut losses at 10%."
+                className="w-full px-3 py-2 rounded-lg bg-metallic-800 border border-metallic-700 text-metallic-200 text-sm focus:border-primary-500 focus:outline-none resize-y"
+              />
+              <div className="flex flex-wrap items-center gap-3 mt-3">
+                <div className="flex items-center gap-2">
+                  <label className="text-xs text-metallic-400">Risk:</label>
+                  <select
+                    value={aiRisk}
+                    onChange={e => setAiRisk(e.target.value as 'conservative' | 'balanced' | 'aggressive')}
+                    className="px-2 py-1 rounded-md bg-metallic-800 border border-metallic-700 text-metallic-200 text-xs focus:border-primary-500 focus:outline-none"
+                  >
+                    <option value="conservative">Conservative</option>
+                    <option value="balanced">Balanced</option>
+                    <option value="aggressive">Aggressive</option>
+                  </select>
+                </div>
+                <button
+                  onClick={handleAIDesign}
+                  disabled={!aiPrompt.trim() || !formAccountId || aiLoading}
+                  className="ml-auto flex items-center gap-2 px-3 py-1.5 bg-primary-500 hover:bg-primary-600 disabled:bg-metallic-700 disabled:text-metallic-500 text-white text-xs font-medium rounded-lg transition-colors"
+                >
+                  {aiLoading ? (
+                    <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Designing…</>
+                  ) : (
+                    <><Sparkles className="w-3.5 h-3.5" /> Generate Strategy</>
+                  )}
+                </button>
+              </div>
+              {aiError && (
+                <div className="mt-3 p-2 text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-md">
+                  {aiError}
+                </div>
+              )}
+              {aiRationale && (
+                <div className="mt-3 p-3 text-xs text-metallic-300 bg-metallic-800/60 border border-metallic-700/50 rounded-md leading-relaxed">
+                  <span className="block text-[10px] uppercase tracking-wider text-primary-400 mb-1">AI rationale</span>
+                  {aiRationale}
+                </div>
+              )}
+            </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Left Column: Basic Info */}
               <div className="space-y-4">

@@ -275,6 +275,53 @@ export async function deleteStrategy(strategyId: number): Promise<void> {
   });
 }
 
+// ─── AI Strategy Architect ──────────────────────────────────────────────────
+
+export interface AIDesignRequest {
+  account_id: number;
+  prompt: string;
+  preferred_exchanges?: string[];
+  preferred_commodities?: string[];
+  risk_profile?: 'conservative' | 'balanced' | 'aggressive';
+}
+
+export interface AIDesignResponse {
+  strategy: {
+    account_id: number;
+    name: string;
+    description?: string | null;
+    strategy_type: string;
+    exchanges: string[];
+    commodities?: string[] | null;
+    min_market_cap?: number | null;
+    max_market_cap?: number | null;
+    min_avg_volume?: number | null;
+    entry_rules: RuleConfig[];
+    entry_logic: 'AND' | 'OR';
+    min_rules_match: number;
+    exit_rules: RuleConfig[];
+    position_sizing: string;
+    position_size_pct: number;
+    max_positions: number;
+    order_type: string;
+    limit_offset_pct: number;
+    check_interval_minutes: number;
+    trading_hours_only: boolean;
+  };
+  rationale: string;
+  model: string;
+  rule_catalog_version: string;
+}
+
+export async function designStrategyWithAI(
+  body: AIDesignRequest,
+): Promise<AIDesignResponse> {
+  return authFetch<AIDesignResponse>(
+    `${API}/api/v1/ai-analyst/strategy-architect/design`,
+    { method: 'POST', body: JSON.stringify(body) },
+  );
+}
+
 // Signals
 export async function fetchSignals(params?: {
   strategy_id?: number;
