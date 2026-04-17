@@ -65,7 +65,7 @@ interface CommodityHistory {
     high: number;
     low: number;
     average: number;
-  };
+  } | null;
 }
 
 interface StockHistory {
@@ -84,7 +84,7 @@ interface StockHistory {
     high: number;
     low: number;
     average: number;
-  };
+  } | null;
 }
 
 interface CommodityOption {
@@ -553,7 +553,9 @@ export default function CommodityPriceChartsPage() {
                 <div className="text-sm text-slate-400">{commodityData?.name || selectedCommodityInfo?.name}</div>
                 <div className="flex items-center gap-3">
                   <span className="text-xl font-bold text-white">
-                    ${commodityData?.summary.end_price.toLocaleString()}
+                    {commodityData?.summary
+                      ? `$${commodityData.summary.end_price.toLocaleString()}`
+                      : <span className="text-slate-500">N/A</span>}
                   </span>
                   {commodityData?.summary && renderChange(commodityData.summary.change, commodityData.summary.changePercent)}
                 </div>
@@ -570,9 +572,11 @@ export default function CommodityPriceChartsPage() {
                     <div className="text-sm text-slate-400">{stockData.symbol} ({stockData.name})</div>
                     <div className="flex items-center gap-3">
                       <span className="text-xl font-bold text-white">
-                        ${stockData.summary.end_price.toFixed(2)}
+                        {stockData.summary
+                          ? `$${stockData.summary.end_price.toFixed(2)}`
+                          : <span className="text-slate-500">N/A</span>}
                       </span>
-                      {renderChange(stockData.summary.change, stockData.summary.changePercent)}
+                      {stockData.summary && renderChange(stockData.summary.change, stockData.summary.changePercent)}
                     </div>
                   </div>
                 </div>
