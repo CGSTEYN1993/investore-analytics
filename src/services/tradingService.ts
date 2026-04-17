@@ -461,6 +461,51 @@ export async function fetchEngineStatus(): Promise<EngineStatus> {
   return authFetch<EngineStatus>(`${API}/api/v1/trading/engine-status`);
 }
 
+// ── Kill Switch ──
+export async function killSwitch(): Promise<{
+  paused_strategies: number;
+  cancelled_orders: number;
+  errors: string[];
+}> {
+  return authFetch(`${API}/api/v1/trading/engine/kill`, { method: 'POST' });
+}
+
+// ── Broker Onboarding ──
+export interface OnboardingStatusResponse {
+  account_id: number;
+  broker: string;
+  is_paper: boolean;
+  broker_linked: boolean;
+  legals_accepted: boolean;
+  mfa_enabled: boolean;
+  is_live_ready: boolean;
+}
+
+export async function fetchOnboardingStatus(accountId: number): Promise<OnboardingStatusResponse> {
+  return authFetch(`${API}/api/v1/trading/onboarding/status/${accountId}`);
+}
+
+export async function startIBOAuth(accountId: number): Promise<{
+  authorize_url: string;
+  state: string;
+  configured: boolean;
+}> {
+  return authFetch(`${API}/api/v1/trading/onboarding/ib/oauth/start`, {
+    method: 'POST',
+    body: JSON.stringify({ account_id: accountId }),
+  });
+}
+
+export async function acceptLegals(
+  accountId: number,
+  documents: Record<string, string>,
+): Promise<{ accepted: string[] }> {
+  return authFetch(`${API}/api/v1/trading/onboarding/accept-legals`, {
+    method: 'POST',
+    body: JSON.stringify({ account_id: accountId, documents }),
+  });
+}
+
 // Alerts
 export async function fetchAlerts(): Promise<TradingAlert[]> {
   return authFetch<TradingAlert[]>(`${API}/api/v1/trading/alerts`);
