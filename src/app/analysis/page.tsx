@@ -343,13 +343,13 @@ export default function AnalysisDashboard() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
             <div className="bg-metallic-800/50 rounded-lg p-4 border border-metallic-700/50">
               <div className="text-2xl font-bold text-primary-400">
-                {dynamicStats ? dynamicStats.total_companies.toLocaleString() : '1,000+'}
+                {dynamicStats ? dynamicStats.total_companies.toLocaleString() : <span className="text-metallic-500">N/A</span>}
               </div>
               <div className="text-sm text-metallic-400">Companies Tracked</div>
             </div>
             <div className="bg-metallic-800/50 rounded-lg p-4 border border-metallic-700/50 group relative">
               <div className="text-2xl font-bold text-primary-400">
-                {dynamicStats ? Object.keys(dynamicStats.by_exchange || {}).length : 6}
+                {dynamicStats ? Object.keys(dynamicStats.by_exchange || {}).length : <span className="text-metallic-500">N/A</span>}
               </div>
               <div className="text-sm text-metallic-400">Exchanges</div>
               {/* Exchange breakdown tooltip */}
@@ -367,7 +367,7 @@ export default function AnalysisDashboard() {
             </div>
             <div className="bg-metallic-800/50 rounded-lg p-4 border border-metallic-700/50">
               <div className="text-2xl font-bold text-primary-400">
-                {dynamicStats ? `${dynamicStats.total_countries}+` : '40+'}
+                {dynamicStats ? `${dynamicStats.total_countries}+` : <span className="text-metallic-500">N/A</span>}
               </div>
               <div className="text-sm text-metallic-400">Countries</div>
             </div>
