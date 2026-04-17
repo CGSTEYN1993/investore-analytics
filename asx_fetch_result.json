@@ -1,0 +1,2614 @@
+{
+  "symbols_processed": 650,
+  "announcements_fetched": 746,
+  "announcements_inserted": 0,
+  "announcements_skipped": 746,
+  "errors": [],
+  "by_symbol": {
+    "BHP": {
+      "fetched": 3,
+      "inserted": 0
+    },
+    "RIO": {
+      "fetched": 5,
+      "inserted": 0
+    },
+    "FMG": {
+      "fetched": 4,
+      "inserted": 0
+    },
+    "NCM": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "S32": {
+      "fetched": 3,
+      "inserted": 0
+    },
+    "MIN": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "IGO": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "NST": {
+      "fetched": 4,
+      "inserted": 0
+    },
+    "EVN": {
+      "fetched": 3,
+      "inserted": 0
+    },
+    "PLS": {
+      "fetched": 3,
+      "inserted": 0
+    },
+    "LTR": {
+      "fetched": 3,
+      "inserted": 0
+    },
+    "SFR": {
+      "fetched": 3,
+      "inserted": 0
+    },
+    "WHC": {
+      "fetched": 3,
+      "inserted": 0
+    },
+    "ILU": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "LYC": {
+      "fetched": 3,
+      "inserted": 0
+    },
+    "RRL": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "DEG": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "GOR": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "CMM": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "RED": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "RSG": {
+      "fetched": 5,
+      "inserted": 0
+    },
+    "PRU": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "WAF": {
+      "fetched": 5,
+      "inserted": 0
+    },
+    "BGL": {
+      "fetched": 5,
+      "inserted": 0
+    },
+    "WGX": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "SBM": {
+      "fetched": 4,
+      "inserted": 0
+    },
+    "RMS": {
+      "fetched": 5,
+      "inserted": 0
+    },
+    "DCN": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "TIE": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "MML": {
+      "fetched": 5,
+      "inserted": 0
+    },
+    "KCN": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "SLR": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "EMR": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "SPR": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "MAD": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "GMD": {
+      "fetched": 3,
+      "inserted": 0
+    },
+    "AUC": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "CDV": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "MGV": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "NVA": {
+      "fetched": 3,
+      "inserted": 0
+    },
+    "NMG": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "CXO": {
+      "fetched": 5,
+      "inserted": 0
+    },
+    "AKE": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "AGY": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "SYA": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "AVZ": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "GLN": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "LKE": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "FFX": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "LRS": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "INR": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "DML": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "LI3": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "ESS": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "AZL": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "CYM": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "WR1": {
+      "fetched": 4,
+      "inserted": 0
+    },
+    "ASN": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "PLL": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "GT1": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "29M": {
+      "fetched": 3,
+      "inserted": 0
+    },
+    "AIS": {
+      "fetched": 5,
+      "inserted": 0
+    },
+    "HCH": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "DVP": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "REZ": {
+      "fetched": 5,
+      "inserted": 0
+    },
+    "C6C": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "CSC": {
+      "fetched": 3,
+      "inserted": 0
+    },
+    "HAV": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "CDT": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "WC8": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "MTH": {
+      "fetched": 3,
+      "inserted": 0
+    },
+    "ILT": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "CVV": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "NIC": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "MCR": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "PAN": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "WSA": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "CEN": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "NKL": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "JRV": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "PDN": {
+      "fetched": 3,
+      "inserted": 0
+    },
+    "BOE": {
+      "fetched": 5,
+      "inserted": 0
+    },
+    "DYL": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "LOT": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "BMN": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "PEN": {
+      "fetched": 5,
+      "inserted": 0
+    },
+    "ERA": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "TOE": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "VMY": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "AGE": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "DEV": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "GTR": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "SLX": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "EL8": {
+      "fetched": 4,
+      "inserted": 0
+    },
+    "ARU": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "NTU": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "IXR": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "VML": {
+      "fetched": 3,
+      "inserted": 0
+    },
+    "HAS": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "RER": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "ASM": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "GGG": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "TGN": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "ATC": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "GRX": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "SYR": {
+      "fetched": 3,
+      "inserted": 0
+    },
+    "TLG": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "EGR": {
+      "fetched": 3,
+      "inserted": 0
+    },
+    "BKT": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "RNU": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "TMT": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "VR8": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "KAI": {
+      "fetched": 3,
+      "inserted": 0
+    },
+    "CRB": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "TRN": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "CIA": {
+      "fetched": 5,
+      "inserted": 0
+    },
+    "MGU": {
+      "fetched": 3,
+      "inserted": 0
+    },
+    "GRR": {
+      "fetched": 5,
+      "inserted": 0
+    },
+    "MGX": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "FEX": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "CUF": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "VMS": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "STA": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "MZZ": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "TRS": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "ASW": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "PNX": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "RMX": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "HOD": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "COB": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "SRL": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "SVL": {
+      "fetched": 3,
+      "inserted": 0
+    },
+    "SIH": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "SO4": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "AGN": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "KLL": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "RWD": {
+      "fetched": 5,
+      "inserted": 0
+    },
+    "MLX": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "ALK": {
+      "fetched": 5,
+      "inserted": 0
+    },
+    "WDS": {
+      "fetched": 3,
+      "inserted": 0
+    },
+    "STO": {
+      "fetched": 5,
+      "inserted": 0
+    },
+    "ORG": {
+      "fetched": 3,
+      "inserted": 0
+    },
+    "WOR": {
+      "fetched": 5,
+      "inserted": 0
+    },
+    "BPT": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "A11": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "A1G": {
+      "fetched": 4,
+      "inserted": 0
+    },
+    "A1M": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "A8G": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "AAJ": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "AAR": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "ABR": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "ACP": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "ADD": {
+      "fetched": 4,
+      "inserted": 0
+    },
+    "ADN": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "ADV": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "ADX": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "AEE": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "AFR": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "AHN": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "AKN": {
+      "fetched": 3,
+      "inserted": 0
+    },
+    "AMI": {
+      "fetched": 3,
+      "inserted": 0
+    },
+    "ANL": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "AOU": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "AQD": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "ARV": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "ASR": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "AUE": {
+      "fetched": 4,
+      "inserted": 0
+    },
+    "AUH": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "AUL": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "AUN": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "AUZ": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "AWV": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "BC8": {
+      "fetched": 3,
+      "inserted": 0
+    },
+    "BCB": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "BCN": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "BDG": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "BEM": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "BLZ": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "BMM": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "BNR": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "BOA": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "BRB": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "BRL": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "BTR": {
+      "fetched": 5,
+      "inserted": 0
+    },
+    "BYH": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "CAD": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "CAI": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "CAZ": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "CCZ": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "CGM": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "CGN": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "CHN": {
+      "fetched": 5,
+      "inserted": 0
+    },
+    "CKA": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "CLZ": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "CMB": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "CML": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "CNB": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "COD": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "CPN": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "CPT": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "CRL": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "CRN": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "CSR": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "CTM": {
+      "fetched": 5,
+      "inserted": 0
+    },
+    "CVN": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "CWX": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "CYL": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "DCX": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "DGO": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "DGR": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "DRE": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "DTM": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "E25": {
+      "fetched": 5,
+      "inserted": 0
+    },
+    "E2M": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "EFE": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "EGS": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "EL1": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "ELE": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "EQR": {
+      "fetched": 5,
+      "inserted": 0
+    },
+    "EVE": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "EVR": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "EXR": {
+      "fetched": 3,
+      "inserted": 0
+    },
+    "FAU": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "FEG": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "FGR": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "FIN": {
+      "fetched": 5,
+      "inserted": 0
+    },
+    "FML": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "FME": {
+      "fetched": 4,
+      "inserted": 0
+    },
+    "FYI": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "GBR": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "GCR": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "GED": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "GEN": {
+      "fetched": 3,
+      "inserted": 0
+    },
+    "GIB": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "GLA": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "GLV": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "GME": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "GNM": {
+      "fetched": 4,
+      "inserted": 0
+    },
+    "GPR": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "GRE": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "GSM": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "HIO": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "HMX": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "HRN": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "HRZ": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "IDA": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "IRM": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "IVR": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "IVZ": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "JDR": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "JMS": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "JRL": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "KAL": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "KDR": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "KGL": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "KIN": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "KNB": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "KNI": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "KOD": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "KSN": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "KZR": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "LAM": {
+      "fetched": 5,
+      "inserted": 0
+    },
+    "LEG": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "LEL": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "LIT": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "LML": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "LNR": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "LOM": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "LPD": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "LTM": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "MAG": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "MAU": {
+      "fetched": 3,
+      "inserted": 0
+    },
+    "MBK": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "MCT": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "MDD": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "MEI": {
+      "fetched": 4,
+      "inserted": 0
+    },
+    "MHK": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "MIO": {
+      "fetched": 5,
+      "inserted": 0
+    },
+    "MKG": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "MKR": {
+      "fetched": 4,
+      "inserted": 0
+    },
+    "MLM": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "MLS": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "MMC": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "MMI": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "MNB": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "MOH": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "MOY": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "MPJ": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "MQR": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "MRD": {
+      "fetched": 4,
+      "inserted": 0
+    },
+    "MRQ": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "MRR": {
+      "fetched": 4,
+      "inserted": 0
+    },
+    "MRZ": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "MSR": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "MTB": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "MTM": {
+      "fetched": 5,
+      "inserted": 0
+    },
+    "MTO": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "MYL": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "NAE": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "NEM": {
+      "fetched": 4,
+      "inserted": 0
+    },
+    "NHC": {
+      "fetched": 5,
+      "inserted": 0
+    },
+    "NML": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "NMT": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "NSM": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "NWC": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "NXM": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "OAR": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "ODM": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "ODY": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "OMH": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "OOK": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "ORA": {
+      "fetched": 5,
+      "inserted": 0
+    },
+    "ORE": {
+      "fetched": 3,
+      "inserted": 0
+    },
+    "ORN": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "OSH": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "OVT": {
+      "fetched": 4,
+      "inserted": 0
+    },
+    "PAK": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "PCL": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "PDI": {
+      "fetched": 5,
+      "inserted": 0
+    },
+    "PEC": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "PEK": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "PEX": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "PFE": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "PGM": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "PKO": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "PMY": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "PNG": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "PNL": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "POS": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "PRM": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "PRN": {
+      "fetched": 5,
+      "inserted": 0
+    },
+    "PRS": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "PSC": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "PSL": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "PTR": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "PUA": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "PVW": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "QGL": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "QXR": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "RAG": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "RAS": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "RAU": {
+      "fetched": 3,
+      "inserted": 0
+    },
+    "RBX": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "RCR": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "RDM": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "REH": {
+      "fetched": 4,
+      "inserted": 0
+    },
+    "RGL": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "RLE": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "RMI": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "RNE": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "ROG": {
+      "fetched": 5,
+      "inserted": 0
+    },
+    "ROS": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "RRR": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "RSM": {
+      "fetched": 3,
+      "inserted": 0
+    },
+    "RTG": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "RTR": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "RVR": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "RXL": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "RXM": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "S2R": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "SAR": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "SAU": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "SCN": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "SEA": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "SER": {
+      "fetched": 5,
+      "inserted": 0
+    },
+    "SGQ": {
+      "fetched": 3,
+      "inserted": 0
+    },
+    "SHN": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "SHP": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "SKY": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "SLM": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "SMI": {
+      "fetched": 5,
+      "inserted": 0
+    },
+    "SNG": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "SOV": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "SPQ": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "SRK": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "SRM": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "SRN": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "SRR": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "STM": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "STN": {
+      "fetched": 5,
+      "inserted": 0
+    },
+    "SUH": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "SUM": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "SVY": {
+      "fetched": 3,
+      "inserted": 0
+    },
+    "TAM": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "TAO": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "TBR": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "TCG": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "TEG": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "TG6": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "THR": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "TI1": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "TLM": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "TMR": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "TMX": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "TNR": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "TOU": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "TRL": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "TRY": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "TSO": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "TVL": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "TWD": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "TWR": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "TYX": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "UUL": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "VAL": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "VAN": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "VEC": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "VEN": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "VGO": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "VIC": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "VKA": {
+      "fetched": 5,
+      "inserted": 0
+    },
+    "VMC": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "VPR": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "VRC": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "VRX": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "VXR": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "WAK": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "WCN": {
+      "fetched": 5,
+      "inserted": 0
+    },
+    "WEG": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "WGO": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "WHK": {
+      "fetched": 5,
+      "inserted": 0
+    },
+    "WKT": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "WML": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "WMX": {
+      "fetched": 4,
+      "inserted": 0
+    },
+    "WWI": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "XAM": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "XST": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "YAL": {
+      "fetched": 5,
+      "inserted": 0
+    },
+    "YRL": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "ZEO": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "ZER": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "ZIM": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "ZMI": {
+      "fetched": 5,
+      "inserted": 0
+    },
+    "ZNC": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "VRL": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "ATT": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "AAM": {
+      "fetched": 5,
+      "inserted": 0
+    },
+    "TAT": {
+      "fetched": 3,
+      "inserted": 0
+    },
+    "PLA": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "RCM": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "AMU": {
+      "fetched": 5,
+      "inserted": 0
+    },
+    "BTM": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "SMX": {
+      "fetched": 5,
+      "inserted": 0
+    },
+    "BTL": {
+      "fetched": 5,
+      "inserted": 0
+    },
+    "EMA": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "ORP": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "OB1": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "RKB": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "XPD": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "AT4": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "GA8": {
+      "fetched": 5,
+      "inserted": 0
+    },
+    "M79": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "GBM": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "OR3": {
+      "fetched": 5,
+      "inserted": 0
+    },
+    "ALR": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "AGC": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "AGR": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "AHK": {
+      "fetched": 3,
+      "inserted": 0
+    },
+    "AKO": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "ALM": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "ALV": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "ALY": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "AR3": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "ARD": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "ARI": {
+      "fetched": 5,
+      "inserted": 0
+    },
+    "ARL": {
+      "fetched": 3,
+      "inserted": 0
+    },
+    "AS2": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "AUG": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "AUV": {
+      "fetched": 3,
+      "inserted": 0
+    },
+    "AVM": {
+      "fetched": 3,
+      "inserted": 0
+    },
+    "AW1": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "BCA": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "BCM": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "BM8": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "BML": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "BMR": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "BPM": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "BRX": {
+      "fetched": 4,
+      "inserted": 0
+    },
+    "BSN": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "BUR": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "SXG": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "AAU": {
+      "fetched": 4,
+      "inserted": 0
+    },
+    "ACB": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "ACE": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "ADG": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "AJC": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "AJM": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "AJQ": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "AJX": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "AKM": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "AM7": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "ANX": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "AOA": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "AOH": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "APC": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "APD": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "AQC": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "AQI": {
+      "fetched": 5,
+      "inserted": 0
+    },
+    "AR1": {
+      "fetched": 3,
+      "inserted": 0
+    },
+    "ARE": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "ARN": {
+      "fetched": 3,
+      "inserted": 0
+    },
+    "AST": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "ATM": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "ATR": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "ATS": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "AUQ": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "AUT": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "AVL": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "AWJ": {
+      "fetched": 3,
+      "inserted": 0
+    },
+    "AZS": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "AZY": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "BAT": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "BBX": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "BCE": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "BCK": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "BDC": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "BDM": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "BDR": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "BEZ": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "BGD": {
+      "fetched": 3,
+      "inserted": 0
+    },
+    "BGH": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "BLK": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "BLY": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "BNL": {
+      "fetched": 5,
+      "inserted": 0
+    },
+    "BOC": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "BPH": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "BRK": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "BRM": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "BRU": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "BSE": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "BSM": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "BUX": {
+      "fetched": 3,
+      "inserted": 0
+    },
+    "BYE": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "C29": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "CAE": {
+      "fetched": 5,
+      "inserted": 0
+    },
+    "CAG": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "CAP": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "CAS": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "CAY": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "CBE": {
+      "fetched": 5,
+      "inserted": 0
+    },
+    "CDR": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "CEL": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "CHK": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "CHR": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "CHZ": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "CLA": {
+      "fetched": 3,
+      "inserted": 0
+    },
+    "CLE": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "CLQ": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "CMC": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "CMD": {
+      "fetched": 3,
+      "inserted": 0
+    },
+    "CMG": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "CMO": {
+      "fetched": 3,
+      "inserted": 0
+    },
+    "CMT": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "CN1": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "CNN": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "COE": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "COI": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "COR": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "COY": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "CPM": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "CPO": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "CPR": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "CPS": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "CR1": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "CRR": {
+      "fetched": 5,
+      "inserted": 0
+    },
+    "CRS": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "CRV": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "CSE": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "CST": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "CU6": {
+      "fetched": 5,
+      "inserted": 0
+    },
+    "CUE": {
+      "fetched": 5,
+      "inserted": 0
+    },
+    "CUL": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "CUO": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "CUX": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "CXM": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "CXU": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "CZI": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "CZN": {
+      "fetched": 3,
+      "inserted": 0
+    },
+    "DIR": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "DLI": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "DLT": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "DM1": {
+      "fetched": 4,
+      "inserted": 0
+    },
+    "DMC": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "DME": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "DMM": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "DNK": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "DRA": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "DRR": {
+      "fetched": 4,
+      "inserted": 0
+    },
+    "DTR": {
+      "fetched": 5,
+      "inserted": 0
+    },
+    "DUX": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "DVN": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "EAX": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "EEG": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "EHL": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "EKA": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "ELM": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "ELO": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "ELT": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "EM2": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "EMH": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "EMU": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "ENR": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "ENT": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "ENX": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "EPM": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "ERM": {
+      "fetched": 3,
+      "inserted": 0
+    },
+    "ERR": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "ERW": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "EUR": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "EXT": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "FAL": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "FCR": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "FEL": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "FHS": {
+      "fetched": 3,
+      "inserted": 0
+    },
+    "FLX": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "FMC": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "FMF": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "FMS": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "FNT": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "FOS": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "FPL": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "FPP": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "FPS": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "FTZ": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "FYD": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "FZR": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "GCY": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "GDM": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "GEV": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "GGE": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "GGL": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "GGX": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "GLB": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "GMC": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "GMN": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "GMR": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "GMS": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "GNG": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "GOG": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "GPX": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "GRA": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "GRL": {
+      "fetched": 1,
+      "inserted": 0
+    },
+    "GRS": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "GRV": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "GRY": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "GSN": {
+      "fetched": 2,
+      "inserted": 0
+    },
+    "GSR": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "GTI": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "GWR": {
+      "fetched": 0,
+      "inserted": 0
+    },
+    "GXY": {
+      "fetched": 0,
+      "inserted": 0
+    }
+  },
+  "debug": [
+    "Using existing asx_announcements table"
+  ],
+  "total_announcements_in_db": 62299,
+  "status": "success"
+}
