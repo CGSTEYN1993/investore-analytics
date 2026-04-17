@@ -18,6 +18,7 @@ import {
 } from '@/services/tradingService';
 import TradeDetailModal from '@/components/trading/TradeDetailModal';
 import StatCard from '@/components/ui/StatCard';
+import { LiveTape } from '@/components/trading/LiveTape';
 
 const EXCHANGE_CURRENCY: Record<string, string> = {
   JSE: 'R', ASX: 'A$', TSX: 'C$', TSXV: 'C$', LSE: '£', NYSE: '$', NASDAQ: '$', HKEX: 'HK$',
@@ -296,6 +297,11 @@ export default function TradingDashboardPage() {
                   </div>
                 </div>
               </div>
+            </div>
+
+            {/* Live tape */}
+            <div className="mt-6">
+              <LiveTape />
             </div>
 
             {/* Recent Trades */}

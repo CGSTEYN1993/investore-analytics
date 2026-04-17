@@ -66,6 +66,7 @@ const platformLinks = [
   { href: '/analysis/commodity-breakdown', label: 'Commodities', icon: <Gem className="w-4 h-4" /> },
   { href: '/analysis/sentiment', label: 'Signals', icon: <TrendingUp className="w-4 h-4" /> },
   { href: '/trading', label: 'Trading Bot', icon: <Bot className="w-4 h-4" /> },
+  { href: '/trading/audit', label: 'Audit Log', icon: <Settings className="w-4 h-4" /> },
 ];
 
 const researchLinks = [

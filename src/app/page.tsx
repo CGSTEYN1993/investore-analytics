@@ -201,6 +201,60 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ═══ RESEARCH → STRATEGISE → EXECUTE ═══ */}
+      <section className="py-16 border-b border-metallic-800/50 bg-gradient-to-b from-metallic-950 to-metallic-900/20">
+        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-10">
+            <span className="text-primary-400 font-medium text-xs tracking-widest uppercase mb-3 block">End-to-end workflow</span>
+            <h2 className="text-3xl sm:text-4xl font-bold text-metallic-100 mb-3">Research. Strategise. Execute.</h2>
+            <p className="text-metallic-400 max-w-2xl mx-auto text-sm">
+              From reading drill results to firing live orders into Interactive Brokers — the whole loop, automated and auditable.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-5">
+            {[
+              {
+                num: '1', title: 'Research', icon: Search,
+                color: 'border-emerald-500/30 bg-emerald-500/[0.04]',
+                chip: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30',
+                desc: 'AI-parsed announcements, drill results, resource estimates, peer benchmarks, sentiment.',
+                cta: 'Explore data', href: '/dashboard',
+              },
+              {
+                num: '2', title: 'Strategise', icon: Brain,
+                color: 'border-primary-500/30 bg-primary-500/[0.04]',
+                chip: 'text-primary-400 bg-primary-500/10 border-primary-500/30',
+                desc: 'Design rule-based strategies with Claude Opus 4.7 or the visual builder. Backtest in seconds.',
+                cta: 'AI Strategy Architect', href: '/trading/strategies',
+              },
+              {
+                num: '3', title: 'Execute', icon: Zap,
+                color: 'border-amber-500/30 bg-amber-500/[0.04]',
+                chip: 'text-amber-400 bg-amber-500/10 border-amber-500/30',
+                desc: 'Paper trade live, or connect Interactive Brokers via OAuth for real execution — with an emergency kill switch.',
+                cta: 'Connect Interactive Brokers', href: '/onboarding/broker',
+              },
+            ].map((band) => {
+              const Icon = band.icon;
+              return (
+                <div key={band.num} className={`relative rounded-xl border ${band.color} p-6 flex flex-col`}>
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full border text-sm font-bold ${band.chip}`}>{band.num}</span>
+                    <Icon className="w-5 h-5 text-metallic-300" />
+                    <h3 className="text-lg font-semibold text-metallic-100">{band.title}</h3>
+                  </div>
+                  <p className="text-sm text-metallic-400 leading-relaxed mb-5 flex-1">{band.desc}</p>
+                  <Link href={band.href} className="inline-flex items-center gap-2 text-sm font-medium text-primary-400 hover:text-primary-300 transition-colors group">
+                    {band.cta} <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                  </Link>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
       {/* ═══ WHAT MAKES US DIFFERENT ═══ */}
       <section className="py-20 border-b border-metallic-800/50">
         <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8">

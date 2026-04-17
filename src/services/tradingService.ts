@@ -506,6 +506,26 @@ export async function acceptLegals(
   });
 }
 
+// ── Audit log ──
+export interface AuditEvent {
+  id: number;
+  event_type: string;
+  payload: Record<string, unknown> | null;
+  created_at: string;
+}
+
+export async function fetchAuditLog(limit = 100): Promise<{ events: AuditEvent[] }> {
+  return authFetch(`${API}/api/v1/trading/audit-log?limit=${limit}`);
+}
+
+// ── SSE live tape (returns EventSource-compatible URL) ──
+export function liveTapeUrl(kinds: string[] = ['signals', 'orders', 'audit']): string {
+  const token = getToken();
+  const qs = new URLSearchParams({ kinds: kinds.join(',') });
+  if (token) qs.set('access_token', token); // fallback if auth header not supported on EventSource
+  return `${API}/api/v1/trading/live-tape?${qs.toString()}`;
+}
+
 // Alerts
 export async function fetchAlerts(): Promise<TradingAlert[]> {
   return authFetch<TradingAlert[]>(`${API}/api/v1/trading/alerts`);
