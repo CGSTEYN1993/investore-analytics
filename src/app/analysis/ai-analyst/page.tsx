@@ -474,7 +474,7 @@ export default function AIAnalystPage() {
               </div>
               <div className="min-w-0">
                 <h1 className="text-lg font-bold text-white leading-tight">AI Research Analyst</h1>
-                <p className="text-xs text-metallic-500 hidden sm:block">66+ data sources · Claude Opus 4.5 · Real-time market data</p>
+                <p className="text-xs text-metallic-500 hidden sm:block">66+ data sources · Claude Opus 4.7 · Real-time market data</p>
               </div>
             </div>
 
@@ -786,7 +786,7 @@ export default function AIAnalystPage() {
               </div>
               <div className="flex items-center justify-between mt-1.5">
                 <span className="text-xs text-metallic-600">Enter to send · Shift+Enter for new line</span>
-                <span className="text-xs text-emerald-500/70 flex items-center gap-1"><Sparkles className="w-3 h-3" /> Claude Opus 4.5</span>
+                <span className="text-xs text-emerald-500/70 flex items-center gap-1"><Sparkles className="w-3 h-3" /> Claude Opus 4.7</span>
               </div>
             </div>
           </div>
