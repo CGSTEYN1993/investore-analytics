@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { RAILWAY_API_URL } from '@/lib/public-api-url';
 import { CheckCircle2, Loader2, ShieldAlert } from 'lucide-react';
@@ -10,7 +10,7 @@ import { CheckCircle2, Loader2, ShieldAlert } from 'lucide-react';
  * We forward the code+state to the backend which exchanges it for tokens and persists
  * the encrypted refresh token.
  */
-export default function BrokerCallbackPage() {
+function CallbackInner() {
   const router = useRouter();
   const params = useSearchParams();
   const [msg, setMsg] = useState('Completing broker link…');
@@ -71,5 +71,19 @@ export default function BrokerCallbackPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function BrokerCallbackPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-metallic-950 text-metallic-100">
+          <Loader2 className="w-6 h-6 animate-spin" />
+        </div>
+      }
+    >
+      <CallbackInner />
+    </Suspense>
   );
 }
