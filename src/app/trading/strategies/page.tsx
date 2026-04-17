@@ -28,35 +28,6 @@ import {
 const EXCHANGES = ['ASX', 'TSX', 'TSXV', 'LSE', 'JSE', 'NYSE', 'NASDAQ', 'HKEX', 'CSE'];
 const COMMODITIES = ['Gold', 'Copper', 'Lithium', 'Zinc', 'Nickel', 'Iron Ore', 'Uranium', 'Silver', 'Cobalt', 'PGE', 'Rare Earths'];
 
-function TabBar() {
-  return (
-    <div className="flex items-center gap-1 mt-6 -mb-px overflow-x-auto">
-      {[
-        { href: '/trading', label: 'Dashboard', icon: <BarChart3 className="w-4 h-4" /> },
-        { href: '/trading/strategies', label: 'Strategies', icon: <Target className="w-4 h-4" /> },
-        { href: '/trading/positions', label: 'Positions', icon: <Crosshair className="w-4 h-4" /> },
-        { href: '/trading/history', label: 'History', icon: <History className="w-4 h-4" /> },
-        { href: '/trading/alerts', label: 'Alerts', icon: <Bell className="w-4 h-4" /> },
-      ].map((tab) => {
-        const isActive = tab.href === '/trading/strategies';
-        return (
-          <Link
-            key={tab.href}
-            href={tab.href}
-            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-t-lg border-b-2 transition-colors whitespace-nowrap ${
-              isActive
-                ? 'text-primary-400 border-primary-400 bg-metallic-800/50'
-                : 'text-metallic-400 border-transparent hover:text-metallic-200 hover:border-metallic-600'
-            }`}
-          >
-            {tab.icon}
-            {tab.label}
-          </Link>
-        );
-      })}
-    </div>
-  );
-}
 
 function RuleSelector({ templates, selected, onChange, category }: {
   templates: RuleTemplate[];
@@ -294,38 +265,29 @@ export default function StrategiesPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-metallic-950 flex items-center justify-center">
+      <div className="flex items-center justify-center py-24">
         <Activity className="w-8 h-8 text-primary-400 animate-pulse" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-metallic-950 pb-12">
-      {/* Header */}
-      <div className="bg-metallic-900/50 border-b border-metallic-800/50">
-        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="flex items-center gap-3 mb-1">
-                <Bot className="w-7 h-7 text-primary-400" />
-                <h1 className="text-2xl font-bold text-metallic-100">Trading Platform</h1>
-              </div>
-              <p className="text-sm text-metallic-400">Build and manage automated trading strategies</p>
-            </div>
-            <button
-              onClick={() => setShowCreate(!showCreate)}
-              className="flex items-center gap-2 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white text-sm font-medium rounded-lg transition-colors"
-            >
-              <Plus className="w-4 h-4" />
-              New Strategy
-            </button>
-          </div>
-          <TabBar />
+    <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 pt-5">
+      <div className="flex items-center justify-between mb-5">
+        <div>
+          <h1 className="text-lg font-semibold text-metallic-100">Strategies</h1>
+          <p className="text-xs text-metallic-500 mt-0.5">Build and manage automated trading strategies</p>
         </div>
+        <button
+          onClick={() => setShowCreate(!showCreate)}
+          className="flex items-center gap-2 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white text-sm font-medium rounded-lg transition-colors"
+        >
+          <Plus className="w-4 h-4" />
+          New Strategy
+        </button>
       </div>
 
-      <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+      <div>
         {error && (
           <div className="flex items-center gap-2 p-3 mb-4 bg-red-500/10 border border-red-500/20 rounded-lg text-sm text-red-400">
             <AlertTriangle className="w-4 h-4 flex-shrink-0" />

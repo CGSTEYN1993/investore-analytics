@@ -25,29 +25,7 @@ const ALERT_TYPES = [
   { value: 'daily_summary', label: 'Daily Summary', desc: 'Daily trading summary alert' },
 ];
 
-function TabBar() {
-  return (
-    <div className="flex items-center gap-1 mt-6 -mb-px overflow-x-auto">
-      {[
-        { href: '/trading', label: 'Dashboard', icon: <BarChart3 className="w-4 h-4" /> },
-        { href: '/trading/strategies', label: 'Strategies', icon: <Target className="w-4 h-4" /> },
-        { href: '/trading/positions', label: 'Positions', icon: <Crosshair className="w-4 h-4" /> },
-        { href: '/trading/history', label: 'History', icon: <History className="w-4 h-4" /> },
-        { href: '/trading/alerts', label: 'Alerts', icon: <Bell className="w-4 h-4" /> },
-      ].map((tab) => {
-        const isActive = tab.href === '/trading/alerts';
-        return (
-          <Link key={tab.href} href={tab.href}
-            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-t-lg border-b-2 transition-colors whitespace-nowrap ${
-              isActive ? 'text-primary-400 border-primary-400 bg-metallic-800/50' : 'text-metallic-400 border-transparent hover:text-metallic-200 hover:border-metallic-600'
-            }`}>
-            {tab.icon}{tab.label}
-          </Link>
-        );
-      })}
-    </div>
-  );
-}
+
 
 export default function AlertsPage() {
   const { user, isAuthenticated } = useAuth();
@@ -94,29 +72,21 @@ export default function AlertsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-metallic-950 pb-12">
-      <div className="bg-metallic-900/50 border-b border-metallic-800/50">
-        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="flex items-center gap-3 mb-1">
-                <Bot className="w-7 h-7 text-primary-400" />
-                <h1 className="text-2xl font-bold text-metallic-100">Trading Platform</h1>
-              </div>
-              <p className="text-sm text-metallic-400">Manage your trading alerts and notifications</p>
-            </div>
-            <button
-              onClick={() => setShowCreate(!showCreate)}
-              className="flex items-center gap-2 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white text-sm font-medium rounded-lg transition-colors"
-            >
-              <Plus className="w-4 h-4" /> New Alert
-            </button>
-          </div>
-          <TabBar />
+    <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 pt-5">
+      <div className="flex items-center justify-between mb-5">
+        <div>
+          <h1 className="text-lg font-semibold text-metallic-100">Alerts</h1>
+          <p className="text-xs text-metallic-500 mt-0.5">Manage your trading alerts and notifications</p>
         </div>
+        <button
+          onClick={() => setShowCreate(!showCreate)}
+          className="flex items-center gap-2 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white text-sm font-medium rounded-lg transition-colors"
+        >
+          <Plus className="w-4 h-4" /> New Alert
+        </button>
       </div>
 
-      <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+      <div>
         {/* Create Alert */}
         {showCreate && (
           <div className="mb-6 bg-metallic-900/80 backdrop-blur-sm border border-metallic-700/50 rounded-xl p-6">

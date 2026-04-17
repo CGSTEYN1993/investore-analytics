@@ -96,7 +96,7 @@ export default function TradingDashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-metallic-950 flex items-center justify-center">
+      <div className="flex items-center justify-center py-24">
         <div className="text-center">
           <Activity className="w-8 h-8 text-primary-400 animate-pulse mx-auto mb-3" />
           <p className="text-metallic-400 text-sm">Loading trading dashboard...</p>
@@ -107,7 +107,7 @@ export default function TradingDashboardPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-metallic-950 flex items-center justify-center p-4">
+      <div className="flex items-center justify-center py-24 p-4">
         <div className="text-center max-w-md">
           <AlertTriangle className="w-8 h-8 text-red-400 mx-auto mb-3" />
           <p className="text-red-400 text-sm mb-4">{error}</p>
@@ -124,71 +124,37 @@ export default function TradingDashboardPage() {
   const pnlPositive = totalPnl >= 0;
 
   return (
-    <div className="min-h-screen bg-metallic-950 pb-12">
-      {/* Header */}
-      <div className="bg-metallic-900/50 border-b border-metallic-800/50">
-        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-3 mb-1">
-                <Bot className="w-7 h-7 text-primary-400" />
-                <h1 className="text-2xl font-bold text-metallic-100">Trading Platform</h1>
-                <EngineStatusBadge status={engineStatus} />
-              </div>
-              <p className="text-sm text-metallic-400">
-                Automated mining stock trading with rule-based strategies
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={loadData}
-                className="flex items-center gap-2 px-3 py-2 bg-metallic-800 hover:bg-metallic-700 text-metallic-300 text-sm rounded-lg transition-colors border border-metallic-700/50"
-              >
-                <RefreshCw className="w-4 h-4" />
-                Refresh
-              </button>
-              {!hasAccounts && (
-                <Link
-                  href="/trading/accounts"
-                  className="flex items-center gap-2 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white text-sm font-medium rounded-lg transition-colors"
-                >
-                  <Plus className="w-4 h-4" />
-                  Create Account
-                </Link>
-              )}
-            </div>
-          </div>
-
-          {/* Navigation Tabs */}
-          <div className="flex items-center gap-1 mt-6 -mb-px overflow-x-auto">
-            {[
-              { href: '/trading', label: 'Dashboard', icon: <BarChart3 className="w-4 h-4" /> },
-              { href: '/trading/strategies', label: 'Strategies', icon: <Target className="w-4 h-4" /> },
-              { href: '/trading/positions', label: 'Positions', icon: <Crosshair className="w-4 h-4" /> },
-              { href: '/trading/history', label: 'History', icon: <History className="w-4 h-4" /> },
-              { href: '/trading/alerts', label: 'Alerts', icon: <Bell className="w-4 h-4" /> },
-            ].map((tab) => {
-              const isActive = tab.href === '/trading';
-              return (
-                <Link
-                  key={tab.href}
-                  href={tab.href}
-                  className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-t-lg border-b-2 transition-colors whitespace-nowrap ${
-                    isActive
-                      ? 'text-primary-400 border-primary-400 bg-metallic-800/50'
-                      : 'text-metallic-400 border-transparent hover:text-metallic-200 hover:border-metallic-600'
-                  }`}
-                >
-                  {tab.icon}
-                  {tab.label}
-                </Link>
-              );
-            })}
-          </div>
+    <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 pt-5">
+      <div className="flex items-center justify-between mb-5">
+        <div>
+          <h1 className="text-lg font-semibold text-metallic-100 flex items-center gap-2">
+            Dashboard <EngineStatusBadge status={engineStatus} />
+          </h1>
+          <p className="text-xs text-metallic-500 mt-0.5">
+            Automated mining stock trading with rule-based strategies
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={loadData}
+            className="flex items-center gap-2 px-3 py-2 bg-metallic-800 hover:bg-metallic-700 text-metallic-300 text-sm rounded-lg transition-colors border border-metallic-700/50"
+          >
+            <RefreshCw className="w-4 h-4" />
+            Refresh
+          </button>
+          {!hasAccounts && (
+            <Link
+              href="/trading/accounts"
+              className="flex items-center gap-2 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white text-sm font-medium rounded-lg transition-colors"
+            >
+              <Plus className="w-4 h-4" />
+              Create Account
+            </Link>
+          )}
         </div>
       </div>
 
-      <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+      <div>
         {!hasAccounts ? (
           /* Empty State */
           <div className="text-center py-20">
