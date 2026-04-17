@@ -275,6 +275,61 @@ export async function deleteStrategy(strategyId: number): Promise<void> {
   });
 }
 
+// ─── Backtest ──────────────────────────────────────────────────────────────
+
+export interface BacktestTrade {
+  entry_date: string;
+  exit_date: string;
+  entry_price: number;
+  exit_price: number;
+  quantity: number;
+  net_pnl: number;
+  return_pct: number;
+  exit_reason: string;
+}
+
+export interface BacktestResult {
+  symbol: string;
+  exchange: string;
+  start_date: string;
+  end_date: string;
+  initial_balance: number;
+  final_value: number;
+  total_return_pct: number;
+  max_drawdown_pct: number;
+  sharpe_ratio: number | null;
+  num_trades: number;
+  win_rate: number | null;
+  equity_curve: Array<{ date: string; equity: number }>;
+  trades: BacktestTrade[];
+}
+
+export async function backtestStrategy(
+  strategyId: number,
+  body: { symbol: string; exchange?: string; period_days?: number; initial_balance?: number },
+): Promise<BacktestResult> {
+  return authFetch<BacktestResult>(
+    `${API}/api/v1/trading/strategies/${strategyId}/backtest`,
+    { method: 'POST', body: JSON.stringify(body) },
+  );
+}
+
+export async function backtestRules(body: {
+  symbol: string;
+  exchange: string;
+  entry_rules: RuleConfig[];
+  exit_rules: RuleConfig[];
+  entry_logic?: 'AND' | 'OR';
+  initial_balance?: number;
+  position_pct?: number;
+  period_days?: number;
+}): Promise<BacktestResult> {
+  return authFetch<BacktestResult>(`${API}/api/v1/trading/backtest`, {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+}
+
 // ─── AI Strategy Architect ──────────────────────────────────────────────────
 
 export interface AIDesignRequest {

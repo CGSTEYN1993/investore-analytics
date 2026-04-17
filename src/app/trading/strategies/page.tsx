@@ -7,8 +7,11 @@ import UpgradePrompt from '@/components/ui/UpgradePrompt';
 import {
   Target, Plus, Trash2, Play, Pause, Settings, AlertTriangle, Activity,
   BarChart3, Crosshair, History, Bell, Bot, ChevronDown, ChevronUp,
-  Zap, Shield, RefreshCw, Check, X, Sparkles, Loader2
+  Zap, Shield, RefreshCw, Check, X, Sparkles, Loader2, LineChart, TrendingUp
 } from 'lucide-react';
+import {
+  AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
+} from 'recharts';
 import {
   fetchStrategies,
   fetchAccounts,
@@ -18,11 +21,13 @@ import {
   deleteStrategy,
   fetchRuleTemplates,
   designStrategyWithAI,
+  backtestStrategy,
   TradingStrategy,
   TradingAccount,
   RuleTemplate,
   RuleTemplatesResponse,
   RuleConfig,
+  BacktestResult,
 } from '@/services/tradingService';
 
 const EXCHANGES = ['ASX', 'TSX', 'TSXV', 'LSE', 'JSE', 'NYSE', 'NASDAQ', 'HKEX', 'CSE'];
@@ -137,6 +142,15 @@ export default function StrategiesPage() {
   const [formMaxPositions, setFormMaxPositions] = useState(20);
   const [creating, setCreating] = useState(false);
 
+  // Backtest state
+  const [backtestStrategyId, setBacktestStrategyId] = useState<number | null>(null);
+  const [backtestSymbol, setBacktestSymbol] = useState('BHP');
+  const [backtestExchange, setBacktestExchange] = useState('ASX');
+  const [backtestPeriod, setBacktestPeriod] = useState(365);
+  const [backtestLoading, setBacktestLoading] = useState(false);
+  const [backtestResult, setBacktestResult] = useState<BacktestResult | null>(null);
+  const [backtestError, setBacktestError] = useState<string | null>(null);
+
   // AI Strategy Architect state
   const [aiPrompt, setAiPrompt] = useState('');
   const [aiRisk, setAiRisk] = useState<'conservative' | 'balanced' | 'aggressive'>('balanced');
@@ -229,6 +243,33 @@ export default function StrategiesPage() {
       await deleteStrategy(id);
       setStrategies(prev => prev.filter(s => s.id !== id));
     } catch { /* ignore */ }
+  };
+
+  const openBacktest = (strat: TradingStrategy) => {
+    setBacktestStrategyId(strat.id);
+    if (strat.exchanges && strat.exchanges.length > 0) {
+      setBacktestExchange(strat.exchanges[0]);
+    }
+    setBacktestResult(null);
+    setBacktestError(null);
+  };
+
+  const handleRunBacktest = async () => {
+    if (!backtestStrategyId || !backtestSymbol.trim()) return;
+    setBacktestLoading(true);
+    setBacktestError(null);
+    setBacktestResult(null);
+    try {
+      const res = await backtestStrategy(backtestStrategyId, {
+        symbol: backtestSymbol.trim().toUpperCase(),
+        exchange: backtestExchange,
+        period_days: backtestPeriod,
+      });
+      setBacktestResult(res);
+    } catch (err) {
+      setBacktestError(err instanceof Error ? err.message : 'Backtest failed');
+    }
+    setBacktestLoading(false);
   };
 
   const handleAIDesign = async () => {
@@ -576,6 +617,13 @@ export default function StrategiesPage() {
                       Run Now
                     </button>
                     <button
+                      onClick={() => openBacktest(strat)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-violet-500/10 hover:bg-violet-500/20 text-violet-400 text-xs font-medium rounded-lg border border-violet-500/20 transition-colors"
+                    >
+                      <LineChart className="w-3.5 h-3.5" />
+                      Backtest
+                    </button>
+                    <button
                       onClick={() => handleToggle(strat.id, strat.is_active)}
                       className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors ${
                         strat.is_active
@@ -613,6 +661,182 @@ export default function StrategiesPage() {
           </div>
         )}
       </div>
+
+      {/* Backtest Modal */}
+      {backtestStrategyId !== null && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={() => setBacktestStrategyId(null)}>
+          <div className="w-full max-w-3xl max-h-[90vh] overflow-y-auto bg-metallic-900 rounded-xl border border-metallic-700 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between p-4 border-b border-metallic-700">
+              <div className="flex items-center gap-2">
+                <LineChart className="w-5 h-5 text-violet-400" />
+                <h3 className="text-lg font-semibold text-metallic-100">
+                  Backtest Strategy #{backtestStrategyId}
+                </h3>
+              </div>
+              <button onClick={() => setBacktestStrategyId(null)} className="p-1 hover:bg-metallic-800 rounded">
+                <X className="w-5 h-5 text-metallic-400" />
+              </button>
+            </div>
+
+            <div className="p-4 space-y-4">
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="text-xs text-metallic-400 block mb-1">Symbol</label>
+                  <input
+                    type="text"
+                    value={backtestSymbol}
+                    onChange={(e) => setBacktestSymbol(e.target.value.toUpperCase())}
+                    placeholder="e.g. BHP"
+                    className="w-full px-3 py-2 text-sm rounded bg-metallic-800 border border-metallic-700 text-metallic-200 focus:border-violet-500 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-metallic-400 block mb-1">Exchange</label>
+                  <select
+                    value={backtestExchange}
+                    onChange={(e) => setBacktestExchange(e.target.value)}
+                    className="w-full px-3 py-2 text-sm rounded bg-metallic-800 border border-metallic-700 text-metallic-200 focus:border-violet-500 focus:outline-none"
+                  >
+                    {EXCHANGES.map(ex => <option key={ex} value={ex}>{ex}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs text-metallic-400 block mb-1">Period (days)</label>
+                  <input
+                    type="number"
+                    value={backtestPeriod}
+                    onChange={(e) => setBacktestPeriod(Number(e.target.value))}
+                    min={60}
+                    max={1825}
+                    className="w-full px-3 py-2 text-sm rounded bg-metallic-800 border border-metallic-700 text-metallic-200 focus:border-violet-500 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <button
+                onClick={handleRunBacktest}
+                disabled={backtestLoading || !backtestSymbol.trim()}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-violet-500 hover:bg-violet-600 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
+              >
+                {backtestLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
+                {backtestLoading ? 'Running backtest...' : 'Run Backtest'}
+              </button>
+
+              {backtestError && (
+                <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-sm text-red-400 flex items-start gap-2">
+                  <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                  <span>{backtestError}</span>
+                </div>
+              )}
+
+              {backtestResult && (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+                    <div className="p-3 rounded-lg bg-metallic-800/50 border border-metallic-700">
+                      <div className="text-xs text-metallic-500">Total Return</div>
+                      <div className={`text-lg font-semibold ${backtestResult.total_return_pct >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                        {backtestResult.total_return_pct >= 0 ? '+' : ''}{backtestResult.total_return_pct.toFixed(2)}%
+                      </div>
+                    </div>
+                    <div className="p-3 rounded-lg bg-metallic-800/50 border border-metallic-700">
+                      <div className="text-xs text-metallic-500">Max Drawdown</div>
+                      <div className="text-lg font-semibold text-amber-400">
+                        {backtestResult.max_drawdown_pct.toFixed(2)}%
+                      </div>
+                    </div>
+                    <div className="p-3 rounded-lg bg-metallic-800/50 border border-metallic-700">
+                      <div className="text-xs text-metallic-500">Sharpe</div>
+                      <div className="text-lg font-semibold text-metallic-200">
+                        {backtestResult.sharpe_ratio !== null ? backtestResult.sharpe_ratio.toFixed(2) : '—'}
+                      </div>
+                    </div>
+                    <div className="p-3 rounded-lg bg-metallic-800/50 border border-metallic-700">
+                      <div className="text-xs text-metallic-500">Win Rate</div>
+                      <div className="text-lg font-semibold text-metallic-200">
+                        {backtestResult.win_rate !== null ? `${backtestResult.win_rate.toFixed(1)}%` : '—'}
+                      </div>
+                    </div>
+                    <div className="p-3 rounded-lg bg-metallic-800/50 border border-metallic-700">
+                      <div className="text-xs text-metallic-500"># Trades</div>
+                      <div className="text-lg font-semibold text-metallic-200">
+                        {backtestResult.num_trades}
+                      </div>
+                    </div>
+                  </div>
+
+                  {backtestResult.equity_curve.length > 0 && (
+                    <div className="h-64 p-3 rounded-lg bg-metallic-800/30 border border-metallic-700">
+                      <div className="text-xs text-metallic-400 mb-2 flex items-center gap-1.5">
+                        <TrendingUp className="w-3.5 h-3.5" />
+                        Equity Curve — {backtestResult.symbol}.{backtestResult.exchange}
+                      </div>
+                      <ResponsiveContainer width="100%" height="90%">
+                        <AreaChart data={backtestResult.equity_curve}>
+                          <defs>
+                            <linearGradient id="equityGrad" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0%" stopColor="#8b5cf6" stopOpacity={0.5} />
+                              <stop offset="100%" stopColor="#8b5cf6" stopOpacity={0} />
+                            </linearGradient>
+                          </defs>
+                          <CartesianGrid stroke="#374151" strokeDasharray="3 3" opacity={0.3} />
+                          <XAxis dataKey="date" stroke="#6b7280" fontSize={10} tickFormatter={(d) => String(d).slice(0, 10)} />
+                          <YAxis stroke="#6b7280" fontSize={10} domain={['auto', 'auto']} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
+                          <Tooltip
+                            contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151', borderRadius: '6px' }}
+                            labelStyle={{ color: '#9ca3af', fontSize: 11 }}
+                            formatter={(v: number) => [`$${v.toLocaleString(undefined, { maximumFractionDigits: 0 })}`, 'Equity']}
+                          />
+                          <Area type="monotone" dataKey="equity" stroke="#8b5cf6" strokeWidth={2} fill="url(#equityGrad)" />
+                        </AreaChart>
+                      </ResponsiveContainer>
+                    </div>
+                  )}
+
+                  {backtestResult.trades.length > 0 && (
+                    <div className="rounded-lg bg-metallic-800/30 border border-metallic-700 overflow-hidden">
+                      <div className="px-3 py-2 border-b border-metallic-700 text-xs font-medium text-metallic-300">
+                        Trade Log ({backtestResult.trades.length})
+                      </div>
+                      <div className="max-h-48 overflow-y-auto">
+                        <table className="w-full text-xs">
+                          <thead className="bg-metallic-900/50 sticky top-0">
+                            <tr className="text-metallic-500">
+                              <th className="text-left px-3 py-1.5 font-normal">Entry</th>
+                              <th className="text-left px-3 py-1.5 font-normal">Exit</th>
+                              <th className="text-right px-3 py-1.5 font-normal">Entry $</th>
+                              <th className="text-right px-3 py-1.5 font-normal">Exit $</th>
+                              <th className="text-right px-3 py-1.5 font-normal">P&L</th>
+                              <th className="text-right px-3 py-1.5 font-normal">Return</th>
+                              <th className="text-left px-3 py-1.5 font-normal">Reason</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {backtestResult.trades.map((t, i) => (
+                              <tr key={i} className="border-t border-metallic-800">
+                                <td className="px-3 py-1.5 text-metallic-400">{t.entry_date.slice(0, 10)}</td>
+                                <td className="px-3 py-1.5 text-metallic-400">{t.exit_date.slice(0, 10)}</td>
+                                <td className="px-3 py-1.5 text-right text-metallic-300">${t.entry_price.toFixed(2)}</td>
+                                <td className="px-3 py-1.5 text-right text-metallic-300">${t.exit_price.toFixed(2)}</td>
+                                <td className={`px-3 py-1.5 text-right font-medium ${t.net_pnl >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                                  {t.net_pnl >= 0 ? '+' : ''}${t.net_pnl.toFixed(0)}
+                                </td>
+                                <td className={`px-3 py-1.5 text-right ${t.return_pct >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                                  {t.return_pct >= 0 ? '+' : ''}{t.return_pct.toFixed(2)}%
+                                </td>
+                                <td className="px-3 py-1.5 text-metallic-500">{t.exit_reason.replace(/_/g, ' ')}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
