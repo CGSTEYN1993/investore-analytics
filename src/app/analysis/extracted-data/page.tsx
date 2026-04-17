@@ -13,6 +13,7 @@ import {
   Building2
 } from 'lucide-react';
 import miningDataService, { ExtractionStats } from '@/services/miningData';
+import { SkeletonCard } from '@/components/ui/skeleton';
 
 export default function ExtractedDataOverviewPage() {
   const [stats, setStats] = useState<ExtractionStats | null>(null);
@@ -105,12 +106,7 @@ export default function ExtractedDataOverviewPage() {
           
           {loading ? (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="bg-metallic-800/50 rounded-lg p-4 animate-pulse">
-                  <div className="h-8 w-20 bg-metallic-700 rounded mb-2" />
-                  <div className="h-4 w-32 bg-metallic-700 rounded" />
-                </div>
-              ))}
+              {[...Array(4)].map((_, i) => (<SkeletonCard key={i} />))}
             </div>
           ) : stats ? (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

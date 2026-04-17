@@ -242,15 +242,16 @@ function ProjectRow({ project }: { project: ProjectByPhase }) {
   );
 }
 
-// Loading skeleton
+// Loading skeleton — uses shared primitives.
+import { Skeleton, SkeletonCard } from '@/components/ui/skeleton';
 function ProjectRowSkeleton() {
   return (
-    <div className="flex items-center justify-between p-4 border-b border-metallic-800 animate-pulse">
+    <div className="flex items-center justify-between p-4 border-b border-metallic-800">
       <div className="flex items-center gap-4">
-        <div className="w-10 h-10 rounded-lg bg-metallic-700" />
+        <Skeleton className="w-10 h-10 rounded-lg" />
         <div className="space-y-2">
-          <div className="h-4 w-32 bg-metallic-700 rounded" />
-          <div className="h-3 w-48 bg-metallic-700 rounded" />
+          <Skeleton className="h-4 w-32" />
+          <Skeleton className="h-3 w-48" />
         </div>
       </div>
     </div>
@@ -417,16 +418,7 @@ export default function StagesPage() {
         {/* Phase Cards Grid */}
         {loading ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            {[...Array(8)].map((_, i) => (
-              <div key={i} className="bg-metallic-900 border border-metallic-800 rounded-xl p-6 animate-pulse">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="w-12 h-12 rounded-lg bg-metallic-700" />
-                  <div className="w-16 h-6 rounded-full bg-metallic-700" />
-                </div>
-                <div className="h-5 w-32 bg-metallic-700 rounded mb-2" />
-                <div className="h-4 w-48 bg-metallic-700 rounded" />
-              </div>
-            ))}
+            {[...Array(8)].map((_, i) => (<SkeletonCard key={i} />))}
           </div>
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">

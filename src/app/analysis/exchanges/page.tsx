@@ -6,6 +6,7 @@ import {
   Search, Globe, Building2,
   BarChart3, ChevronDown, ExternalLink, ArrowLeft
 } from 'lucide-react';
+import { SkeletonCard } from '@/components/ui/skeleton';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://web-production-4faa7.up.railway.app';
 
@@ -239,7 +240,7 @@ export default function ExchangesPage() {
         {loading ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
             {[...Array(6)].map((_, i) => (
-              <div key={i} className="bg-metallic-900 border border-metallic-800 rounded-xl p-6 animate-pulse h-52" />
+              <SkeletonCard key={i} className="h-52" />
             ))}
           </div>
         ) : error ? (

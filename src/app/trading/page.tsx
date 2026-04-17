@@ -17,39 +17,12 @@ import {
   EngineStatus,
 } from '@/services/tradingService';
 import TradeDetailModal from '@/components/trading/TradeDetailModal';
+import StatCard from '@/components/ui/StatCard';
 
 const EXCHANGE_CURRENCY: Record<string, string> = {
   JSE: 'R', ASX: 'A$', TSX: 'C$', TSXV: 'C$', LSE: '£', NYSE: '$', NASDAQ: '$', HKEX: 'HK$',
 };
 function ccy(exchange: string): string { return EXCHANGE_CURRENCY[exchange] || '$'; }
-
-function StatCard({ label, value, icon, change, positive }: {
-  label: string;
-  value: string;
-  icon: React.ReactNode;
-  change?: string;
-  positive?: boolean;
-}) {
-  return (
-    <div className="bg-metallic-900/80 backdrop-blur-sm border border-metallic-700/50 rounded-xl p-5">
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-xs font-medium uppercase tracking-wider text-metallic-500">{label}</p>
-          <p className="text-2xl font-bold text-metallic-100 mt-1">{value}</p>
-          {change && (
-            <div className={`flex items-center gap-1 mt-1 text-xs font-medium ${positive ? 'text-emerald-400' : 'text-red-400'}`}>
-              {positive ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
-              {change}
-            </div>
-          )}
-        </div>
-        <div className="p-2.5 rounded-lg bg-metallic-800/80">
-          {icon}
-        </div>
-      </div>
-    </div>
-  );
-}
 
 function EngineStatusBadge({ status }: { status: EngineStatus | null }) {
   if (!status) return null;
