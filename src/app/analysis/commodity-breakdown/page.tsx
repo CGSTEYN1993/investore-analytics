@@ -653,7 +653,7 @@ export default function CommodityBreakdownPage() {
                       <tr key={`${c.exchange}-${c.ticker}`} className="hover:bg-metallic-800/40 transition-colors">
                         <td className="px-3 py-2.5 text-xs text-metallic-500 sticky left-0 bg-metallic-900/80">{idx + 1}</td>
                         <td className="px-3 py-2.5 sticky left-8 bg-metallic-900/80 z-10">
-                          <Link href={`/company/${c.ticker}`} className="text-sm font-semibold text-primary-400 hover:text-primary-300 hover:underline">
+                          <Link href={`/company/${c.ticker}${c.exchange ? `?exchange=${encodeURIComponent(c.exchange)}` : ''}`} className="text-sm font-semibold text-primary-400 hover:text-primary-300 hover:underline">
                             {c.ticker}
                           </Link>
                         </td>

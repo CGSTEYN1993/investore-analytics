@@ -210,7 +210,7 @@ export default function NewsHitsPage() {
                         {modalData.companies.map((company, idx) => (
                           <a 
                             key={`${company.ticker}-${company.exchange}`}
-                            href={`/company/${company.ticker}`}
+                            href={`/company/${company.ticker}${company.exchange ? `?exchange=${encodeURIComponent(company.exchange)}` : ''}`}
                             className="flex items-center justify-between p-3 border-b border-slate-700/50 hover:bg-slate-700/30 transition-colors"
                           >
                             <div>
@@ -271,7 +271,7 @@ export default function NewsHitsPage() {
                         >
                           <div className="flex items-center gap-2 mb-1">
                             <a
-                              href={`/company/${item.ticker}`}
+                              href={`/company/${item.ticker}${item.exchange ? `?exchange=${encodeURIComponent(item.exchange)}` : ''}`}
                               onClick={(e) => e.stopPropagation()}
                               className="font-mono font-bold text-amber-400 hover:text-amber-300 hover:underline transition-colors cursor-pointer"
                             >
@@ -488,7 +488,7 @@ export default function NewsHitsPage() {
                   {stats.top_companies.slice(0, 8).map((company, idx) => (
                     <a 
                       key={company.ticker} 
-                      href={`/company/${company.ticker}`}
+                      href={`/company/${company.ticker}${company.exchange ? `?exchange=${encodeURIComponent(company.exchange)}` : ''}`}
                       className="flex items-center justify-between p-2 bg-slate-800/50 rounded-lg hover:bg-slate-700/50 transition-colors"
                     >
                       <div className="flex items-center gap-2">
@@ -623,7 +623,7 @@ function NewsHitCard({
   const handleTickerClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     // Navigate to company page
-    window.location.href = `/company/${news.ticker}`;
+    window.location.href = `/company/${news.ticker}${news.exchange ? `?exchange=${encodeURIComponent(news.exchange)}` : ''}`;
   };
 
   const handleTitleClick = (e: React.MouseEvent) => {

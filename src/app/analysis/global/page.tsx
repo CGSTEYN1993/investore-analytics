@@ -612,7 +612,7 @@ function GlobalSpatialContent() {
                     <tr 
                       key={`${company.exchange}-${company.symbol}`}
                       className="hover:bg-metallic-800/50 cursor-pointer transition-colors"
-                      onClick={() => router.push(`/company/${company.symbol}`)}
+                      onClick={() => router.push(`/company/${company.symbol}${company.exchange ? `?exchange=${encodeURIComponent(company.exchange)}` : ''}`)}
                     >
                       <td className="px-4 py-3">
                         <span className="font-mono font-semibold text-primary-400">
@@ -913,7 +913,7 @@ function GlobalSpatialContent() {
               {/* View Full Profile Button */}
               <div className="pt-4 border-t border-metallic-700">
                 <Link 
-                  href={`/company/${selectedCompany.symbol}`}
+                  href={`/company/${selectedCompany.symbol}${selectedCompany.exchange ? `?exchange=${encodeURIComponent(selectedCompany.exchange)}` : ''}`}
                   className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-primary-600 hover:bg-primary-500 text-white rounded-lg font-medium transition-colors"
                 >
                   <span>View Full Profile</span>

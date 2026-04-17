@@ -61,10 +61,11 @@ function formatMarketCap(value: number | null, category: string | null): string 
 function CompanyCard({ company }: { company: Company }) {
   const color = getCommodityColor(company.primary_commodity || 'Au');
   const displayTicker = company.ticker || company.symbol || '';
+  const exchangeQuery = company.exchange ? `?exchange=${encodeURIComponent(company.exchange)}` : '';
   
   return (
     <Link 
-      href={`/company/${displayTicker}`}
+      href={`/company/${displayTicker}${exchangeQuery}`}
       className="block bg-metallic-900 border border-metallic-800 rounded-xl p-4 hover:border-primary-500/50 hover:bg-metallic-900/80 transition-all"
     >
       <div className="flex items-start justify-between mb-3">

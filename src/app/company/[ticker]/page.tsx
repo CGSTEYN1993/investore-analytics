@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import { 
   ArrowLeft, ExternalLink, MapPin, Building2, Calendar, TrendingUp, TrendingDown,
   Bookmark, BookmarkCheck, Bell, Share2, FileText, Hammer, Globe, ChevronRight,
@@ -169,7 +169,10 @@ interface LassondeResponse {
 
 export default function CompanyProfile() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const ticker = (params.ticker as string)?.toUpperCase() || '';
+  const exchangeParam = (searchParams?.get('exchange') || '').toUpperCase();
+  const exchangeQuery = exchangeParam ? `?exchange=${encodeURIComponent(exchangeParam)}` : '';
   
   const [companyData, setCompanyData] = useState<CompanyData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -230,8 +233,8 @@ export default function CompanyProfile() {
       setLassondeLoading(true);
       const [quoteRes, detailsRes, announcementsRes, lassondeRes] = await Promise.all([
         fetch(`${API_URL}/api/v1/market/quote/${ticker}`).catch(() => null),
-        fetch(`${API_URL}/api/v1/market/company/${ticker}/details`).catch(() => null),
-        fetch(`${API_URL}/api/v1/announcements/company/${ticker}?days_back=90&limit=20`).catch(() => null),
+        fetch(`${API_URL}/api/v1/market/company/${ticker}/details${exchangeQuery}`).catch(() => null),
+        fetch(`${API_URL}/api/v1/announcements/company/${ticker}?days_back=90&limit=20${exchangeParam ? `&exchange=${encodeURIComponent(exchangeParam)}` : ''}`).catch(() => null),
         fetch(`${API_URL}/api/v1/mining/company/${ticker}/lassonde`).catch(() => null)
       ]);
       
