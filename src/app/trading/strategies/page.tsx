@@ -784,7 +784,10 @@ export default function StrategiesPage() {
                           <Tooltip
                             contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151', borderRadius: '6px' }}
                             labelStyle={{ color: '#9ca3af', fontSize: 11 }}
-                            formatter={(v: number) => [`$${v.toLocaleString(undefined, { maximumFractionDigits: 0 })}`, 'Equity']}
+                            formatter={(v: number | string | undefined) => {
+                              const n = typeof v === 'number' ? v : Number(v ?? 0);
+                              return [`$${n.toLocaleString(undefined, { maximumFractionDigits: 0 })}`, 'Equity'];
+                            }}
                           />
                           <Area type="monotone" dataKey="equity" stroke="#8b5cf6" strokeWidth={2} fill="url(#equityGrad)" />
                         </AreaChart>
