@@ -1,3 +1,8 @@
 
 poppler-25.12.0/
 test_pdfs/
+
+# IB Gateway installer (too large for git)
+downloads/ibgateway-*.exe
+*.msi
+
