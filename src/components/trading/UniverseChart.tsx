@@ -285,9 +285,9 @@ export function UniverseChart({
       c.setDataLoader({
         getBars: ({ type, callback }) => {
           if (type === 'init') {
-            callback(data, false);
+            callback(data, { backward: false, forward: false });
           } else {
-            callback([], false);
+            callback([], { backward: false, forward: false });
           }
         },
       });
