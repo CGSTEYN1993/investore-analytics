@@ -503,6 +503,7 @@ function TradingDashboardInner() {
         onClose={() => setTicketOpen(false)}
         accounts={modeAccounts}
         initialSide={ticketSide}
+        initialExchange="ASX"
         onSubmitted={() => loadData()}
       />
     </div>

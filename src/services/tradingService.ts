@@ -262,6 +262,31 @@ export async function fetchBrokerStatus(accountId: number): Promise<BrokerStatus
   return authFetch<BrokerStatus>(`${API}/api/v1/trading/accounts/${accountId}/broker-status`);
 }
 
+// Universe — tickers covered by InvestOre research
+export interface UniverseItem {
+  symbol: string;
+  name: string;
+  exchange: string;
+  primary_commodity: string;
+  country: string;
+  market_cap_category: string;
+}
+
+export async function fetchUniverse(opts: {
+  exchange?: string;
+  q?: string;
+  limit?: number;
+} = {}): Promise<{ items: UniverseItem[]; total: number }> {
+  const params = new URLSearchParams();
+  if (opts.exchange) params.set('exchange', opts.exchange);
+  if (opts.q) params.set('q', opts.q);
+  if (opts.limit) params.set('limit', String(opts.limit));
+  const qs = params.toString();
+  return authFetch<{ items: UniverseItem[]; total: number }>(
+    `${API}/api/v1/trading/universe${qs ? '?' + qs : ''}`,
+  );
+}
+
 // Strategies
 export async function fetchStrategies(accountId?: number): Promise<TradingStrategy[]> {
   const params = accountId ? `?account_id=${accountId}` : '';

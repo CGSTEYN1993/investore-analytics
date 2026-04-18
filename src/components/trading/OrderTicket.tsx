@@ -18,8 +18,10 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { X, ArrowUpCircle, ArrowDownCircle, Loader2, AlertCircle } from 'lucide-react';
 import {
   submitManualOrder,
+  fetchUniverse,
   TradingAccount,
   TradingOrder,
+  UniverseItem,
 } from '@/services/tradingService';
 
 const EXCHANGES = ['SMART', 'NYSE', 'NASDAQ', 'ASX', 'TSX', 'TSXV', 'LSE', 'JSE', 'HKEX'];
@@ -55,6 +57,27 @@ export function OrderTicket({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const symbolRef = useRef<HTMLInputElement>(null);
+
+  // Universe autocomplete (InvestOre-tracked tickers)
+  const [universe, setUniverse] = useState<UniverseItem[]>([]);
+  const [showSuggest, setShowSuggest] = useState(false);
+  const [suggestLoading, setSuggestLoading] = useState(false);
+
+  // Load universe for selected exchange (excludes SMART meta-route)
+  useEffect(() => {
+    if (!open) return;
+    const ex = exchange === 'SMART' ? '' : exchange;
+    setSuggestLoading(true);
+    fetchUniverse({ exchange: ex, limit: 1000 })
+      .then(r => setUniverse(r.items))
+      .catch(() => setUniverse([]))
+      .finally(() => setSuggestLoading(false));
+  }, [open, exchange]);
+
+  const filteredSuggest = universe
+    .filter(u => !symbol || u.symbol.startsWith(symbol) || u.name.toLowerCase().includes(symbol.toLowerCase()))
+    .slice(0, 8);
+  const inUniverse = universe.some(u => u.symbol === symbol);
 
   // Re-seed when opened
   useEffect(() => {
@@ -156,16 +179,41 @@ export function OrderTicket({
               className={`py-2 text-sm font-semibold transition-colors ${
                 !isBuy ? 'bg-red-500/20 text-red-400' : 'bg-metallic-800 text-metallic-400 hover:text-metallic-200'
               }`}
-            >SELL <span className="text-[10px] opacity-60 ml-1">(S)</span></button>
-          </div>
-
-          {/* Account */}
-          <div>
-            <label className="block text-xs text-metallic-500 uppercase tracking-wider mb-1">Account</label>
-            <select
-              value={accountId ?? ''}
-              onChange={e => setAccountId(Number(e.target.value))}
-              className="w-full px-3 py-2 text-sm rounded-lg bg-metallic-800 border border-metallic-700 text-metallic-100 focus:border-primary-500 focus:outline-none"
+            >SEL className="relative">
+              <label className="block text-xs text-metallic-500 uppercase tracking-wider mb-1">
+                Symbol {symbol && !inUniverse && (
+                  <span className="text-amber-400 normal-case ml-1">⚠ not in InvestOre universe</span>
+                )}
+              </label>
+              <input
+                ref={symbolRef}
+                type="text"
+                value={symbol}
+                onChange={e => { setSymbol(e.target.value.toUpperCase()); setShowSuggest(true); }}
+                onFocus={() => setShowSuggest(true)}
+                onBlur={() => setTimeout(() => setShowSuggest(false), 150)}
+                placeholder={exchange === 'ASX' ? 'BHP' : 'AAPL'}
+                className="w-full px-3 py-2 text-sm rounded-lg bg-metallic-800 border border-metallic-700 text-metallic-100 font-mono uppercase focus:border-primary-500 focus:outline-none"
+              />
+              {showSuggest && filteredSuggest.length > 0 && (
+                <div className="absolute z-10 mt-1 w-full max-h-64 overflow-y-auto rounded-lg border border-metallic-700 bg-metallic-900 shadow-lg">
+                  {filteredSuggest.map(u => (
+                    <button
+                      key={u.symbol}
+                      type="button"
+                      onMouseDown={e => { e.preventDefault(); setSymbol(u.symbol); setShowSuggest(false); }}
+                      className="w-full text-left px-3 py-2 hover:bg-metallic-800 border-b border-metallic-800 last:border-0"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-mono text-sm text-metallic-100">{u.symbol}</span>
+                        <span className="text-[10px] text-metallic-500 uppercase">{u.primary_commodity}</span>
+                      </div>
+                      <div className="text-xs text-metallic-400 truncate">{u.name}</div>
+                    </button>
+                  ))}
+                </div>
+              )}
+              {suggestLoading && <div className="text-[10px] text-metallic-500 mt-1">loading universe…</div>}assName="w-full px-3 py-2 text-sm rounded-lg bg-metallic-800 border border-metallic-700 text-metallic-100 focus:border-primary-500 focus:outline-none"
             >
               {accounts.map(a => (
                 <option key={a.id} value={a.id}>
