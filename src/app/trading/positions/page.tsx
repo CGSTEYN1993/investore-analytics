@@ -12,6 +12,7 @@ import {
   fetchPositions,
   fetchAccounts,
   closePosition,
+  submitManualOrder,
   TradingPosition,
   TradingAccount,
 } from '@/services/tradingService';
@@ -30,6 +31,7 @@ export default function PositionsPage() {
   const [filter, setFilter] = useState<'open' | 'closed' | 'all'>('open');
   const [accountFilter, setAccountFilter] = useState<number | undefined>(undefined);
   const [closingId, setClosingId] = useState<number | null>(null);
+  const [actingId, setActingId] = useState<number | null>(null);
   const [selectedPositionId, setSelectedPositionId] = useState<number | null>(null);
 
   useEffect(() => {
@@ -57,6 +59,27 @@ export default function PositionsPage() {
       await loadData();
     } catch { /* ignore */ }
     setClosingId(null);
+  };
+
+  // Flat: send a market order opposite to the position size.
+  // Reverse: same direction but 2× size, i.e. flat then re-enter the other side.
+  const handleFlatten = async (pos: TradingPosition, multiplier: 1 | 2, label: string) => {
+    if (!confirm(`${label} ${pos.ticker} (${pos.quantity * multiplier} @ market)?`)) return;
+    setActingId(pos.id);
+    try {
+      await submitManualOrder({
+        account_id: pos.account_id,
+        symbol: pos.ticker,
+        exchange: pos.exchange,
+        side: pos.side === 'long' ? 'sell' : 'buy',
+        quantity: pos.quantity * multiplier,
+        order_type: 'market',
+      });
+      await loadData();
+    } catch (e) {
+      alert(e instanceof Error ? e.message : `${label} failed`);
+    }
+    setActingId(null);
   };
 
   return (
@@ -183,13 +206,31 @@ export default function PositionsPage() {
                         </td>
                         <td className="px-5 py-3">
                           {pos.status === 'open' && (
-                            <button
-                              onClick={() => handleClose(pos.id)}
-                              disabled={closingId === pos.id}
-                              className="px-3 py-1 text-xs font-medium text-red-400 hover:text-red-300 bg-red-500/10 hover:bg-red-500/20 rounded border border-red-500/20 transition-colors disabled:opacity-50"
-                            >
-                              {closingId === pos.id ? 'Closing...' : 'Close'}
-                            </button>
+                            <div className="flex items-center gap-1.5 justify-end">
+                              <button
+                                onClick={() => handleFlatten(pos, 1, 'Flatten')}
+                                disabled={actingId === pos.id || closingId === pos.id}
+                                title="Send market order opposite to position size"
+                                className="px-2.5 py-1 text-xs font-medium text-amber-400 hover:text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 rounded border border-amber-500/20 transition-colors disabled:opacity-50"
+                              >
+                                {actingId === pos.id ? '…' : 'Flat'}
+                              </button>
+                              <button
+                                onClick={() => handleFlatten(pos, 2, 'Reverse')}
+                                disabled={actingId === pos.id || closingId === pos.id}
+                                title="Flatten and open opposite-side position of same size"
+                                className="px-2.5 py-1 text-xs font-medium text-diamond-400 hover:text-diamond-300 bg-diamond-500/10 hover:bg-diamond-500/20 rounded border border-diamond-500/20 transition-colors disabled:opacity-50"
+                              >
+                                {actingId === pos.id ? '…' : 'Rev'}
+                              </button>
+                              <button
+                                onClick={() => handleClose(pos.id)}
+                                disabled={closingId === pos.id || actingId === pos.id}
+                                className="px-2.5 py-1 text-xs font-medium text-red-400 hover:text-red-300 bg-red-500/10 hover:bg-red-500/20 rounded border border-red-500/20 transition-colors disabled:opacity-50"
+                              >
+                                {closingId === pos.id ? '…' : 'Close'}
+                              </button>
+                            </div>
                           )}
                         </td>
                       </tr>

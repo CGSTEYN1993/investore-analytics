@@ -215,6 +215,11 @@ export async function createAccount(data: {
   is_paper?: boolean;
   initial_balance?: number;
   base_currency?: string;
+  broker_host?: string;
+  broker_port?: number;
+  broker_client_id?: number;
+  broker_account_id?: string;
+  broker_agent_id?: string;
 }): Promise<TradingAccount> {
   return authFetch<TradingAccount>(`${API}/api/v1/trading/accounts`, {
     method: 'POST',
@@ -226,6 +231,35 @@ export async function deleteAccount(accountId: number): Promise<void> {
   await authFetch<{ status: string }>(`${API}/api/v1/trading/accounts/${accountId}`, {
     method: 'DELETE',
   });
+}
+
+// Live broker account summary (NetLiq / BuyingPower / cash / etc.)
+export interface AccountSummary {
+  account_id: number;
+  broker: string;
+  currency: string;
+  is_live: boolean;
+  fields: Record<string, number | string | null>;
+}
+
+export async function fetchAccountSummary(accountId: number): Promise<AccountSummary> {
+  return authFetch<AccountSummary>(`${API}/api/v1/trading/accounts/${accountId}/summary`);
+}
+
+// Broker reachability probe (cheap TCP check / agent-registry lookup)
+export interface BrokerStatus {
+  account_id: number;
+  broker: string;
+  mode: 'paper' | 'live';
+  reachable: boolean;
+  host: string | null;
+  port: number | null;
+  agent_id?: string;
+  message: string;
+}
+
+export async function fetchBrokerStatus(accountId: number): Promise<BrokerStatus> {
+  return authFetch<BrokerStatus>(`${API}/api/v1/trading/accounts/${accountId}/broker-status`);
 }
 
 // Strategies
@@ -400,16 +434,17 @@ export async function fetchOrders(accountId?: number, limit = 50): Promise<Tradi
 
 export async function submitManualOrder(data: {
   account_id: number;
-  ticker: string;
+  symbol: string;
   exchange: string;
   side: 'buy' | 'sell';
   quantity: number;
   order_type?: string;
-  price?: number;
+  limit_price?: number;
+  stop_price?: number;
 }): Promise<TradingOrder> {
   return authFetch<TradingOrder>(`${API}/api/v1/trading/orders/manual`, {
     method: 'POST',
-    body: JSON.stringify(data),
+    body: JSON.stringify({ order_type: 'market', ...data }),
   });
 }
 

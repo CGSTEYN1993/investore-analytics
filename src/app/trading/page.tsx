@@ -19,6 +19,11 @@ import {
 import TradeDetailModal from '@/components/trading/TradeDetailModal';
 import StatCard from '@/components/ui/StatCard';
 import { LiveTape } from '@/components/trading/LiveTape';
+import { OrderTicket, useOrderTicketHotkeys } from '@/components/trading/OrderTicket';
+import { AccountHeader } from '@/components/trading/AccountHeader';
+import { TradingViewChart } from '@/components/trading/TradingViewChart';
+import { TradingModeProvider, useTradingMode } from '@/contexts/TradingModeContext';
+import { TradingModeSwitch } from '@/components/trading/TradingModeSwitch';
 
 const EXCHANGE_CURRENCY: Record<string, string> = {
   JSE: 'R', ASX: 'A$', TSX: 'C$', TSXV: 'C$', LSE: '£', NYSE: '$', NASDAQ: '$', HKEX: 'HK$',
@@ -40,16 +45,33 @@ function EngineStatusBadge({ status }: { status: EngineStatus | null }) {
 }
 
 export default function TradingDashboardPage() {
+  return (
+    <TradingModeProvider>
+      <TradingDashboardInner />
+    </TradingModeProvider>
+  );
+}
+
+function TradingDashboardInner() {
   const { user, isAuthenticated } = useAuth();
+  const { mode, filterAccounts } = useTradingMode();
   const [dashboard, setDashboard] = useState<TradingDashboard | null>(null);
   const [engineStatus, setEngineStatus] = useState<EngineStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedPositionId, setSelectedPositionId] = useState<number | null>(null);
+  const [ticketOpen, setTicketOpen] = useState(false);
+  const [ticketSide, setTicketSide] = useState<'buy' | 'sell'>('buy');
+  const [chartSymbol, setChartSymbol] = useState<{ symbol: string; exchange: string }>({ symbol: 'AAPL', exchange: 'NASDAQ' });
 
   useEffect(() => {
     loadData();
   }, []);
+
+  useOrderTicketHotkeys((side) => {
+    setTicketSide(side);
+    setTicketOpen(true);
+  }, !ticketOpen);
 
   const loadData = async () => {
     setLoading(true);
@@ -94,6 +116,8 @@ export default function TradingDashboardPage() {
   }
 
   const hasAccounts = dashboard && dashboard.accounts.length > 0;
+  const allAccounts = dashboard?.accounts ?? [];
+  const modeAccounts = filterAccounts(allAccounts);
   const totalPnl = dashboard?.total_pnl ?? 0;
   const pnlPositive = totalPnl >= 0;
 
@@ -109,6 +133,18 @@ export default function TradingDashboardPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          {hasAccounts && (
+            <button
+              onClick={() => { setTicketSide('buy'); setTicketOpen(true); }}
+              disabled={modeAccounts.length === 0}
+              className="flex items-center gap-2 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              title={modeAccounts.length === 0 ? `No ${mode} account configured` : 'Hotkey: B (buy) / S (sell)'}
+            >
+              <Plus className="w-4 h-4" />
+              New Order
+              <span className="text-[10px] font-mono opacity-70 ml-1">B/S</span>
+            </button>
+          )}
           <button
             onClick={loadData}
             className="flex items-center gap-2 px-3 py-2 bg-metallic-800 hover:bg-metallic-700 text-metallic-300 text-sm rounded-lg transition-colors border border-metallic-700/50"
@@ -147,6 +183,18 @@ export default function TradingDashboardPage() {
           </div>
         ) : (
           <>
+            {/* Mode switch (PAPER / LIVE) + broker reachability */}
+            <div className="mb-4">
+              <TradingModeSwitch accounts={allAccounts} onAccountCreated={loadData} />
+            </div>
+
+            {/* Live broker account header (NetLiq / BP / cash) */}
+            {modeAccounts.length > 0 && (
+              <div className="mb-5">
+                <AccountHeader accounts={modeAccounts} />
+              </div>
+            )}
+
             {/* Stats Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
               <StatCard
@@ -299,6 +347,31 @@ export default function TradingDashboardPage() {
               </div>
             </div>
 
+            {/* Chart */}
+            <div className="mt-6 rounded-xl border border-metallic-700/50 bg-metallic-900/40 overflow-hidden">
+              <div className="flex flex-wrap items-center gap-3 px-5 py-3 border-b border-metallic-800">
+                <h3 className="text-sm font-semibold text-metallic-200 uppercase tracking-wider">Chart</h3>
+                <div className="flex items-center gap-2 ml-auto">
+                  <input
+                    value={chartSymbol.symbol}
+                    onChange={e => setChartSymbol(s => ({ ...s, symbol: e.target.value.toUpperCase() }))}
+                    className="px-3 py-1.5 text-sm rounded-lg bg-metallic-800 border border-metallic-700 text-metallic-100 font-mono uppercase w-28 focus:border-primary-500 focus:outline-none"
+                    placeholder="AAPL"
+                  />
+                  <select
+                    value={chartSymbol.exchange}
+                    onChange={e => setChartSymbol(s => ({ ...s, exchange: e.target.value }))}
+                    className="px-2 py-1.5 text-sm rounded-lg bg-metallic-800 border border-metallic-700 text-metallic-100 focus:border-primary-500 focus:outline-none"
+                  >
+                    {['NASDAQ','NYSE','ASX','TSX','TSXV','LSE','JSE','HKEX','SMART'].map(x => (
+                      <option key={x} value={x}>{x}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <TradingViewChart symbol={chartSymbol.symbol} exchange={chartSymbol.exchange} height={460} />
+            </div>
+
             {/* Live tape */}
             <div className="mt-6">
               <LiveTape />
@@ -423,6 +496,15 @@ export default function TradingDashboardPage() {
           onClose={() => setSelectedPositionId(null)}
         />
       )}
+
+      {/* Order Ticket */}
+      <OrderTicket
+        open={ticketOpen}
+        onClose={() => setTicketOpen(false)}
+        accounts={modeAccounts}
+        initialSide={ticketSide}
+        onSubmitted={() => loadData()}
+      />
     </div>
   );
 }
