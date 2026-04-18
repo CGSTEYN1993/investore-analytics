@@ -179,7 +179,28 @@ export function OrderTicket({
               className={`py-2 text-sm font-semibold transition-colors ${
                 !isBuy ? 'bg-red-500/20 text-red-400' : 'bg-metallic-800 text-metallic-400 hover:text-metallic-200'
               }`}
-            >SEL className="relative">
+            >SELL <span className="text-[10px] opacity-60 ml-1">(S)</span></button>
+          </div>
+
+          {/* Account */}
+          <div>
+            <label className="block text-xs text-metallic-500 uppercase tracking-wider mb-1">Account</label>
+            <select
+              value={accountId ?? ''}
+              onChange={e => setAccountId(Number(e.target.value))}
+              className="w-full px-3 py-2 text-sm rounded-lg bg-metallic-800 border border-metallic-700 text-metallic-100 focus:border-primary-500 focus:outline-none"
+            >
+              {accounts.map(a => (
+                <option key={a.id} value={a.id}>
+                  {a.account_name} · {a.broker}{a.is_paper ? ' (paper)' : ''}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Symbol + exchange */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="relative">
               <label className="block text-xs text-metallic-500 uppercase tracking-wider mb-1">
                 Symbol {symbol && !inUniverse && (
                   <span className="text-amber-400 normal-case ml-1">⚠ not in InvestOre universe</span>
@@ -213,28 +234,7 @@ export function OrderTicket({
                   ))}
                 </div>
               )}
-              {suggestLoading && <div className="text-[10px] text-metallic-500 mt-1">loading universe…</div>}assName="w-full px-3 py-2 text-sm rounded-lg bg-metallic-800 border border-metallic-700 text-metallic-100 focus:border-primary-500 focus:outline-none"
-            >
-              {accounts.map(a => (
-                <option key={a.id} value={a.id}>
-                  {a.account_name} · {a.broker}{a.is_paper ? ' (paper)' : ''}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Symbol + exchange */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs text-metallic-500 uppercase tracking-wider mb-1">Symbol</label>
-              <input
-                ref={symbolRef}
-                type="text"
-                value={symbol}
-                onChange={e => setSymbol(e.target.value.toUpperCase())}
-                placeholder="AAPL"
-                className="w-full px-3 py-2 text-sm rounded-lg bg-metallic-800 border border-metallic-700 text-metallic-100 font-mono uppercase focus:border-primary-500 focus:outline-none"
-              />
+              {suggestLoading && <div className="text-[10px] text-metallic-500 mt-1">loading universe…</div>}
             </div>
             <div>
               <label className="block text-xs text-metallic-500 uppercase tracking-wider mb-1">Exchange</label>

@@ -123,6 +123,7 @@ function TradingDashboardInner() {
   const allAccounts = dashboard?.accounts ?? [];
   const modeAccounts = filterAccounts(allAccounts);
   const modeAccountIds = new Set(modeAccounts.map(a => a.id));
+  const hasAccounts = allAccounts.length > 0;
 
   // Scope all dashboard metrics to the active mode (paper vs live)
   const scopedPositions = (dashboard?.open_positions ?? []).filter(p => modeAccountIds.has(p.account_id));
