@@ -260,47 +260,59 @@ export function UniverseChart({
       .catch(() => setUniverse([]));
   }, [exchange]);
 
-  // ── Load data (klinecharts v10 API: setSymbol + setPeriod + setDataLoader) ─
-  const loadData = useCallback(async () => {
+  // ── Load data (klinecharts v10: loader fetches inside getBars) ───────
+  // Hold latest fetch params in a ref so the data loader (set once)
+  // always reads the current symbol/exchange/range without re-init.
+  const loaderArgsRef = useRef({ symbol, exchange, currentRange });
+  loaderArgsRef.current = { symbol, exchange, currentRange };
+
+  const loadData = useCallback(() => {
     const c = chartRef.current;
     if (!c) return;
     setLoading(true);
     setError(null);
-    try {
-      const res = await fetchChart(symbol, {
-        exchange,
-        range: currentRange.range,
-        interval: currentRange.interval,
-      });
-      const data: KLineData[] = res.candles.map(cd => ({
-        timestamp: cd.timestamp,
-        open: cd.open,
-        high: cd.high,
-        low: cd.low,
-        close: cd.close,
-        volume: cd.volume,
-      }));
-      c.setSymbol({ ticker: `${exchange}:${symbol}`, pricePrecision: 2, volumePrecision: 0 });
-      c.setPeriod(currentRange.period);
-      c.setDataLoader({
-        getBars: ({ type, callback }) => {
-          if (type === 'init') {
-            callback(data, { backward: false, forward: false });
-          } else {
-            callback([], { backward: false, forward: false });
-          }
-        },
-      });
-      setMeta({
-        currency: res.currency,
-        lastPrice: res.regular_market_price ?? (data[data.length - 1]?.close ?? null),
-        prevClose: res.previous_close,
-      });
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to load chart');
-    } finally {
-      setLoading(false);
-    }
+
+    // Set the loader; klinecharts will invoke getBars(type='init')
+    // when setSymbol or setPeriod is called below.
+    c.setDataLoader({
+      getBars: async ({ type, callback }) => {
+        if (type !== 'init') {
+          callback([], false);
+          return;
+        }
+        try {
+          const { symbol: s, exchange: ex, currentRange: rng } = loaderArgsRef.current;
+          const res = await fetchChart(s, {
+            exchange: ex,
+            range: rng.range,
+            interval: rng.interval,
+          });
+          const data: KLineData[] = res.candles.map(cd => ({
+            timestamp: cd.timestamp,
+            open: cd.open,
+            high: cd.high,
+            low: cd.low,
+            close: cd.close,
+            volume: cd.volume,
+          }));
+          setMeta({
+            currency: res.currency,
+            lastPrice: res.regular_market_price ?? (data[data.length - 1]?.close ?? null),
+            prevClose: res.previous_close,
+          });
+          callback(data, false);
+        } catch (e) {
+          setError(e instanceof Error ? e.message : 'Failed to load chart');
+          callback([], false);
+        } finally {
+          setLoading(false);
+        }
+      },
+    });
+
+    // These two trigger getBars(type='init')
+    c.setSymbol({ ticker: `${exchange}:${symbol}`, pricePrecision: 2, volumePrecision: 0 });
+    c.setPeriod(currentRange.period);
   }, [symbol, exchange, currentRange]);
 
   useEffect(() => { loadData(); }, [loadData]);
