@@ -31,9 +31,11 @@ import {
 } from 'lucide-react';
 import { fetchChart, fetchUniverse, type UniverseItem } from '@/services/tradingService';
 import { registerCustomIndicators } from './indicatorRegistry';
+import { registerStrategies, STRATEGY_META } from './strategies';
 
-// Register custom TA indicators once at module load
+// Register custom TA indicators + strategies once at module load
 registerCustomIndicators();
+registerStrategies();
 
 // ─── Config ────────────────────────────────────────────────────────────────
 
@@ -193,9 +195,11 @@ export function UniverseChart({
   const [chartType, setChartType] = useState<typeof CHART_TYPES[number]['id']>('candle_solid');
   const [activeMainInds, setActiveMainInds] = useState<Set<string>>(new Set(['MA']));
   const [activeSubInds, setActiveSubInds] = useState<Set<string>>(new Set(['VOL']));
+  const [activeStrategies, setActiveStrategies] = useState<Set<string>>(new Set());
   const [fullscreen, setFullscreen] = useState(false);
   const [drawingMenuOpen, setDrawingMenuOpen] = useState(false);
   const [indicatorMenuOpen, setIndicatorMenuOpen] = useState(false);
+  const [strategyMenuOpen, setStrategyMenuOpen] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [pickerQuery, setPickerQuery] = useState('');
   const [universe, setUniverse] = useState<UniverseItem[]>([]);
@@ -318,6 +322,7 @@ export function UniverseChart({
     const desired = new Set<string>();
     activeMainInds.forEach(n => desired.add(n));
     activeSubInds.forEach(n => desired.add(n));
+    activeStrategies.forEach(n => desired.add(n));
 
     // Remove indicators no longer desired
     for (const [name, id] of Array.from(ids.entries())) {
@@ -340,7 +345,14 @@ export function UniverseChart({
         if (id) ids.set(name, id);
       }
     }
-  }, [activeMainInds, activeSubInds]);
+    // Add strategy markers (overlay onto candle pane)
+    for (const name of Array.from(activeStrategies)) {
+      if (!ids.has(name)) {
+        const id = c.createIndicator(name, true, { id: 'candle_pane' });
+        if (id) ids.set(name, id);
+      }
+    }
+  }, [activeMainInds, activeSubInds, activeStrategies]);
 
   // ── Drawing tools ───────────────────────────────────────────────────────
   const startDrawing = (overlayName: string) => {
@@ -361,6 +373,13 @@ export function UniverseChart({
   };
   const toggleSub = (id: string) => {
     setActiveSubInds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+  const toggleStrategy = (id: string) => {
+    setActiveStrategies(prev => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id); else next.add(id);
       return next;
@@ -495,7 +514,7 @@ export function UniverseChart({
         {/* Indicators dropdown */}
         <div className="relative">
           <button
-            onClick={() => { setIndicatorMenuOpen(o => !o); setDrawingMenuOpen(false); }}
+            onClick={() => { setIndicatorMenuOpen(o => !o); setDrawingMenuOpen(false); setStrategyMenuOpen(false); }}
             className="flex items-center gap-1 px-2 py-1 rounded-lg bg-metallic-800 hover:bg-metallic-700 text-metallic-200 text-xs"
           >
             <LineChart className="w-3.5 h-3.5" /> Indicators
@@ -540,10 +559,55 @@ export function UniverseChart({
           )}
         </div>
 
+        {/* Strategies dropdown */}
+        <div className="relative">
+          <button
+            onClick={() => { setStrategyMenuOpen(o => !o); setIndicatorMenuOpen(false); setDrawingMenuOpen(false); }}
+            className="flex items-center gap-1 px-2 py-1 rounded-lg bg-metallic-800 hover:bg-metallic-700 text-metallic-200 text-xs"
+          >
+            <TrendingUp className="w-3.5 h-3.5" /> Strategies
+            {activeStrategies.size > 0 && (
+              <span className="ml-1 px-1 rounded bg-primary-500 text-white text-[9px]">{activeStrategies.size}</span>
+            )}
+          </button>
+          {strategyMenuOpen && (
+            <div className="absolute right-0 z-30 mt-1 w-96 max-h-[70vh] overflow-y-auto rounded-lg border border-metallic-700 bg-metallic-900 shadow-xl p-3">
+              <div className="flex items-center justify-between mb-2">
+                <div className="text-[10px] font-semibold text-metallic-500 uppercase tracking-wider">
+                  Strategies ({STRATEGY_META.length})
+                </div>
+                {activeStrategies.size > 0 && (
+                  <button
+                    onClick={() => setActiveStrategies(new Set())}
+                    className="text-[10px] text-metallic-400 hover:text-metallic-200"
+                  >Clear all</button>
+                )}
+              </div>
+              <p className="text-[10px] text-metallic-500 mb-2 leading-tight">
+                Buy/sell markers plotted on candles. Green = entry, red = exit.
+              </p>
+              <div className="grid grid-cols-2 gap-1">
+                {STRATEGY_META.map(s => (
+                  <button
+                    key={s.id}
+                    onClick={() => toggleStrategy(s.id)}
+                    title={s.label}
+                    className={`px-2 py-1 text-[10px] rounded font-mono text-left truncate ${
+                      activeStrategies.has(s.id)
+                        ? 'bg-primary-500 text-white'
+                        : 'bg-metallic-800 text-metallic-400 hover:bg-metallic-700'
+                    }`}
+                  >{s.label}</button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
         {/* Drawing tools */}
         <div className="relative">
           <button
-            onClick={() => { setDrawingMenuOpen(o => !o); setIndicatorMenuOpen(false); }}
+            onClick={() => { setDrawingMenuOpen(o => !o); setIndicatorMenuOpen(false); setStrategyMenuOpen(false); }}
             className="flex items-center gap-1 px-2 py-1 rounded-lg bg-metallic-800 hover:bg-metallic-700 text-metallic-200 text-xs"
           >
             <Pencil className="w-3.5 h-3.5" /> Draw
