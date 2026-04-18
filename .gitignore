@@ -6,3 +6,7 @@ test_pdfs/
 downloads/ibgateway-*.exe
 *.msi
 
+# Local env files (never commit secrets)
+.env
+.env.local
+agent/.env

@@ -1,0 +1,3 @@
+websockets>=12.0
+ibapi==10.30.1   # any 10.x works; user can swap with their TWS-bundled version
+requests>=2.31  # used by setup.py for one-shot enrollment
