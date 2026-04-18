@@ -13,7 +13,9 @@ import {
 import {
   fetchDashboard,
   fetchEngineStatus,
+  fetchStrategies,
   TradingDashboard,
+  TradingStrategy,
   EngineStatus,
 } from '@/services/tradingService';
 import TradeDetailModal from '@/components/trading/TradeDetailModal';
@@ -56,6 +58,7 @@ function TradingDashboardInner() {
   const { user, isAuthenticated } = useAuth();
   const { mode, filterAccounts } = useTradingMode();
   const [dashboard, setDashboard] = useState<TradingDashboard | null>(null);
+  const [strategies, setStrategies] = useState<TradingStrategy[]>([]);
   const [engineStatus, setEngineStatus] = useState<EngineStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -77,12 +80,14 @@ function TradingDashboardInner() {
     setLoading(true);
     setError(null);
     try {
-      const [dash, engine] = await Promise.all([
+      const [dash, engine, strats] = await Promise.all([
         fetchDashboard(),
         fetchEngineStatus(),
+        fetchStrategies().catch(() => [] as TradingStrategy[]),
       ]);
       setDashboard(dash);
       setEngineStatus(engine);
+      setStrategies(strats);
     } catch (err) {
       // If not authenticated, just show empty state
       console.log('Trading API:', err instanceof Error ? err.message : 'Failed to load');
@@ -115,8 +120,15 @@ function TradingDashboardInner() {
     );
   }
 
-  const hasAccounts = dashboard && dashboard.accounts.length > 0;
-  const allAccounts = dashboard?.accounts ?? [];
+  const modeAccountIds = new Set(modeAccounts.map(a => a.id));
+
+  // Scope all dashboard metrics to the active mode (paper vs live)
+  const scopedPositions = (dashboard?.open_positions ?? []).filter(p => modeAccountIds.has(p.account_id));
+  const scopedPortfolioValue = modeAccounts.reduce((sum, a) => sum + (a.current_balance ?? 0), 0);
+  const scopedPnl = scopedPositions.reduce((sum, p) => sum + (p.unrealised_pnl ?? 0), 0);
+  const scopedActiveStrategies = strategies.filter(s => s.is_active && modeAccountIds.has(s.account_id)).length;
+  const pnlPositive = scopedPnl >= 0;
+  const modeLabel = mode === 'paper' ? 'Paper' : 'Live'counts ?? [];
   const modeAccounts = filterAccounts(allAccounts);
   const totalPnl = dashboard?.total_pnl ?? 0;
   const pnlPositive = totalPnl >= 0;
@@ -189,33 +201,42 @@ function TradingDashboardInner() {
             </div>
 
             {/* Live broker account header (NetLiq / BP / cash) */}
-            {modeAccounts.length > 0 && (
+            {modeAccounts.length > 0 ? (
               <div className="mb-5">
                 <AccountHeader accounts={modeAccounts} />
               </div>
+            ) : (
+              <div className="mb-5 p-4 rounded-xl border border-amber-500/30 bg-amber-500/5 flex items-center gap-3">
+                <AlertTriangle className="w-5 h-5 text-amber-400 flex-shrink-0" />
+                <div className="text-sm text-amber-200">
+                  No <span className="font-semibold uppercase">{mode}</span> account configured yet.
+                  Use the <span className="font-mono text-xs bg-amber-500/20 px-1.5 py-0.5 rounded">+ Add {mode.toUpperCase()} account</span> button above
+                  (or run <span className="font-mono text-xs bg-amber-500/20 px-1.5 py-0.5 rounded">agent/setup.py --mode {mode}</span> on your trading laptop).
+                </div>
+              </div>
             )}
 
-            {/* Stats Grid */}
+            {/* Stats Grid (scoped to active mode) */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
               <StatCard
-                label="Portfolio Value"
-                value={`$${(dashboard?.total_portfolio_value ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                label={`${modeLabel} Portfolio`}
+                value={`$${scopedPortfolioValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                 icon={<DollarSign className="w-5 h-5 text-primary-400" />}
               />
               <StatCard
-                label="Total P&L"
-                value={`${pnlPositive ? '+' : ''}$${totalPnl.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                label={`${modeLabel} Unrealised P&L`}
+                value={`${pnlPositive ? '+' : ''}$${scopedPnl.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                 icon={pnlPositive ? <TrendingUp className="w-5 h-5 text-emerald-400" /> : <TrendingDown className="w-5 h-5 text-red-400" />}
                 positive={pnlPositive}
               />
               <StatCard
-                label="Open Positions"
-                value={String(dashboard?.open_positions?.length ?? 0)}
+                label={`${modeLabel} Open Positions`}
+                value={String(scopedPositions.length)}
                 icon={<Crosshair className="w-5 h-5 text-amber-400" />}
               />
               <StatCard
-                label="Active Strategies"
-                value={String(dashboard?.active_strategies ?? 0)}
+                label={`${modeLabel} Active Strategies`}
+                value={String(scopedActiveStrategies)}
                 icon={<Target className="w-5 h-5 text-diamond-400" />}
               />
             </div>
@@ -230,9 +251,9 @@ function TradingDashboardInner() {
                   </Link>
                 </div>
                 <div className="p-5">
-                  {dashboard?.open_positions && dashboard.open_positions.length > 0 ? (
+                  {scopedPositions.length > 0 ? (
                     <div className="space-y-3">
-                      {dashboard.open_positions.slice(0, 8).map((pos) => {
+                      {scopedPositions.slice(0, 8).map((pos) => {
                         const pnl = pos.unrealised_pnl ?? 0;
                         const isProfit = pnl >= 0;
                         return (
