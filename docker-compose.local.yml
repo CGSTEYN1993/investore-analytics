@@ -1,0 +1,43 @@
+services:
+  db:
+    image: riotinto-docker.artifactory.riotinto.com/timescale/timescaledb:latest-pg15
+    container_name: investore_db_local
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: investore
+      POSTGRES_PASSWORD: investore_dev_password
+      POSTGRES_DB: investore
+    ports:
+      - "5432:5432"
+    volumes:
+      - investore_db_local_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U investore"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: investore_backend_local
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://investore:investore_dev_password@db:5432/investore
+      - SECRET_KEY=local-dev-secret-key-not-for-prod-32bytes-minimum-change-me
+      - BROKER_ENCRYPTION_KEY=YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXpBQkNERUY=
+      - DEBUG=true
+      - ENVIRONMENT=development
+      - REDIS_URL=
+      - FRONTEND_URL=http://localhost:3000
+    ports:
+      - "8000:8000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  investore_db_local_data:

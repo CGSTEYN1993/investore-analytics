@@ -158,15 +158,48 @@ class IB:
 
     @staticmethod
     def _make_contract(symbol: str, exchange: str) -> Contract:
+        """Build an IB Contract from (symbol, exchange).
+
+        Recognises common exchange codes used by InvestOre and maps them to
+        the IB-native (exchange, primaryExchange, currency) triple.
+        ``symbol`` may be passed with a suffix (e.g. ``BHP.AX``) — the suffix
+        is stripped and used as the exchange hint when no exchange is given.
+        """
+        # Strip Yahoo-style suffixes (BHP.AX -> BHP, exchange=ASX)
+        ex = (exchange or "").upper().strip()
+        sym = symbol.upper().strip()
+        if "." in sym and not ex:
+            base, suffix = sym.rsplit(".", 1)
+            sym = base
+            ex = {
+                "AX": "ASX", "TO": "TSX", "V": "TSXV", "L": "LSE",
+                "JO": "JSE", "HK": "HKEX", "NS": "NSE", "SI": "SGX",
+            }.get(suffix, suffix)
+
+        # IB exchange/currency map (mirror of backend ib_native.py IB_EXCHANGE_MAP)
+        ib_map = {
+            "ASX":    {"exchange": "ASX",   "primary": "ASX",     "currency": "AUD"},
+            "TSX":    {"exchange": "SMART", "primary": "TSE",     "currency": "CAD"},
+            "TSXV":   {"exchange": "SMART", "primary": "VENTURE", "currency": "CAD"},
+            "NYSE":   {"exchange": "SMART", "primary": "NYSE",    "currency": "USD"},
+            "NASDAQ": {"exchange": "SMART", "primary": "NASDAQ",  "currency": "USD"},
+            "LSE":    {"exchange": "SMART", "primary": "LSE",     "currency": "GBP"},
+            "JSE":    {"exchange": "JSE",   "primary": "JSE",     "currency": "ZAR"},
+            "CSE":    {"exchange": "SMART", "primary": "CSE",     "currency": "CAD"},
+            "HKEX":   {"exchange": "SEHK",  "primary": "SEHK",    "currency": "HKD"},
+            "SEHK":   {"exchange": "SEHK",  "primary": "SEHK",    "currency": "HKD"},
+            "":       {"exchange": "SMART", "primary": "",        "currency": "USD"},
+            "SMART":  {"exchange": "SMART", "primary": "",        "currency": "USD"},
+        }
+        m = ib_map.get(ex, {"exchange": ex or "SMART", "primary": ex, "currency": "USD"})
+
         c = Contract()
-        c.symbol = symbol
+        c.symbol = sym
         c.secType = "STK"
-        c.currency = "USD"
-        if exchange in {"SMART", "", None}:
-            c.exchange = "SMART"
-        else:
-            c.exchange = "SMART"
-            c.primaryExchange = exchange
+        c.currency = m["currency"]
+        c.exchange = m["exchange"]
+        if m["primary"]:
+            c.primaryExchange = m["primary"]
         return c
 
     @staticmethod
