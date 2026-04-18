@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   TrendingUp, TrendingDown, Eye, X, ChevronRight,
-  Bell, BellOff, RefreshCw
+  Bell, BellOff, RefreshCw, XCircle
 } from 'lucide-react';
 import {
   getActiveSignals,
@@ -123,6 +123,21 @@ export default function SignalNotifications() {
     }, 400);
   };
 
+  // Clear ALL active toasts at once (pure UI — doesn't touch server signals)
+  const handleClearAllToasts = () => {
+    setToasts(prev => prev.map(t => ({ ...t, removing: true })));
+    setTimeout(() => setToasts([]), 400);
+  };
+
+  // Dismiss every active signal on the server in parallel
+  const handleDismissAll = async () => {
+    const ids = signals.map(s => s.id);
+    if (ids.length === 0) return;
+    setSignals([]);
+    handleClearAllToasts();
+    await Promise.allSettled(ids.map(id => dismissSignal(id)));
+  };
+
   const handleRefresh = async () => {
     setLoading(true);
     try {
@@ -153,6 +168,15 @@ export default function SignalNotifications() {
       <div className="fixed bottom-6 right-6 z-[60] flex flex-col items-end gap-3">
         {/* Toast stack */}
         <div className="flex flex-col gap-2 mb-2 max-w-sm w-80">
+          {toasts.length > 1 && (
+            <button
+              onClick={handleClearAllToasts}
+              className="self-end flex items-center gap-1 px-2 py-1 rounded-full bg-slate-800/90 hover:bg-slate-700 border border-slate-600 text-[11px] text-slate-300 shadow-lg backdrop-blur transition-colors"
+              title="Hide all notification pop-ups"
+            >
+              <XCircle className="w-3 h-3" /> Clear all ({toasts.length})
+            </button>
+          )}
           {toasts.slice(-3).map((toast) => (
             <div
               key={`toast-${toast.signal.id}`}
@@ -241,6 +265,14 @@ export default function SignalNotifications() {
               </p>
             </div>
             <div className="flex items-center gap-1">
+              <button
+                onClick={handleDismissAll}
+                disabled={signals.length === 0}
+                className="px-2 py-1 text-[11px] rounded-md bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                title="Dismiss all signals"
+              >
+                Dismiss all
+              </button>
               <button
                 onClick={handleRefresh}
                 disabled={loading}

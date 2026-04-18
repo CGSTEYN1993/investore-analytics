@@ -411,7 +411,7 @@ export function UniverseChart({
 
   return (
     <div
-      className={`flex flex-col bg-metallic-950 border border-metallic-800 rounded-xl overflow-hidden ${
+      className={`flex flex-col flex-1 w-full bg-metallic-950 border border-metallic-800 rounded-xl overflow-hidden ${
         fullscreen ? 'fixed inset-2 z-50' : ''
       }`}
     >

@@ -28,7 +28,7 @@ import dynamic from 'next/dynamic';
 const UniverseChart = dynamic(
   () => import('@/components/trading/UniverseChart').then(m => m.UniverseChart),
   { ssr: false, loading: () => (
-    <div className="h-[460px] flex items-center justify-center text-xs text-metallic-500">Loading chart engine…</div>
+    <div className="min-h-[85vh] flex items-center justify-center text-xs text-metallic-500">Loading chart engine…</div>
   ) },
 );
 import { TradingModeProvider, useTradingMode } from '@/contexts/TradingModeContext';
@@ -376,8 +376,8 @@ function TradingDashboardInner() {
             </div>
 
             {/* Chart — in-house InvestOre universe chart (no TradingView embed) */}
-            <div className="mt-6">
-              <UniverseChart initialSymbol={chartSymbol.symbol} initialExchange={chartSymbol.exchange} height={1000} />
+            <div className="mt-6 min-h-[85vh] flex">
+              <UniverseChart initialSymbol={chartSymbol.symbol} initialExchange={chartSymbol.exchange} height={1300} />
             </div>
 
             {/* Live tape */}
