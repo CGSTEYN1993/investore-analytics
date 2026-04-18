@@ -23,7 +23,14 @@ import StatCard from '@/components/ui/StatCard';
 import { LiveTape } from '@/components/trading/LiveTape';
 import { OrderTicket, useOrderTicketHotkeys } from '@/components/trading/OrderTicket';
 import { AccountHeader } from '@/components/trading/AccountHeader';
-import { TradingViewChart } from '@/components/trading/TradingViewChart';
+import dynamic from 'next/dynamic';
+
+const UniverseChart = dynamic(
+  () => import('@/components/trading/UniverseChart').then(m => m.UniverseChart),
+  { ssr: false, loading: () => (
+    <div className="h-[460px] flex items-center justify-center text-xs text-metallic-500">Loading chart engine…</div>
+  ) },
+);
 import { TradingModeProvider, useTradingMode } from '@/contexts/TradingModeContext';
 import { TradingModeSwitch } from '@/components/trading/TradingModeSwitch';
 
@@ -65,7 +72,7 @@ function TradingDashboardInner() {
   const [selectedPositionId, setSelectedPositionId] = useState<number | null>(null);
   const [ticketOpen, setTicketOpen] = useState(false);
   const [ticketSide, setTicketSide] = useState<'buy' | 'sell'>('buy');
-  const [chartSymbol, setChartSymbol] = useState<{ symbol: string; exchange: string }>({ symbol: 'AAPL', exchange: 'NASDAQ' });
+  const [chartSymbol] = useState<{ symbol: string; exchange: string }>({ symbol: 'BHP', exchange: 'ASX' });
 
   useEffect(() => {
     loadData();
@@ -368,29 +375,9 @@ function TradingDashboardInner() {
               </div>
             </div>
 
-            {/* Chart */}
-            <div className="mt-6 rounded-xl border border-metallic-700/50 bg-metallic-900/40 overflow-hidden">
-              <div className="flex flex-wrap items-center gap-3 px-5 py-3 border-b border-metallic-800">
-                <h3 className="text-sm font-semibold text-metallic-200 uppercase tracking-wider">Chart</h3>
-                <div className="flex items-center gap-2 ml-auto">
-                  <input
-                    value={chartSymbol.symbol}
-                    onChange={e => setChartSymbol(s => ({ ...s, symbol: e.target.value.toUpperCase() }))}
-                    className="px-3 py-1.5 text-sm rounded-lg bg-metallic-800 border border-metallic-700 text-metallic-100 font-mono uppercase w-28 focus:border-primary-500 focus:outline-none"
-                    placeholder="AAPL"
-                  />
-                  <select
-                    value={chartSymbol.exchange}
-                    onChange={e => setChartSymbol(s => ({ ...s, exchange: e.target.value }))}
-                    className="px-2 py-1.5 text-sm rounded-lg bg-metallic-800 border border-metallic-700 text-metallic-100 focus:border-primary-500 focus:outline-none"
-                  >
-                    {['NASDAQ','NYSE','ASX','TSX','TSXV','LSE','JSE','HKEX','SMART'].map(x => (
-                      <option key={x} value={x}>{x}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-              <TradingViewChart symbol={chartSymbol.symbol} exchange={chartSymbol.exchange} height={460} />
+            {/* Chart — in-house InvestOre universe chart (no TradingView embed) */}
+            <div className="mt-6">
+              <UniverseChart initialSymbol={chartSymbol.symbol} initialExchange={chartSymbol.exchange} height={520} />
             </div>
 
             {/* Live tape */}
