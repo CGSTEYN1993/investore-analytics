@@ -183,7 +183,7 @@ export interface UniverseChartProps {
 export function UniverseChart({
   initialSymbol = ASX_DEFAULT,
   initialExchange = 'ASX',
-  height = 820,
+  height = 1100,
 }: UniverseChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<Chart | null>(null);

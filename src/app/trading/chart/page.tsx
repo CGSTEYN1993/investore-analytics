@@ -29,7 +29,7 @@ export default function ChartPage() {
       <UniverseChart
         initialSymbol={symbol}
         initialExchange={exchange}
-        height={900}
+        height={1200}
       />
     </div>
   );

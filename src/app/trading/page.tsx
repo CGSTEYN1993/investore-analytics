@@ -377,7 +377,7 @@ function TradingDashboardInner() {
 
             {/* Chart — in-house InvestOre universe chart (no TradingView embed) */}
             <div className="mt-6">
-              <UniverseChart initialSymbol={chartSymbol.symbol} initialExchange={chartSymbol.exchange} height={780} />
+              <UniverseChart initialSymbol={chartSymbol.symbol} initialExchange={chartSymbol.exchange} height={1000} />
             </div>
 
             {/* Live tape */}
