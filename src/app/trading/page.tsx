@@ -120,6 +120,8 @@ function TradingDashboardInner() {
     );
   }
 
+  const allAccounts = dashboard?.accounts ?? [];
+  const modeAccounts = filterAccounts(allAccounts);
   const modeAccountIds = new Set(modeAccounts.map(a => a.id));
 
   // Scope all dashboard metrics to the active mode (paper vs live)
@@ -128,10 +130,7 @@ function TradingDashboardInner() {
   const scopedPnl = scopedPositions.reduce((sum, p) => sum + (p.unrealised_pnl ?? 0), 0);
   const scopedActiveStrategies = strategies.filter(s => s.is_active && modeAccountIds.has(s.account_id)).length;
   const pnlPositive = scopedPnl >= 0;
-  const modeLabel = mode === 'paper' ? 'Paper' : 'Live'counts ?? [];
-  const modeAccounts = filterAccounts(allAccounts);
-  const totalPnl = dashboard?.total_pnl ?? 0;
-  const pnlPositive = totalPnl >= 0;
+  const modeLabel = mode === 'paper' ? 'Paper' : 'Live';
 
   return (
     <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 pt-5">
