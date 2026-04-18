@@ -30,6 +30,10 @@ import {
   Pencil, Trash2,
 } from 'lucide-react';
 import { fetchChart, fetchUniverse, type UniverseItem } from '@/services/tradingService';
+import { registerCustomIndicators } from './indicatorRegistry';
+
+// Register custom TA indicators once at module load
+registerCustomIndicators();
 
 // ─── Config ────────────────────────────────────────────────────────────────
 
@@ -54,30 +58,83 @@ const CHART_TYPES = [
 
 // Indicators that draw on the main candle pane (overlays)
 const MAIN_INDICATORS = [
+  // Built-in
   { id: 'MA', label: 'MA' },
   { id: 'EMA', label: 'EMA' },
   { id: 'SMA', label: 'SMA' },
-  { id: 'BOLL', label: 'Bollinger' },
-  { id: 'SAR', label: 'SAR' },
+  { id: 'BOLL', label: 'Bollinger Bands' },
+  { id: 'SAR', label: 'Parabolic SAR' },
   { id: 'BBI', label: 'BBI' },
+  // Custom moving averages
+  { id: 'WMA', label: 'WMA' },
+  { id: 'DEMA', label: 'DEMA' },
+  { id: 'TEMA', label: 'TEMA' },
+  { id: 'HMA', label: 'Hull MA' },
+  { id: 'VWMA', label: 'Volume-Weighted MA' },
+  { id: 'VWAP', label: 'VWAP' },
+  { id: 'LINREG', label: 'Linear Regression' },
+  // Custom channels & overlays
+  { id: 'KC', label: 'Keltner Channels' },
+  { id: 'DC', label: 'Donchian Channels' },
+  { id: 'ENV', label: 'Envelope' },
+  { id: 'SUPERTREND', label: 'Supertrend' },
+  { id: 'PIVOTS', label: 'Pivot Points' },
+  { id: 'ZIGZAG', label: 'Zig Zag' },
 ] as const;
 
 // Indicators that get their own sub-pane
 const SUB_INDICATORS = [
+  // Built-in
   { id: 'VOL', label: 'Volume' },
   { id: 'MACD', label: 'MACD' },
   { id: 'RSI', label: 'RSI' },
   { id: 'KDJ', label: 'KDJ' },
   { id: 'CCI', label: 'CCI' },
-  { id: 'WR', label: 'W&R' },
+  { id: 'WR', label: 'Williams %R' },
   { id: 'DMI', label: 'DMI' },
   { id: 'OBV', label: 'OBV' },
   { id: 'BIAS', label: 'BIAS' },
   { id: 'PSY', label: 'PSY' },
-  { id: 'MTM', label: 'MTM' },
-  { id: 'ROC', label: 'ROC' },
+  { id: 'MTM', label: 'Momentum' },
+  { id: 'ROC', label: 'Rate of Change' },
   { id: 'TRIX', label: 'TRIX' },
-  { id: 'AO', label: 'AO' },
+  { id: 'AO', label: 'Awesome Osc' },
+  { id: 'BRAR', label: 'BRAR' },
+  { id: 'CR', label: 'CR' },
+  { id: 'DMA', label: 'DMA' },
+  { id: 'EMV', label: 'Ease of Movement (EMV)' },
+  { id: 'PVT', label: 'Price Volume Trend' },
+  { id: 'VR', label: 'Volume Ratio' },
+  // Custom oscillators / volatility
+  { id: 'ATR', label: 'Average True Range' },
+  { id: 'STDEV', label: 'Standard Deviation' },
+  { id: 'BBPCT', label: 'Bollinger %B' },
+  { id: 'BBW', label: 'Bollinger Bandwidth' },
+  { id: 'STOCH', label: 'Stochastic' },
+  { id: 'STOCHRSI', label: 'Stochastic RSI' },
+  { id: 'ADX', label: 'ADX' },
+  { id: 'MFI', label: 'Money Flow Index' },
+  { id: 'CMF', label: 'Chaikin Money Flow' },
+  { id: 'AD', label: 'Accumulation/Distribution' },
+  { id: 'CHO', label: 'Chaikin Oscillator' },
+  { id: 'UO', label: 'Ultimate Oscillator' },
+  { id: 'BOP', label: 'Balance of Power' },
+  { id: 'AROON', label: 'Aroon' },
+  { id: 'AROONOSC', label: 'Aroon Oscillator' },
+  { id: 'VORTEX', label: 'Vortex' },
+  { id: 'CHOP', label: 'Choppiness Index' },
+  { id: 'FORCE', label: 'Force Index' },
+  { id: 'EOM', label: 'Ease of Movement' },
+  { id: 'MASS', label: 'Mass Index' },
+  { id: 'KST', label: 'Know Sure Thing' },
+  { id: 'COPPOCK', label: 'Coppock Curve' },
+  { id: 'PPO', label: 'PPO' },
+  { id: 'PVO', label: 'PVO' },
+  { id: 'DPO', label: 'Detrended Price Osc' },
+  { id: 'NETVOL', label: 'Net Volume' },
+  { id: 'CVI', label: 'Cumulative Volume' },
+  { id: 'NVI', label: 'Negative Volume Index' },
+  { id: 'PVI', label: 'Positive Volume Index' },
 ] as const;
 
 // Drawing overlays (built-in to klinecharts)
@@ -444,14 +501,17 @@ export function UniverseChart({
             <LineChart className="w-3.5 h-3.5" /> Indicators
           </button>
           {indicatorMenuOpen && (
-            <div className="absolute right-0 z-30 mt-1 w-64 rounded-lg border border-metallic-700 bg-metallic-900 shadow-xl p-3">
-              <div className="text-[10px] font-semibold text-metallic-500 uppercase tracking-wider mb-1">Overlays</div>
-              <div className="grid grid-cols-3 gap-1 mb-3">
+            <div className="absolute right-0 z-30 mt-1 w-96 max-h-[70vh] overflow-y-auto rounded-lg border border-metallic-700 bg-metallic-900 shadow-xl p-3">
+              <div className="text-[10px] font-semibold text-metallic-500 uppercase tracking-wider mb-1">
+                Overlays ({MAIN_INDICATORS.length})
+              </div>
+              <div className="grid grid-cols-2 gap-1 mb-3">
                 {MAIN_INDICATORS.map(ind => (
                   <button
                     key={ind.id}
                     onClick={() => toggleMain(ind.id)}
-                    className={`px-2 py-1 text-[10px] rounded font-mono ${
+                    title={ind.label}
+                    className={`px-2 py-1 text-[10px] rounded font-mono text-left truncate ${
                       activeMainInds.has(ind.id)
                         ? 'bg-primary-500 text-white'
                         : 'bg-metallic-800 text-metallic-400 hover:bg-metallic-700'
@@ -459,13 +519,16 @@ export function UniverseChart({
                   >{ind.label}</button>
                 ))}
               </div>
-              <div className="text-[10px] font-semibold text-metallic-500 uppercase tracking-wider mb-1">Sub-panes</div>
-              <div className="grid grid-cols-3 gap-1">
+              <div className="text-[10px] font-semibold text-metallic-500 uppercase tracking-wider mb-1">
+                Sub-panes ({SUB_INDICATORS.length})
+              </div>
+              <div className="grid grid-cols-2 gap-1">
                 {SUB_INDICATORS.map(ind => (
                   <button
                     key={ind.id}
                     onClick={() => toggleSub(ind.id)}
-                    className={`px-2 py-1 text-[10px] rounded font-mono ${
+                    title={ind.label}
+                    className={`px-2 py-1 text-[10px] rounded font-mono text-left truncate ${
                       activeSubInds.has(ind.id)
                         ? 'bg-primary-500 text-white'
                         : 'bg-metallic-800 text-metallic-400 hover:bg-metallic-700'
