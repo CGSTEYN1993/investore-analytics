@@ -287,6 +287,44 @@ export async function fetchUniverse(opts: {
   );
 }
 
+// Charting — OHLCV from Yahoo Finance (free, ~20 min delayed)
+export interface OHLCVCandle {
+  timestamp: number;  // ms epoch
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  volume: number;
+}
+
+export interface OHLCVChartResponse {
+  symbol: string;
+  exchange: string;
+  yahoo_symbol: string;
+  range: string;
+  interval: string;
+  currency: string | null;
+  instrument_type: string | null;
+  exchange_timezone: string | null;
+  regular_market_price: number | null;
+  previous_close: number | null;
+  candles: OHLCVCandle[];
+}
+
+export async function fetchChart(
+  symbol: string,
+  opts: { exchange?: string; range?: string; interval?: string } = {},
+): Promise<OHLCVChartResponse> {
+  const params = new URLSearchParams();
+  if (opts.exchange) params.set('exchange', opts.exchange);
+  if (opts.range) params.set('range', opts.range);
+  if (opts.interval) params.set('interval', opts.interval);
+  const qs = params.toString();
+  return authFetch<OHLCVChartResponse>(
+    `${API}/api/v1/trading/chart/${encodeURIComponent(symbol)}${qs ? '?' + qs : ''}`,
+  );
+}
+
 // Strategies
 export async function fetchStrategies(accountId?: number): Promise<TradingStrategy[]> {
   const params = accountId ? `?account_id=${accountId}` : '';
