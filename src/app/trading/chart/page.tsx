@@ -18,10 +18,10 @@ type LayoutId = '1' | '2v' | '2h' | '4';
 type Cell = { id: string; symbol: string; exchange: string };
 
 const LAYOUTS: { id: LayoutId; label: string; cells: number; icon: React.ComponentType<{ className?: string }>; grid: string; cellHeight: number }[] = [
-  { id: '1',  label: '1',         cells: 1, icon: Square,    grid: 'grid-cols-1',                       cellHeight: 1100 },
-  { id: '2v', label: '2 stacked', cells: 2, icon: Rows,      grid: 'grid-cols-1',                       cellHeight: 580 },
-  { id: '2h', label: '2 side',    cells: 2, icon: Columns,   grid: 'grid-cols-1 lg:grid-cols-2',        cellHeight: 1100 },
-  { id: '4',  label: '4 quad',    cells: 4, icon: Grid2X2,   grid: 'grid-cols-1 lg:grid-cols-2',        cellHeight: 580 },
+  { id: '1',  label: '1',         cells: 1, icon: Square,    grid: 'grid-cols-1',                       cellHeight: 1400 },
+  { id: '2v', label: '2 stacked', cells: 2, icon: Rows,      grid: 'grid-cols-1',                       cellHeight: 850 },
+  { id: '2h', label: '2 side',    cells: 2, icon: Columns,   grid: 'grid-cols-1 lg:grid-cols-2',        cellHeight: 1200 },
+  { id: '4',  label: '4 quad',    cells: 4, icon: Grid2X2,   grid: 'grid-cols-1 lg:grid-cols-2',        cellHeight: 850 },
 ];
 
 const STORAGE_KEY = 'investore.charts.layout.v1';
@@ -107,7 +107,7 @@ export default function ChartPage() {
   };
 
   return (
-    <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 pt-5 pb-10">
+    <div className="max-w-[1920px] 2xl:max-w-none mx-auto px-3 sm:px-4 lg:px-6 pt-5 pb-10">
       {/* Header */}
       <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
         <div>
