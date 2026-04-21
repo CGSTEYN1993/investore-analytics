@@ -157,7 +157,11 @@ export default function ChartPage() {
       {/* Grid of charts */}
       <div className={`grid ${layout.grid} gap-4`}>
         {visible.map((cell, i) => (
-          <div key={cell.id} className="relative group">
+          <div
+            key={cell.id}
+            className="relative group flex"
+            style={{ minHeight: layout.cellHeight + 130 }}
+          >
             {layout.cells > 1 && (
               <button
                 onClick={() => removeCell(cell.id)}

@@ -261,7 +261,18 @@ export function UniverseChart({
     });
     chartRef.current = chart;
 
+    // Repaint on container resize (layout swap, fullscreen toggle, window resize)
+    let ro: ResizeObserver | null = null;
+    try {
+      ro = new ResizeObserver(() => {
+        const c = chartRef.current as unknown as { resize?: () => void } | null;
+        if (c && typeof c.resize === 'function') c.resize();
+      });
+      ro.observe(containerRef.current);
+    } catch { /* SSR / older browsers */ }
+
     return () => {
+      try { ro?.disconnect(); } catch { /* ignore */ }
       dispose(id);
       chartRef.current = null;
     };
