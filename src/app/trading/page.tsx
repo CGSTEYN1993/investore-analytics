@@ -134,7 +134,14 @@ function TradingDashboardInner() {
 
   // Scope all dashboard metrics to the active mode (paper vs live)
   const scopedPositions = (dashboard?.open_positions ?? []).filter(p => modeAccountIds.has(p.account_id));
-  const scopedPortfolioValue = modeAccounts.reduce((sum, a) => sum + (a.current_balance ?? 0), 0);
+  const scopedCash = modeAccounts.reduce((sum, a) => sum + (a.current_balance ?? 0), 0);
+  const scopedGpv = scopedPositions.reduce(
+    (sum, p) => sum + Math.abs((p.current_price ?? p.entry_price ?? 0) * (p.quantity ?? 0)),
+    0,
+  );
+  // Net liquidation = cash + gross position value, matching AccountHeader's
+  // NetLiquidation field (broker-reported for live, computed for paper).
+  const scopedNetLiq = scopedCash + scopedGpv;
   const scopedPnl = scopedPositions.reduce((sum, p) => sum + (p.unrealised_pnl ?? 0), 0);
   const scopedActiveStrategies = strategies.filter(s => s.is_active && modeAccountIds.has(s.account_id)).length;
   const pnlPositive = scopedPnl >= 0;
@@ -226,8 +233,8 @@ function TradingDashboardInner() {
             {/* Stats Grid (scoped to active mode) */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
               <StatCard
-                label={`${modeLabel} Portfolio`}
-                value={`$${scopedPortfolioValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                label={`${modeLabel} Net Liquidation`}
+                value={`$${scopedNetLiq.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                 icon={<DollarSign className="w-5 h-5 text-primary-400" />}
               />
               <StatCard
