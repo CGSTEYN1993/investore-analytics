@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { formatPrice } from '@/lib/utils';
 import {
   X, TrendingUp, TrendingDown, Activity, Target, Shield,
   Clock, BarChart3, Zap, ArrowUpRight, ArrowDownRight, Info
@@ -67,13 +68,13 @@ function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: 
       <p className="text-metallic-400 mb-1.5">{label}</p>
       <div className="grid grid-cols-2 gap-x-4 gap-y-0.5">
         <span className="text-metallic-500">Open</span>
-        <span className="text-metallic-200 text-right">{d.open?.toFixed(2)}</span>
+        <span className="text-metallic-200 text-right">{formatPrice(d.open)}</span>
         <span className="text-metallic-500">High</span>
-        <span className="text-metallic-200 text-right">{d.high?.toFixed(2)}</span>
+        <span className="text-metallic-200 text-right">{formatPrice(d.high)}</span>
         <span className="text-metallic-500">Low</span>
-        <span className="text-metallic-200 text-right">{d.low?.toFixed(2)}</span>
+        <span className="text-metallic-200 text-right">{formatPrice(d.low)}</span>
         <span className="text-metallic-500">Close</span>
-        <span className="text-metallic-200 text-right font-semibold">{d.close?.toFixed(2)}</span>
+        <span className="text-metallic-200 text-right font-semibold">{formatPrice(d.close)}</span>
         <span className="text-metallic-500">Volume</span>
         <span className="text-metallic-200 text-right">{(d.volume || 0).toLocaleString()}</span>
       </div>
@@ -243,7 +244,7 @@ export default function TradeDetailModal({ positionId, onClose }: TradeDetailMod
                   interval={Math.max(Math.floor(chartData.length / 8), 1)}
                   tickFormatter={(v: string) => { const d = new Date(v); return `${d.getDate()}/${d.getMonth()+1}`; }} />
                 <YAxis domain={[yMin, yMax]} tick={{ fill: '#64748b', fontSize: 10 }} tickLine={false}
-                  width={65} tickFormatter={(v: number) => v >= 1000 ? `${(v/1000).toFixed(1)}k` : v.toFixed(2)} />
+                  width={65} tickFormatter={(v: number) => v >= 1000 ? `${(v/1000).toFixed(1)}k` : formatPrice(v)} />
                 <Tooltip content={<ChartTooltip />} />
 
                 {/* Price area + line */}

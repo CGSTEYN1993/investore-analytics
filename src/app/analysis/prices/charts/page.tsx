@@ -35,6 +35,7 @@ import {
   ReferenceDot,
 } from 'recharts';
 import { RAILWAY_API_URL } from '@/lib/public-api-url';
+import { formatPrice } from '@/lib/utils';
 
 const API_BASE = RAILWAY_API_URL;
 
@@ -573,7 +574,7 @@ export default function CommodityPriceChartsPage() {
                     <div className="flex items-center gap-3">
                       <span className="text-xl font-bold text-white">
                         {stockData.summary
-                          ? `$${stockData.summary.end_price.toFixed(2)}`
+                          ? `$${formatPrice(stockData.summary.end_price)}`
                           : <span className="text-slate-500">N/A</span>}
                       </span>
                       {stockData.summary && renderChange(stockData.summary.change, stockData.summary.changePercent)}
@@ -632,7 +633,7 @@ export default function CommodityPriceChartsPage() {
                         orientation="right"
                         stroke="#64748b"
                         tick={{ fill: '#64748b', fontSize: 12 }}
-                        tickFormatter={(val) => `$${val.toFixed(2)}`}
+                        tickFormatter={(val) => `$${formatPrice(val)}`}
                       />
                     )}
                     <Tooltip
@@ -714,7 +715,7 @@ export default function CommodityPriceChartsPage() {
                         orientation="right"
                         stroke="#64748b"
                         tick={{ fill: '#64748b', fontSize: 12 }}
-                        tickFormatter={(val) => `$${val.toFixed(2)}`}
+                        tickFormatter={(val) => `$${formatPrice(val)}`}
                       />
                     )}
                     <Tooltip
@@ -819,23 +820,23 @@ export default function CommodityPriceChartsPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-xs text-slate-500">Period Start</p>
-                  <p className="text-lg font-semibold text-white">${stockData.summary.start_price.toFixed(2)}</p>
+                  <p className="text-lg font-semibold text-white">${formatPrice(stockData.summary.start_price)}</p>
                 </div>
                 <div>
                   <p className="text-xs text-slate-500">Period End</p>
-                  <p className="text-lg font-semibold text-white">${stockData.summary.end_price.toFixed(2)}</p>
+                  <p className="text-lg font-semibold text-white">${formatPrice(stockData.summary.end_price)}</p>
                 </div>
                 <div>
                   <p className="text-xs text-slate-500">Period High</p>
-                  <p className="text-lg font-semibold text-green-400">${stockData.summary.high.toFixed(2)}</p>
+                  <p className="text-lg font-semibold text-green-400">${formatPrice(stockData.summary.high)}</p>
                 </div>
                 <div>
                   <p className="text-xs text-slate-500">Period Low</p>
-                  <p className="text-lg font-semibold text-red-400">${stockData.summary.low.toFixed(2)}</p>
+                  <p className="text-lg font-semibold text-red-400">${formatPrice(stockData.summary.low)}</p>
                 </div>
                 <div>
                   <p className="text-xs text-slate-500">Average</p>
-                  <p className="text-lg font-semibold text-slate-300">${stockData.summary.average.toFixed(2)}</p>
+                  <p className="text-lg font-semibold text-slate-300">${formatPrice(stockData.summary.average)}</p>
                 </div>
                 <div>
                   <p className="text-xs text-slate-500">Period Change</p>

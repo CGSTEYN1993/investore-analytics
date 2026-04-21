@@ -10,6 +10,7 @@ import {
   BarChart3, DollarSign, Users, Layers, Download, Loader2, RefreshCw, AlertCircle
 } from 'lucide-react';
 import { getCommodityColor } from '@/lib/subscription-tiers';
+import { formatPrice } from '@/lib/utils';
 import CompanyGeoscienceWidget from '@/components/dashboard/CompanyGeoscienceWidget';import CompanyMiningDataWidget from '@/components/mining/CompanyMiningDataWidget';
 // Dynamic import for Plotly to avoid SSR issues
 const Plot = dynamic(() => import('react-plotly.js'), { ssr: false });
@@ -512,11 +513,11 @@ export default function CompanyProfile() {
               {marketData && (
                 <div className="text-right">
                   <div className="text-3xl font-bold text-metallic-100">
-                    ${marketData.price.toFixed(2)}
+                    ${formatPrice(marketData.price)}
                   </div>
                   <div className={`flex items-center justify-end gap-1 ${isPositive ? 'text-green-400' : 'text-red-400'}`}>
                     {isPositive ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
-                    <span>${Math.abs(marketData.change).toFixed(2)}</span>
+                    <span>${formatPrice(Math.abs(marketData.change))}</span>
                     <span>({isPositive ? '+' : ''}{marketData.changePercent.toFixed(2)}%)</span>
                   </div>
                 </div>
@@ -610,7 +611,7 @@ export default function CompanyProfile() {
                   />
                   <StatCard 
                     label="52W Range" 
-                    value={marketData.high52w > 0 ? `$${marketData.low52w.toFixed(2)} - $${marketData.high52w.toFixed(2)}` : 'N/A'}
+                    value={marketData.high52w > 0 ? `$${formatPrice(marketData.low52w)} - $${formatPrice(marketData.high52w)}` : 'N/A'}
                     icon={TrendingUp}
                   />
                   {marketData.sharesOutstanding && (

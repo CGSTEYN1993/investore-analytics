@@ -44,6 +44,32 @@ export function formatCurrency(value: number | null | undefined, currency = 'USD
 }
 
 /**
+ * Format a stock/instrument price with adaptive precision.
+ * - value >= 1   → 2 decimals  (e.g. 12.34)
+ * - value <  1   → 3 decimals  (e.g. 0.036)
+ * - value <  0.1 → 4 decimals  (e.g. 0.0125)
+ *
+ * This matches typical exchange tick-size conventions (e.g. ASX where sub-$2
+ * names trade in 0.001 increments and sub-$0.10 in 0.0001).
+ */
+export function formatPrice(value: number | null | undefined): string {
+  if (value === null || value === undefined || Number.isNaN(value)) return '—';
+  const abs = Math.abs(value);
+  if (abs > 0 && abs < 0.1) return value.toFixed(4);
+  if (abs < 1) return value.toFixed(3);
+  return value.toFixed(2);
+}
+
+/** Suggested input step for a limit-price box, given the current price. */
+export function priceStep(value: number | null | undefined): string {
+  if (value == null || Number.isNaN(value)) return '0.001';
+  const abs = Math.abs(value);
+  if (abs > 0 && abs < 0.1) return '0.0001';
+  if (abs < 1) return '0.001';
+  return '0.01';
+}
+
+/**
  * Format contained metal (oz, tonnes, etc.)
  */
 export function formatMetal(value: number | null | undefined, unit: string): string {

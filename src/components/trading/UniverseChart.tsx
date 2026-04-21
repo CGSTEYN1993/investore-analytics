@@ -30,6 +30,7 @@ import {
   Pencil, Trash2,
 } from 'lucide-react';
 import { fetchChart, fetchUniverse, type UniverseItem } from '@/services/tradingService';
+import { formatPrice } from '@/lib/utils';
 import { registerCustomIndicators } from './indicatorRegistry';
 import { registerStrategies, STRATEGY_META } from './strategies';
 
@@ -311,7 +312,7 @@ export function UniverseChart({
     });
 
     // These two trigger getBars(type='init')
-    c.setSymbol({ ticker: `${exchange}:${symbol}`, pricePrecision: 2, volumePrecision: 0 });
+    c.setSymbol({ ticker: `${exchange}:${symbol}`, pricePrecision: 3, volumePrecision: 0 });
     c.setPeriod(currentRange.period);
   }, [symbol, exchange, currentRange]);
 
@@ -476,12 +477,12 @@ export function UniverseChart({
         {meta.lastPrice != null && (
           <div className="flex items-baseline gap-2">
             <span className="text-lg font-mono font-semibold text-metallic-100">
-              {meta.lastPrice.toFixed(2)}
+              {formatPrice(meta.lastPrice)}
             </span>
             {meta.currency && <span className="text-[10px] text-metallic-500">{meta.currency}</span>}
             {change != null && changePct != null && (
               <span className={`text-xs font-mono ${change >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                {change >= 0 ? '+' : ''}{change.toFixed(2)} ({changePct.toFixed(2)}%)
+                {change >= 0 ? '+' : ''}{formatPrice(change)} ({changePct.toFixed(2)}%)
               </span>
             )}
           </div>

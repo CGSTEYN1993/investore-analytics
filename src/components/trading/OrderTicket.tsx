@@ -286,10 +286,11 @@ export function OrderTicket({
               <label className="block text-xs text-metallic-500 uppercase tracking-wider mb-1">Limit price</label>
               <input
                 type="number"
-                step="0.01"
+                step="0.001"
+                min="0"
                 value={limitPrice}
                 onChange={e => setLimitPrice(e.target.value)}
-                placeholder="0.00"
+                placeholder="0.000"
                 className="w-full px-3 py-2 text-sm rounded-lg bg-metallic-800 border border-metallic-700 text-metallic-100 font-mono focus:border-primary-500 focus:outline-none"
               />
             </div>
