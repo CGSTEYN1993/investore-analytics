@@ -179,12 +179,15 @@ export interface UniverseChartProps {
   initialSymbol?: string;
   initialExchange?: string;
   height?: number;
+  /** Called whenever the user picks a new symbol/exchange in this chart. */
+  onSymbolChange?: (symbol: string, exchange: string) => void;
 }
 
 export function UniverseChart({
   initialSymbol = ASX_DEFAULT,
   initialExchange = 'ASX',
   height = 1100,
+  onSymbolChange,
 }: UniverseChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<Chart | null>(null);
@@ -211,6 +214,17 @@ export function UniverseChart({
   const [error, setError] = useState<string | null>(null);
 
   const currentRange = useMemo(() => RANGES.find(r => r.label === rangeKey)!, [rangeKey]);
+
+  // ── Notify parent on symbol/exchange change (skip first render) ─────────
+  const didMountRef = useRef(false);
+  useEffect(() => {
+    if (!didMountRef.current) {
+      didMountRef.current = true;
+      return;
+    }
+    onSymbolChange?.(symbol, exchange);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [symbol, exchange]);
 
   // ── Init chart ──────────────────────────────────────────────────────────
   useEffect(() => {
