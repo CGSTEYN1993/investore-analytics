@@ -96,8 +96,15 @@ function TradingDashboardInner() {
       setEngineStatus(engine);
       setStrategies(strats);
     } catch (err) {
-      // If not authenticated, just show empty state
-      console.log('Trading API:', err instanceof Error ? err.message : 'Failed to load');
+      const msg = err instanceof Error ? err.message : 'Failed to load trading dashboard';
+      // 401 = not signed in → genuinely show empty/get-started state.
+      // Anything else (500, network, timeout) → show error so we don't
+      // misleadingly wipe accounts that exist server-side.
+      if (/401|unauthor/i.test(msg)) {
+        console.log('Trading API: not authenticated');
+      } else {
+        setError(msg);
+      }
     }
     setLoading(false);
   };
