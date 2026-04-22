@@ -2,8 +2,6 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
-import { useAuth } from '@/components/providers/AuthProvider';
-import UpgradePrompt from '@/components/ui/UpgradePrompt';
 import { RefreshCw, TrendingUp, TrendingDown, AlertTriangle, PieChart } from 'lucide-react';
 import {
   fetchPortfolioOverview, PortfolioOverview, Timeframe,
@@ -32,7 +30,6 @@ function money(v: number | null | undefined, decimals = 2) {
 }
 
 export default function PortfolioPage() {
-  const { user, isLoading } = useAuth();
   const [timeframe, setTimeframe] = useState<Timeframe>('1M');
   const [data, setData] = useState<PortfolioOverview | null>(null);
   const [loading, setLoading] = useState(false);
@@ -52,9 +49,6 @@ export default function PortfolioPage() {
   }, [timeframe]);
 
   useEffect(() => { void load(); }, [load]);
-
-  if (isLoading) return null;
-  if (!user) return <UpgradePrompt feature="Trading Portfolio" />;
 
   const aggReturn = data?.aggregate.weighted_period_return_pct ?? null;
   const aggUp = (aggReturn ?? 0) >= 0;

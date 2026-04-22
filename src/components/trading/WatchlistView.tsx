@@ -1,8 +1,6 @@
 'use client';
 
 import React, { useEffect, useState, useCallback } from 'react';
-import { useAuth } from '@/components/providers/AuthProvider';
-import UpgradePrompt from '@/components/ui/UpgradePrompt';
 import {
   RefreshCw, TrendingUp, TrendingDown, Plus, Trash2, AlertTriangle, Star,
 } from 'lucide-react';
@@ -26,7 +24,6 @@ function pct(v: number | null | undefined) {
 }
 
 export default function WatchlistView() {
-  const { user, isLoading } = useAuth();
   const [lists, setLists] = useState<Watchlist[]>([]);
   const [activeId, setActiveId] = useState<number | null>(null);
   const [timeframe, setTimeframe] = useState<Timeframe>('1M');
@@ -112,9 +109,6 @@ export default function WatchlistView() {
       setError(e instanceof Error ? e.message : 'Failed to create');
     }
   };
-
-  if (isLoading) return null;
-  if (!user) return <UpgradePrompt feature="Watchlist" />;
 
   const avg = quotes?.aggregate.avg_return_pct ?? null;
   const avgUp = (avg ?? 0) >= 0;
