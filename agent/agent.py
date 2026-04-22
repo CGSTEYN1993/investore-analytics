@@ -72,6 +72,9 @@ class _IB(EWrapper, EClient):
         self._account_summary_done = threading.Event()
         self._prices: Dict[int, Dict[int, float]] = {}
         self._managed_accounts: str = ""
+        self._bars: Dict[int, List[Dict[str, Any]]] = {}
+        self._bars_done: Dict[int, threading.Event] = {}
+        self._bars_error: Dict[int, str] = {}
 
     # --- EWrapper callbacks ---
     def nextValidId(self, orderId: int) -> None:  # noqa: N802
@@ -123,8 +126,29 @@ class _IB(EWrapper, EClient):
     def tickPrice(self, reqId, tickType, price, attrib):  # noqa: N802,N803
         self._prices.setdefault(reqId, {})[int(tickType)] = float(price)
 
+    def historicalData(self, reqId, bar):  # noqa: N802,N803
+        self._bars.setdefault(int(reqId), []).append({
+            "date": str(bar.date),
+            "open": float(bar.open),
+            "high": float(bar.high),
+            "low": float(bar.low),
+            "close": float(bar.close),
+            "volume": float(bar.volume) if bar.volume is not None else 0.0,
+        })
+
+    def historicalDataEnd(self, reqId, start, end):  # noqa: N802,N803
+        ev = self._bars_done.get(int(reqId))
+        if ev is not None:
+            ev.set()
+
     def error(self, reqId, errorCode, errorString, advancedOrderRejectJson=""):  # noqa: N802,N803
         log.warning("IB error req=%s code=%s %s", reqId, errorCode, errorString)
+        # Surface terminal historical-data errors so the RPC unblocks.
+        if int(errorCode) in (162, 200, 354, 366, 430):
+            rid = int(reqId) if reqId is not None else -1
+            if rid in self._bars_done:
+                self._bars_error[rid] = f"{errorCode}: {errorString}"
+                self._bars_done[rid].set()
 
 
 class IB:
@@ -312,6 +336,47 @@ class IB:
             pass
         return None
 
+    def get_historical_bars(self, params: Dict[str, Any]) -> Dict[str, Any]:
+        """Fetch IB historical bars.
+
+        params: { symbol, exchange, duration, bar_size, what_to_show?, use_rth? }
+          duration:  e.g. "1 D", "1 W", "1 M", "6 M", "1 Y", "5 Y"
+          bar_size:  e.g. "1 day", "1 hour", "5 mins", "1 week"
+        Returns: { ok, bars: [{date, open, high, low, close, volume}], error? }
+        """
+        if not self.connect():
+            return {"ok": False, "bars": [], "error": "IB Gateway not reachable"}
+        contract = self._make_contract(params["symbol"], params.get("exchange") or "SMART")
+        duration = str(params.get("duration") or "1 M")
+        bar_size = str(params.get("bar_size") or "1 day")
+        what_to_show = str(params.get("what_to_show") or "TRADES")
+        use_rth = 1 if params.get("use_rth", True) else 0
+        req_id = self.next_id()
+        ev = threading.Event()
+        self.app._bars[req_id] = []
+        self.app._bars_done[req_id] = ev
+        try:
+            self.app.reqHistoricalData(
+                req_id, contract, "", duration, bar_size,
+                what_to_show, use_rth, 1, False, [],
+            )
+            # IB historical responses can take a few seconds; allow up to 25s.
+            got = ev.wait(25.0)
+            bars = list(self.app._bars.get(req_id, []))
+            err = self.app._bars_error.pop(req_id, None)
+            if not got and not bars:
+                return {"ok": False, "bars": [], "error": "timeout waiting for historical data"}
+            if err and not bars:
+                return {"ok": False, "bars": [], "error": err}
+            return {"ok": True, "bars": bars, "error": err}
+        finally:
+            self.app._bars.pop(req_id, None)
+            self.app._bars_done.pop(req_id, None)
+            try:
+                self.app.cancelHistoricalData(req_id)
+            except Exception:
+                pass
+
 
 # ─── WebSocket loop ───────────────────────────────────────────────────────────
 
@@ -325,6 +390,7 @@ RPC_HANDLERS = {
     "get_open_orders": ib.get_open_orders,
     "get_account_summary": ib.get_account_summary,
     "get_market_price": ib.get_market_price,
+    "get_historical_bars": ib.get_historical_bars,
 }
 
 
