@@ -71,11 +71,15 @@ class _IB(EWrapper, EClient):
         self._account_summary: Dict[str, Any] = {}
         self._account_summary_done = threading.Event()
         self._prices: Dict[int, Dict[int, float]] = {}
+        self._managed_accounts: str = ""
 
     # --- EWrapper callbacks ---
     def nextValidId(self, orderId: int) -> None:  # noqa: N802
         with self._next_id_lock:
             self._next_id = max(self._next_id, orderId)
+
+    def managedAccounts(self, accountsList: str) -> None:  # noqa: N802,N803
+        self._managed_accounts = accountsList or ""
 
     def orderStatus(self, orderId, status, filled, remaining, avgFillPrice,  # noqa: N802,N803
                     permId, parentId, lastFillPrice, clientId, whyHeld, mktCapPrice):
@@ -146,11 +150,12 @@ class IB:
             return False
         self._thread = threading.Thread(target=self.app.run, daemon=True)
         self._thread.start()
-        # Wait for nextValidId
-        for _ in range(50):
-            if self.app._next_id > 1:
+        # Wait for nextValidId OR managedAccounts (either confirms handshake)
+        for _ in range(150):
+            if self.app._next_id > 1 or self.app._managed_accounts:
                 self._connected = True
-                log.info("connected to IB Gateway %s:%s clientId=%s", IB_HOST, IB_PORT, IB_CLIENT_ID)
+                log.info("connected to IB Gateway %s:%s clientId=%s accounts=%s",
+                         IB_HOST, IB_PORT, IB_CLIENT_ID, self.app._managed_accounts)
                 return True
             time.sleep(0.1)
         log.error("IB handshake timed out")
@@ -212,6 +217,9 @@ class IB:
         if o.orderType == "LMT" and limit_price is not None:
             o.lmtPrice = float(limit_price)
         o.tif = "DAY"
+        # ibapi 9.81 ships these defaults that IB rejects with code 10268
+        o.eTradeOnly = False
+        o.firmQuoteOnly = False
         return o
 
     # --- RPC handlers ---
@@ -330,6 +338,7 @@ async def _handle_message(ws, raw: str) -> None:
         rpc_id = msg.get("id")
         method = msg.get("method")
         params = msg.get("params") or {}
+        log.info("RPC received: method=%s id=%s", method, rpc_id)
         handler = RPC_HANDLERS.get(method)
         if handler is None:
             await ws.send(json.dumps({"type": "rpc_result", "id": rpc_id,
@@ -347,9 +356,11 @@ async def _handle_message(ws, raw: str) -> None:
             await ws.send(json.dumps({"type": "rpc_result", "id": rpc_id,
                                       "ok": False, "error": str(e)}))
     elif mtype == "pong":
-        pass
+        log.info("pong received")
     elif mtype == "welcome":
         log.info("server welcome: %s", msg.get("server"))
+    else:
+        log.info("unknown msg type=%s raw=%s", mtype, raw[:200])
 
 
 async def _run_once() -> None:
@@ -357,8 +368,23 @@ async def _run_once() -> None:
     log.info("connecting to %s", API_URL)
     async with websockets.connect(url, ping_interval=30, ping_timeout=10, max_size=2**20) as ws:
         await ws.send(json.dumps({"type": "hello", "agent_id": AGENT_ID, "version": "1"}))
-        async for raw in ws:
-            await _handle_message(ws, raw)
+
+        async def _app_keepalive():
+            # App-level JSON ping — keeps Railway Edge proxy from dropping
+            # idle server->client frames. Protocol-level pings aren't enough.
+            while True:
+                await asyncio.sleep(15)
+                try:
+                    await ws.send(json.dumps({"type": "ping"}))
+                except Exception:
+                    return
+
+        ka_task = asyncio.create_task(_app_keepalive())
+        try:
+            async for raw in ws:
+                await _handle_message(ws, raw)
+        finally:
+            ka_task.cancel()
 
 
 async def main() -> None:
