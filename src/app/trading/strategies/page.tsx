@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/components/providers/AuthProvider';
 import UpgradePrompt from '@/components/ui/UpgradePrompt';
+import { formatPrice } from '@/lib/utils';
 import {
   Target, Plus, Trash2, Play, Pause, Settings, AlertTriangle, Activity,
   BarChart3, Crosshair, History, Bell, Bot, ChevronDown, ChevronUp,
@@ -818,8 +819,8 @@ export default function StrategiesPage() {
                               <tr key={i} className="border-t border-metallic-800">
                                 <td className="px-3 py-1.5 text-metallic-400">{t.entry_date.slice(0, 10)}</td>
                                 <td className="px-3 py-1.5 text-metallic-400">{t.exit_date.slice(0, 10)}</td>
-                                <td className="px-3 py-1.5 text-right text-metallic-300">${t.entry_price.toFixed(2)}</td>
-                                <td className="px-3 py-1.5 text-right text-metallic-300">${t.exit_price.toFixed(2)}</td>
+                                <td className="px-3 py-1.5 text-right text-metallic-300">${formatPrice(t.entry_price)}</td>
+                                <td className="px-3 py-1.5 text-right text-metallic-300">${formatPrice(t.exit_price)}</td>
                                 <td className={`px-3 py-1.5 text-right font-medium ${t.net_pnl >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                                   {t.net_pnl >= 0 ? '+' : ''}${t.net_pnl.toFixed(0)}
                                 </td>

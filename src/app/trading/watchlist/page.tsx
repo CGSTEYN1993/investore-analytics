@@ -1,5 +1,5 @@
 import WatchlistView from '@/components/trading/WatchlistView';
 
-export default function WatchlistPage() {
+export default function TradingWatchlistPage() {
   return <WatchlistView />;
 }

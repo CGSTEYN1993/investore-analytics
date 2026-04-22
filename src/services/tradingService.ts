@@ -721,3 +721,131 @@ export interface PositionDetail {
 export async function fetchPositionDetail(positionId: number): Promise<PositionDetail> {
   return authFetch<PositionDetail>(`${API}/api/v1/trading/position-detail/${positionId}`);
 }
+
+// ── Portfolio (live broker positions with timeframe returns) ──
+
+export type Timeframe = '1D' | '1W' | '1M' | '3M' | '6M' | '1Y' | 'YTD' | 'ALL';
+export const TIMEFRAMES: Timeframe[] = ['1D', '1W', '1M', '3M', '6M', '1Y', 'YTD', 'ALL'];
+
+export interface PortfolioPosition {
+  id: number;
+  account_id: number;
+  ticker: string;
+  exchange: string;
+  side: string;
+  quantity: number;
+  entry_price: number;
+  current_price: number | null;
+  stop_loss: number | null;
+  take_profit: number | null;
+  market_value: number;
+  since_entry_pnl: number | null;
+  period_start_price: number | null;
+  period_return_pct: number | null;
+  period_pnl: number | null;
+  opened_at: string;
+}
+
+export interface PortfolioOverview {
+  account_id: number | null;
+  timeframe: Timeframe;
+  positions: PortfolioPosition[];
+  aggregate: {
+    total_market_value: number;
+    total_unrealised_pnl: number;
+    weighted_period_return_pct: number | null;
+    period_pnl: number;
+    best: { ticker: string; return_pct: number } | null;
+    worst: { ticker: string; return_pct: number } | null;
+  };
+  data_source: 'ib_agent' | 'unavailable';
+}
+
+export async function fetchPortfolioOverview(
+  timeframe: Timeframe = '1M',
+  accountId?: number,
+): Promise<PortfolioOverview> {
+  const q = new URLSearchParams({ timeframe });
+  if (accountId) q.append('account_id', String(accountId));
+  return authFetch<PortfolioOverview>(`${API}/api/v1/portfolio/overview?${q}`);
+}
+
+// ── Watchlist ──
+
+export interface Watchlist {
+  id: number;
+  name: string;
+  is_default: boolean;
+  created_at: string;
+  item_count: number;
+}
+
+export interface WatchlistItem {
+  id: number;
+  watchlist_id: number;
+  ticker: string;
+  exchange: string;
+  notes: string | null;
+  added_at: string;
+  current_price?: number | null;
+  period_start_price?: number | null;
+  period_return_pct?: number | null;
+  bar_count?: number;
+}
+
+export interface WatchlistQuotes {
+  watchlist_id: number;
+  timeframe: Timeframe;
+  items: WatchlistItem[];
+  aggregate: {
+    avg_return_pct: number | null;
+    best: { ticker: string; return_pct: number } | null;
+    worst: { ticker: string; return_pct: number } | null;
+  };
+  data_source: 'ib_agent' | 'unavailable';
+}
+
+export async function fetchWatchlists(): Promise<Watchlist[]> {
+  return authFetch<Watchlist[]>(`${API}/api/v1/watchlist`);
+}
+
+export async function createWatchlist(name: string): Promise<Watchlist> {
+  return authFetch<Watchlist>(`${API}/api/v1/watchlist`, {
+    method: 'POST',
+    body: JSON.stringify({ name }),
+  });
+}
+
+export async function deleteWatchlist(id: number): Promise<{ ok: boolean }> {
+  return authFetch(`${API}/api/v1/watchlist/${id}`, { method: 'DELETE' });
+}
+
+export async function addWatchlistItem(
+  watchlistId: number,
+  ticker: string,
+  exchange: string,
+  notes?: string,
+): Promise<WatchlistItem> {
+  return authFetch<WatchlistItem>(`${API}/api/v1/watchlist/${watchlistId}/items`, {
+    method: 'POST',
+    body: JSON.stringify({ ticker, exchange, notes }),
+  });
+}
+
+export async function removeWatchlistItem(
+  watchlistId: number,
+  itemId: number,
+): Promise<{ ok: boolean }> {
+  return authFetch(`${API}/api/v1/watchlist/${watchlistId}/items/${itemId}`, {
+    method: 'DELETE',
+  });
+}
+
+export async function fetchWatchlistQuotes(
+  watchlistId: number,
+  timeframe: Timeframe = '1M',
+): Promise<WatchlistQuotes> {
+  return authFetch<WatchlistQuotes>(
+    `${API}/api/v1/watchlist/${watchlistId}/quotes?timeframe=${timeframe}`,
+  );
+}

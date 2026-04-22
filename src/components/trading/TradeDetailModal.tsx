@@ -21,9 +21,19 @@ interface TradeDetailModalProps {
   onClose: () => void;
 }
 
-function formatCurrency(value: number | null | undefined, decimals = 2): string {
+function formatCurrency(value: number | null | undefined, decimals?: number): string {
   if (value == null) return '—';
-  return value.toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+  // Auto-decimals based on magnitude when caller doesn't override.
+  // Mirrors lib/utils.formatPrice so sub-dollar tickers (e.g. ASX 0.036)
+  // don't get rounded to two decimals on cards/labels.
+  let d = decimals;
+  if (d == null) {
+    const abs = Math.abs(value);
+    if (abs > 0 && abs < 0.1) d = 4;
+    else if (abs < 1) d = 3;
+    else d = 2;
+  }
+  return value.toLocaleString(undefined, { minimumFractionDigits: d, maximumFractionDigits: d });
 }
 
 function formatDate(dateStr: string): string {

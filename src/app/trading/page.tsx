@@ -19,6 +19,7 @@ import {
   EngineStatus,
 } from '@/services/tradingService';
 import TradeDetailModal from '@/components/trading/TradeDetailModal';
+import { formatPrice } from '@/lib/utils';
 import StatCard from '@/components/ui/StatCard';
 import { LiveTape } from '@/components/trading/LiveTape';
 import { OrderTicket, useOrderTicketHotkeys } from '@/components/trading/OrderTicket';
@@ -288,7 +289,7 @@ function TradingDashboardInner() {
                               <span className="text-xs text-metallic-500 ml-2">{pos.exchange}</span>
                               <span className="text-metallic-600 ml-1 text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">View &#8599;</span>
                               <div className="text-xs text-metallic-400 mt-0.5">
-                                {pos.quantity} shares @ {ccy(pos.exchange)}{pos.entry_price.toFixed(2)}
+                                {pos.quantity} shares @ {ccy(pos.exchange)}{formatPrice(pos.entry_price)}
                               </div>
                             </div>
                             <div className="text-right">
@@ -297,7 +298,7 @@ function TradingDashboardInner() {
                               </div>
                               {pos.current_price && (
                                 <div className="text-xs text-metallic-500">
-                                  {ccy(pos.exchange)}{pos.current_price.toFixed(2)}
+                                  {ccy(pos.exchange)}{formatPrice(pos.current_price)}
                                 </div>
                               )}
                             </div>
@@ -440,8 +441,8 @@ function TradingDashboardInner() {
                                   {trade.side.toUpperCase()}
                                 </span>
                               </td>
-                              <td className="py-3 pr-4 text-metallic-300">${trade.entry_price.toFixed(2)}</td>
-                              <td className="py-3 pr-4 text-metallic-300">${trade.exit_price.toFixed(2)}</td>
+                              <td className="py-3 pr-4 text-metallic-300">${formatPrice(trade.entry_price)}</td>
+                              <td className="py-3 pr-4 text-metallic-300">${formatPrice(trade.exit_price)}</td>
                               <td className="py-3 pr-4 text-metallic-300">{trade.quantity}</td>
                               <td className={`py-3 pr-4 text-right font-medium ${isProfit ? 'text-emerald-400' : 'text-red-400'}`}>
                                 {isProfit ? '+' : ''}${trade.pnl.toFixed(2)}

@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 import {
   Bot, BarChart3, Target, Crosshair, History, Bell, Wallet,
   Command as CommandIcon, Activity, Zap, ArrowUpRight, AlertTriangle,
-  CandlestickChart,
+  CandlestickChart, PieChart, Star,
 } from 'lucide-react';
 import CommandPalette from '@/components/trading/CommandPalette';
 import { fetchEngineStatus, EngineStatus } from '@/services/tradingService';
@@ -14,6 +14,8 @@ import { fetchEngineStatus, EngineStatus } from '@/services/tradingService';
 const TABS = [
   { href: '/trading', label: 'Dashboard', icon: BarChart3 },
   { href: '/trading/chart', label: 'Charts', icon: CandlestickChart },
+  { href: '/trading/portfolio', label: 'Portfolio', icon: PieChart },
+  { href: '/trading/watchlist', label: 'Watchlist', icon: Star },
   { href: '/trading/strategies', label: 'Strategies', icon: Target },
   { href: '/trading/positions', label: 'Positions', icon: Crosshair },
   { href: '/trading/history', label: 'History', icon: History },

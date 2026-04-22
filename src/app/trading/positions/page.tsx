@@ -17,6 +17,7 @@ import {
   TradingAccount,
 } from '@/services/tradingService';
 import TradeDetailModal from '@/components/trading/TradeDetailModal';
+import { formatPrice } from '@/lib/utils';
 
 const EXCHANGE_CURRENCY: Record<string, string> = {
   JSE: 'R', ASX: 'A$', TSX: 'C$', TSXV: 'C$', LSE: '£', NYSE: '$', NASDAQ: '$', HKEX: 'HK$',
@@ -174,15 +175,15 @@ export default function PositionsPage() {
                           </span>
                         </td>
                         <td className="px-5 py-3 text-metallic-300">{pos.quantity}</td>
-                        <td className="px-5 py-3 text-metallic-300">{ccy(pos.exchange)}{pos.entry_price.toFixed(2)}</td>
+                        <td className="px-5 py-3 text-metallic-300">{ccy(pos.exchange)}{formatPrice(pos.entry_price)}</td>
                         <td className="px-5 py-3 text-metallic-200 font-medium">
-                          {pos.current_price ? `${ccy(pos.exchange)}${pos.current_price.toFixed(2)}` : '—'}
+                          {pos.current_price ? `${ccy(pos.exchange)}${formatPrice(pos.current_price)}` : '—'}
                         </td>
                         <td className="px-5 py-3 text-red-400/70 text-xs">
-                          {pos.stop_loss ? `${ccy(pos.exchange)}${pos.stop_loss.toFixed(2)}` : '—'}
+                          {pos.stop_loss ? `${ccy(pos.exchange)}${formatPrice(pos.stop_loss)}` : '—'}
                         </td>
                         <td className="px-5 py-3 text-emerald-400/70 text-xs">
-                          {pos.take_profit ? `${ccy(pos.exchange)}${pos.take_profit.toFixed(2)}` : '—'}
+                          {pos.take_profit ? `${ccy(pos.exchange)}${formatPrice(pos.take_profit)}` : '—'}
                         </td>
                         <td className={`px-5 py-3 text-right font-semibold ${isProfit ? 'text-emerald-400' : 'text-red-400'}`}>
                           {pos.status === 'open' ? (
