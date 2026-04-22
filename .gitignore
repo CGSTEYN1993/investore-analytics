@@ -10,3 +10,11 @@ downloads/ibgateway-*.exe
 .env
 .env.local
 agent/.env
+
+# Python virtualenvs
+.venv/
+venv/
+**/.venv/
+**/venv/
+__pycache__/
+*.pyc
