@@ -382,6 +382,22 @@ class IB:
 
 ib = IB()
 
+try:
+    from gateway import (
+        get_status as _gw_status,
+        get_config as _gw_get_config,
+        set_config as _gw_set_config,
+        start_gateway as _gw_start,
+        clear_credentials as _gw_clear,
+    )
+    _GATEWAY_AVAILABLE = True
+except Exception as _gw_err:
+    log.warning("gateway module unavailable: %s", _gw_err)
+    _GATEWAY_AVAILABLE = False
+    _gw_status = _gw_get_config = _gw_set_config = _gw_start = _gw_clear = (
+        lambda _p=None: {"ok": False, "error": "gateway module unavailable"}
+    )
+
 RPC_HANDLERS = {
     "ping": lambda _p: {"pong": True},
     "submit_order": ib.submit_order,
@@ -391,6 +407,11 @@ RPC_HANDLERS = {
     "get_account_summary": ib.get_account_summary,
     "get_market_price": ib.get_market_price,
     "get_historical_bars": ib.get_historical_bars,
+    "gateway_status": _gw_status,
+    "gateway_get_config": _gw_get_config,
+    "gateway_set_config": _gw_set_config,
+    "gateway_start": _gw_start,
+    "gateway_clear_credentials": _gw_clear,
 }
 
 
