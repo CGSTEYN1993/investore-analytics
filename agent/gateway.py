@@ -191,6 +191,12 @@ def start_gateway(_params: Dict[str, Any] | None = None) -> Dict[str, Any]:
 
     Idempotent — returns immediately if already running and the API port
     is reachable.
+
+    Implementation note: IBC's ``StartGateway.bat`` resets ``TWSUSERID`` /
+    ``TWSPASSWORD`` to empty inside the script, so plain env-var injection
+    does NOT work. We instead generate a temporary wrapper ``.bat`` that
+    pre-defines those variables and then ``call``s the real script.
+    The wrapper file is deleted after a short delay.
     """
     cfg = load_config()
     if _port_open(cfg.ib_host, cfg.ib_port, timeout=0.8):
@@ -205,19 +211,13 @@ def start_gateway(_params: Dict[str, Any] | None = None) -> Dict[str, Any]:
     if not ibc_dir.exists():
         return {"ok": False, "error": f"IBC path does not exist: {cfg.ibc_path}"}
 
-    # IBC ships with platform-specific launchers.
     if sys.platform == "win32":
-        script = ibc_dir / ("StartGateway.bat" if cfg.trading_mode == "paper" else "StartGateway.bat")
-        if not script.exists():
-            # Some IBC distributions use scripts/ subfolder
-            alt = ibc_dir / "scripts" / "StartGateway.bat"
-            if alt.exists():
-                script = alt
-        if not script.exists():
+        target = ibc_dir / "StartGateway.bat"
+        if not target.exists():
             return {"ok": False, "error": f"StartGateway.bat not found under {ibc_dir}"}
     else:
-        script = ibc_dir / "scripts" / "ibcstart.sh"
-        if not script.exists():
+        target = ibc_dir / "scripts" / "ibcstart.sh"
+        if not target.exists():
             return {"ok": False, "error": f"IBC start script not found under {ibc_dir}"}
 
     try:
@@ -225,36 +225,97 @@ def start_gateway(_params: Dict[str, Any] | None = None) -> Dict[str, Any]:
     except Exception as e:
         return {"ok": False, "error": f"Failed to decrypt stored password: {e}"}
 
-    env = os.environ.copy()
-    env["TWS_USERID"] = cfg.username
-    env["TWS_PASSWORD"] = password
-    # IBC also reads these forms in different versions
-    env["IBC_USERID"] = cfg.username
-    env["IBC_PASSWORD"] = password
+    # Derive TWS_MAJOR_VRSN from gateway_path basename if it looks like a version
+    tws_major = ""
     if cfg.gateway_path:
-        env["TWS_PATH"] = cfg.gateway_path
-        env["TWS_MAJOR_VRSN"] = Path(cfg.gateway_path).name  # e.g. "1019"
-    env["TRADING_MODE"] = cfg.trading_mode
+        base = Path(cfg.gateway_path).name
+        if base.isdigit():
+            tws_major = base
+    tws_path_root = ""
+    if cfg.gateway_path:
+        # gateway_path is like C:\Jts\ibgateway\1019 — TWS_PATH should be C:\Jts
+        p = Path(cfg.gateway_path)
+        if p.parent.name.lower() == "ibgateway":
+            tws_path_root = str(p.parent.parent)
+        else:
+            tws_path_root = str(p)
 
-    log.info("Launching IB Gateway via IBC: %s (mode=%s)", script, cfg.trading_mode)
-
-    creationflags = 0
     if sys.platform == "win32":
-        # DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP — survive agent restarts
-        creationflags = 0x00000008 | 0x00000200
+        # Write a wrapper batch into %TEMP% that pre-defines the credentials
+        # and key paths, then calls IBC's StartGateway.bat. We pass values
+        # through env vars too so any IBC version that reads either form works.
+        import tempfile
+        wrapper_lines = [
+            "@echo off",
+            "setlocal enableextensions",
+            f'set "TWSUSERID={cfg.username}"',
+            f'set "TWSPASSWORD={password}"',
+            f'set "TWS_USERID={cfg.username}"',
+            f'set "TWS_PASSWORD={password}"',
+            f'set "IBC_USERID={cfg.username}"',
+            f'set "IBC_PASSWORD={password}"',
+            f'set "TRADING_MODE={cfg.trading_mode}"',
+            f'set "IBC_PATH={cfg.ibc_path}"',
+        ]
+        if tws_major:
+            wrapper_lines.append(f'set "TWS_MAJOR_VRSN={tws_major}"')
+        if tws_path_root:
+            wrapper_lines.append(f'set "TWS_PATH={tws_path_root}"')
+        wrapper_lines.append(f'cd /d "{cfg.ibc_path}"')
+        wrapper_lines.append(f'call "{target}" /INLINE')
+        wrapper_lines.append("endlocal")
 
-    try:
-        subprocess.Popen(
-            [str(script)] if sys.platform == "win32" else ["bash", str(script), cfg.trading_mode],
-            cwd=str(ibc_dir),
-            env=env,
-            creationflags=creationflags,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-            close_fds=(sys.platform != "win32"),
-        )
-    except Exception as e:
-        return {"ok": False, "error": f"Failed to launch: {e}"}
+        fd, wrapper_path = tempfile.mkstemp(prefix="investore_gw_", suffix=".bat")
+        try:
+            with os.fdopen(fd, "w", encoding="ascii", errors="ignore") as f:
+                f.write("\r\n".join(wrapper_lines) + "\r\n")
+        except Exception as e:
+            return {"ok": False, "error": f"Failed to write wrapper bat: {e}"}
+
+        log.info("Launching IB Gateway via wrapper: %s (mode=%s)", wrapper_path, cfg.trading_mode)
+        creationflags = 0x00000008 | 0x00000200  # DETACHED | NEW_PROCESS_GROUP
+        try:
+            subprocess.Popen(
+                ["cmd.exe", "/c", wrapper_path],
+                cwd=cfg.ibc_path,
+                creationflags=creationflags,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+        except Exception as e:
+            try: os.remove(wrapper_path)
+            except Exception: pass
+            return {"ok": False, "error": f"Failed to launch: {e}"}
+
+        # Schedule deletion of the wrapper a bit later (creds in plaintext while alive)
+        def _cleanup():
+            try:
+                time.sleep(20.0)
+                os.remove(wrapper_path)
+            except Exception:
+                pass
+        import threading as _t
+        _t.Thread(target=_cleanup, daemon=True).start()
+    else:
+        env = os.environ.copy()
+        env.update({
+            "TWS_USERID": cfg.username, "TWS_PASSWORD": password,
+            "IBC_USERID": cfg.username, "IBC_PASSWORD": password,
+            "TRADING_MODE": cfg.trading_mode,
+        })
+        if cfg.gateway_path:
+            env["TWS_PATH"] = cfg.gateway_path
+        try:
+            subprocess.Popen(
+                ["bash", str(target), cfg.trading_mode],
+                cwd=str(ibc_dir),
+                env=env,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                close_fds=True,
+            )
+        except Exception as e:
+            return {"ok": False, "error": f"Failed to launch: {e}"}
 
     # Poll for the API port to come up (login + gateway boot can take 30-60s).
     deadline = time.time() + 90.0
