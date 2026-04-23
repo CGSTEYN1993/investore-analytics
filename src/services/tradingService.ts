@@ -29,16 +29,71 @@ function authHeaders(): HeadersInit {
   };
 }
 
+// Reliability tuning — Railway can cold-start (~15s) and tab switches in the
+// trading workstation cancel in-flight requests, surfacing as the cryptic
+// "Failed to fetch" TypeError. We add: (1) a hard timeout, (2) one retry on
+// transient network/5xx errors, (3) respect caller-provided AbortSignal so
+// unmounting tabs can cancel cleanly without showing an error screen.
+const REQUEST_TIMEOUT_MS = 25_000;
+const RETRY_DELAY_MS = 800;
+
+function isTransient(err: unknown, status?: number): boolean {
+  if (status && [502, 503, 504, 408, 429].includes(status)) return true;
+  if (err instanceof TypeError) return true; // "Failed to fetch" / network error
+  return false;
+}
+
 async function authFetch<T>(url: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(url, {
-    ...init,
-    headers: { ...authHeaders(), ...(init?.headers || {}) },
-  });
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}));
-    throw new Error(body.detail || `Request failed: ${res.status}`);
+  const callerSignal = init?.signal ?? null;
+
+  const attempt = async (): Promise<T> => {
+    const ctl = new AbortController();
+    const timeoutId = setTimeout(() => ctl.abort(), REQUEST_TIMEOUT_MS);
+    const onCallerAbort = () => ctl.abort();
+    if (callerSignal) {
+      if (callerSignal.aborted) ctl.abort();
+      else callerSignal.addEventListener('abort', onCallerAbort, { once: true });
+    }
+    try {
+      const res = await fetch(url, {
+        ...init,
+        headers: { ...authHeaders(), ...(init?.headers || {}) },
+        signal: ctl.signal,
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        const err = new Error(body.detail || `Request failed: ${res.status}`) as Error & { status?: number };
+        err.status = res.status;
+        throw err;
+      }
+      return (await res.json()) as T;
+    } finally {
+      clearTimeout(timeoutId);
+      if (callerSignal) callerSignal.removeEventListener('abort', onCallerAbort);
+    }
+  };
+
+  try {
+    return await attempt();
+  } catch (err) {
+    // If the caller cancelled (tab switch / unmount), propagate silently.
+    if (callerSignal?.aborted) throw err;
+    const status = (err as { status?: number }).status;
+    if (!isTransient(err, status)) throw err;
+    // One retry after a short backoff for transient failures.
+    await new Promise(r => setTimeout(r, RETRY_DELAY_MS));
+    try {
+      return await attempt();
+    } catch (err2) {
+      if (err2 instanceof TypeError) {
+        throw new Error('Network error — backend may be waking up. Try again in a moment.');
+      }
+      if (err2 instanceof DOMException && err2.name === 'AbortError') {
+        throw new Error('Request timed out — backend is slow to respond. Try again.');
+      }
+      throw err2;
+    }
   }
-  return res.json();
 }
 
 // ── Types ──

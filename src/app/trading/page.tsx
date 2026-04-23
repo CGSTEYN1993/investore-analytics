@@ -76,7 +76,10 @@ function TradingDashboardInner() {
   const [chartSymbol] = useState<{ symbol: string; exchange: string }>({ symbol: 'BHP', exchange: 'ASX' });
 
   useEffect(() => {
-    loadData();
+    let cancelled = false;
+    void loadData(() => cancelled);
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useOrderTicketHotkeys((side) => {
@@ -84,7 +87,7 @@ function TradingDashboardInner() {
     setTicketOpen(true);
   }, !ticketOpen);
 
-  const loadData = async () => {
+  const loadData = async (isCancelled?: () => boolean) => {
     setLoading(true);
     setError(null);
     try {
@@ -93,10 +96,14 @@ function TradingDashboardInner() {
         fetchEngineStatus(),
         fetchStrategies().catch(() => [] as TradingStrategy[]),
       ]);
+      if (isCancelled?.()) return;
       setDashboard(dash);
       setEngineStatus(engine);
       setStrategies(strats);
     } catch (err) {
+      if (isCancelled?.()) return;
+      // Aborted requests (tab switch / unmount) shouldn't show an error.
+      if (err instanceof DOMException && err.name === 'AbortError') return;
       const msg = err instanceof Error ? err.message : 'Failed to load trading dashboard';
       // 401 = not signed in → genuinely show empty/get-started state.
       // Anything else (500, network, timeout) → show error so we don't
@@ -107,7 +114,7 @@ function TradingDashboardInner() {
         setError(msg);
       }
     }
-    setLoading(false);
+    if (!isCancelled?.()) setLoading(false);
   };
 
   if (loading) {
