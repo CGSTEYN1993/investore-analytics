@@ -17,6 +17,7 @@ const PROTECTED_ROUTES = [
   '/watchlist',
   '/peers',
   '/subscription',
+  '/trading',
 ];
 
 // Routes that should redirect to dashboard if already authenticated
