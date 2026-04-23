@@ -190,7 +190,9 @@ export default function RegisterPage() {
       setSuccess(true);
     } catch (err) {
       if (err instanceof TypeError && err.message.includes("fetch")) {
-        setError("Unable to connect to the server. Please check your internet connection.");
+        setError("The server is taking longer than usual to respond. Please try again in a few seconds.");
+      } else if (err instanceof DOMException && err.name === 'AbortError') {
+        setError("The server is taking longer than usual to respond. Please try again in a few seconds.");
       } else {
         setError(err instanceof Error ? err.message : "An error occurred");
       }

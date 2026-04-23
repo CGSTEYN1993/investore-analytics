@@ -2,7 +2,7 @@
 /**
  * InvestOre Analytics - Secure Login Page
  */
-import { useState, Suspense } from "react";
+import { useState, Suspense, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getPublicApiV1Url } from "@/lib/public-api-url";
@@ -104,6 +104,22 @@ function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Warm up Railway backend on page mount so the first real request after the
+  // user submits doesn't hit a cold-start TCP timeout.
+  useEffect(() => {
+    const apiV1Url = getPublicApiV1Url();
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 60_000);
+    fetch(`${apiV1Url.replace(/\/api\/v1$/, '')}/api/v1/trading/engine-status`, {
+      method: 'GET',
+      signal: ctrl.signal,
+      cache: 'no-store',
+    })
+      .catch(() => {/* ignore — best effort */})
+      .finally(() => clearTimeout(t));
+    return () => { clearTimeout(t); ctrl.abort(); };
+  }, []);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
     setFormData(prev => ({
@@ -131,7 +147,9 @@ function LoginForm() {
       }
     } catch (err) {
       if (err instanceof TypeError && err.message.includes("fetch")) {
-        setError("Unable to connect to the server. Please check your internet connection.");
+        setError("The server is taking longer than usual to respond. Please try again in a few seconds.");
+      } else if (err instanceof DOMException && err.name === 'AbortError') {
+        setError("The server is taking longer than usual to respond. Please try again in a few seconds.");
       } else {
         setError(err instanceof Error ? err.message : "An error occurred");
       }

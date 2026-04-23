@@ -257,14 +257,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Login handler
   const login = async (email: string, password: string, rememberMe: boolean = true) => {
     setState(s => ({ ...s, isLoading: true, error: null }));
-    
+
+    // Railway backend can cold-start (30-60s). Retry transient network errors
+    // and 5xx responses up to 3 times before surfacing the failure to the user.
+    const fetchLoginWithRetry = async (): Promise<Response> => {
+      const maxAttempts = 3;
+      let lastErr: unknown = null;
+      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        try {
+          const ctrl = new AbortController();
+          const timeoutId = setTimeout(() => ctrl.abort(), 60_000);
+          const r = await fetch(`${API_URL}/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password }),
+            signal: ctrl.signal,
+          });
+          clearTimeout(timeoutId);
+          if (r.status >= 500 && attempt < maxAttempts) {
+            await new Promise(res => setTimeout(res, 1500 * attempt));
+            continue;
+          }
+          return r;
+        } catch (e) {
+          lastErr = e;
+          if (attempt >= maxAttempts) break;
+          await new Promise(res => setTimeout(res, 1500 * attempt));
+        }
+      }
+      throw lastErr ?? new Error('Network error');
+    };
+
     try {
-      const response = await fetch(`${API_URL}/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-      
+      const response = await fetchLoginWithRetry();
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ detail: 'Login failed' }));
         throw new Error(errorData.detail || 'Invalid credentials');
