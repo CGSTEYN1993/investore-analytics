@@ -122,7 +122,13 @@ function LoginForm() {
       // Use AuthProvider so tokens are stored as cookies that the
       // Next.js middleware can read (localStorage isn't visible to middleware).
       await login(formData.email, formData.password, formData.rememberMe);
-      router.push(returnUrl);
+      // Hard navigation guarantees the freshly-set cookie is included on the
+      // next request so middleware allows the protected route through.
+      if (typeof window !== 'undefined') {
+        window.location.assign(returnUrl);
+      } else {
+        router.push(returnUrl);
+      }
     } catch (err) {
       if (err instanceof TypeError && err.message.includes("fetch")) {
         setError("Unable to connect to the server. Please check your internet connection.");

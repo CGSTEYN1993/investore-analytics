@@ -285,10 +285,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isLoading: false,
         error: null,
       });
-      
-      // Redirect to intended destination or analysis
-      const returnUrl = new URLSearchParams(window.location.search).get('returnUrl');
-      router.push(returnUrl || '/analysis');
+
+      // Note: callers (e.g. login form) are responsible for navigation so
+      // that they can choose hard vs soft navigation. We avoid pushing here
+      // to prevent double-navigation races.
     } catch (err) {
       setState(s => ({
         ...s,
