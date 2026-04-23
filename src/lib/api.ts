@@ -67,9 +67,12 @@ class ApiClient {
       }
     );
 
-    // Load token from storage on init
+    // Load token from storage on init (cookie first, then localStorage)
     if (typeof window !== 'undefined') {
-      this.accessToken = localStorage.getItem('access_token');
+      const cookieMatch = document.cookie.match(/(?:^|;\s*)access_token=([^;]+)/);
+      this.accessToken = cookieMatch
+        ? decodeURIComponent(cookieMatch[1])
+        : localStorage.getItem('access_token');
     }
   }
 

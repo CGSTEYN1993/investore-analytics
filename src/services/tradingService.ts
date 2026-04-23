@@ -11,7 +11,14 @@ const API = RAILWAY_API_URL;
 
 function getToken(): string | null {
   if (typeof window === 'undefined') return null;
-  return localStorage.getItem('access_token');
+  // Cookie is the canonical store (set by AuthProvider). Fall back to
+  // localStorage / sessionStorage for backwards compat with older sessions.
+  const cookieMatch = document.cookie.match(/(?:^|;\s*)access_token=([^;]+)/);
+  if (cookieMatch) return decodeURIComponent(cookieMatch[1]);
+  return (
+    localStorage.getItem('access_token') ||
+    sessionStorage.getItem('access_token')
+  );
 }
 
 function authHeaders(): HeadersInit {
