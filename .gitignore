@@ -11,6 +11,12 @@ downloads/ibgateway-*.exe
 .env.local
 agent/.env
 
+# AFR / paywall session cookies (sensitive auth tokens)
+afr_cookie.txt
+*_cookie.txt
+*.har
+afr_cookie*.txt
+
 # Python virtualenvs
 .venv/
 venv/
