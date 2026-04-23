@@ -849,3 +849,77 @@ export async function fetchWatchlistQuotes(
     `${API}/api/v1/watchlist/${watchlistId}/quotes?timeframe=${timeframe}`,
   );
 }
+
+// ── IB Gateway control ─────────────────────────────────────────────────────
+
+export interface GatewayStatus {
+  configured: boolean;
+  process_running: boolean;
+  port_open: boolean;
+  ib_host: string;
+  ib_port: number;
+  trading_mode: 'paper' | 'live';
+  auto_launch: boolean;
+  ibc_path: string;
+  gateway_path: string;
+  has_username: boolean;
+  has_password: boolean;
+}
+
+export interface GatewayConfig {
+  ibc_path: string;
+  gateway_path: string;
+  trading_mode: 'paper' | 'live';
+  username: string;
+  ib_host: string;
+  ib_port: number;
+  auto_launch: boolean;
+  has_password: boolean;
+}
+
+export interface GatewayConfigUpdate {
+  ibc_path?: string;
+  gateway_path?: string;
+  trading_mode?: 'paper' | 'live';
+  username?: string;
+  password?: string;
+  ib_host?: string;
+  ib_port?: number;
+  auto_launch?: boolean;
+}
+
+export interface GatewayStartResult {
+  ok: boolean;
+  already_running?: boolean;
+  message?: string;
+  error?: string;
+}
+
+export async function fetchGatewayStatus(): Promise<GatewayStatus> {
+  return authFetch<GatewayStatus>(`${API}/api/v1/agent/gateway/status`);
+}
+
+export async function fetchGatewayConfig(): Promise<GatewayConfig> {
+  return authFetch<GatewayConfig>(`${API}/api/v1/agent/gateway/config`);
+}
+
+export async function updateGatewayConfig(
+  body: GatewayConfigUpdate,
+): Promise<{ ok: boolean; config: GatewayConfig }> {
+  return authFetch(`${API}/api/v1/agent/gateway/config`, {
+    method: 'PUT',
+    body: JSON.stringify(body),
+  });
+}
+
+export async function startGateway(): Promise<GatewayStartResult> {
+  return authFetch<GatewayStartResult>(`${API}/api/v1/agent/gateway/start`, {
+    method: 'POST',
+  });
+}
+
+export async function clearGatewayCredentials(): Promise<{ ok: boolean }> {
+  return authFetch(`${API}/api/v1/agent/gateway/credentials`, {
+    method: 'DELETE',
+  });
+}

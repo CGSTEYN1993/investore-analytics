@@ -141,29 +141,44 @@ export default function HomePage() {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-400 opacity-75" />
                 <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-primary-500" />
               </span>
-              Tracking 5 Exchanges · 2,000+ Mining Companies · Updated Daily
+              Now live: Automated Trading Platform · Interactive Brokers integration
             </div>
 
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.1] mb-5">
-              <span className="text-metallic-100">The Intelligence Platform</span>
-              <br />
-              <span className="text-metallic-100">for </span>
+              <span className="text-metallic-100">Research, Strategise &amp; </span>
               <span className="bg-gradient-to-r from-primary-400 via-primary-300 to-accent-copper bg-clip-text text-transparent">
-                Mining Investors
+                Trade Mining
               </span>
+              <br />
+              <span className="text-metallic-100">From One Platform</span>
             </h1>
 
             <p className="text-lg sm:text-xl text-metallic-400 max-w-2xl leading-relaxed mb-8">
-              AI that reads every mining announcement, extracts drill results, scores sentiment, and tells you exactly which companies to watch — across ASX, TSX, JSE, NYSE & LSE.
+              AI that reads every mining announcement, scores sentiment, and routes trades through Interactive Brokers — across ASX, TSX, JSE, NYSE &amp; LSE. Two platforms, one login.
             </p>
+
+            <div className="grid sm:grid-cols-2 gap-3 mb-6 max-w-2xl w-full">
+              <Link href="/trading"
+                className="group relative overflow-hidden px-6 py-4 bg-gradient-to-br from-primary-600 to-primary-700 hover:from-primary-500 hover:to-primary-600 text-white font-semibold rounded-xl transition-all shadow-[0_0_30px_rgba(20,184,166,0.3)] hover:shadow-[0_0_40px_rgba(20,184,166,0.5)] flex flex-col items-start gap-1 text-left">
+                <span className="text-[10px] uppercase tracking-widest text-primary-200/80 font-bold">Trading Platform</span>
+                <span className="text-base flex items-center gap-2">Open Workstation <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" /></span>
+                <span className="text-xs font-normal text-primary-100/80">Live IB orders · Strategies · Watchlists</span>
+              </Link>
+              <Link href="/dashboard"
+                className="group relative overflow-hidden px-6 py-4 bg-metallic-800/80 hover:bg-metallic-700/80 border border-metallic-700 hover:border-metallic-600 text-metallic-100 font-semibold rounded-xl transition-all flex flex-col items-start gap-1 text-left">
+                <span className="text-[10px] uppercase tracking-widest text-metallic-400 font-bold">Analysis Platform</span>
+                <span className="text-base flex items-center gap-2">Open Dashboard <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" /></span>
+                <span className="text-xs font-normal text-metallic-400">Signals · Maps · AI Analyst · Peers</span>
+              </Link>
+            </div>
 
             <div className="flex flex-col sm:flex-row gap-3 mb-10">
               <Link href="/register"
-                className="px-8 py-3.5 bg-primary-600 hover:bg-primary-500 text-white font-semibold rounded-lg transition-all shadow-[0_0_20px_rgba(20,184,166,0.25)] hover:shadow-[0_0_30px_rgba(20,184,166,0.4)] flex items-center justify-center gap-2 text-sm">
-                Start Free — No Credit Card <ArrowRight className="w-4 h-4" />
+                className="px-6 py-2.5 bg-transparent text-metallic-300 hover:text-metallic-100 font-medium text-sm transition-colors flex items-center justify-center gap-2">
+                Start Free <ArrowRight className="w-3.5 h-3.5" />
               </Link>
               <Link href="/pricing"
-                className="px-8 py-3.5 bg-transparent text-metallic-300 font-medium rounded-lg border border-metallic-700 hover:border-metallic-500 hover:text-metallic-100 transition-all flex items-center justify-center gap-2 text-sm">
+                className="px-6 py-2.5 bg-transparent text-metallic-300 hover:text-metallic-100 font-medium text-sm transition-colors flex items-center justify-center gap-2">
                 View Pricing
               </Link>
             </div>

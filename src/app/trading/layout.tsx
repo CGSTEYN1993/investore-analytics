@@ -6,9 +6,10 @@ import { usePathname } from 'next/navigation';
 import {
   Bot, BarChart3, Target, Crosshair, History, Bell, Wallet,
   Command as CommandIcon, Activity, Zap, ArrowUpRight, AlertTriangle,
-  CandlestickChart, PieChart, Star,
+  CandlestickChart, PieChart, Star, Power,
 } from 'lucide-react';
 import CommandPalette from '@/components/trading/CommandPalette';
+import { GatewayLauncher } from '@/components/trading/GatewayLauncher';
 import { fetchEngineStatus, EngineStatus } from '@/services/tradingService';
 
 const TABS = [
@@ -21,6 +22,7 @@ const TABS = [
   { href: '/trading/history', label: 'History', icon: History },
   { href: '/trading/alerts', label: 'Alerts', icon: Bell },
   { href: '/trading/accounts', label: 'Accounts', icon: Wallet },
+  { href: '/trading/gateway', label: 'Gateway', icon: Power },
 ] as const;
 
 function useIsMac() {
@@ -160,7 +162,8 @@ export default function TradingLayout({ children }: { children: React.ReactNode 
           </div>
         </div>
       </header>
-
+      {/* ── Gateway launcher banner (auto + manual) ──────────── */}
+      <GatewayLauncher />
       {/* ── Page content ────────────────────────────────────────── */}
       <main className="flex-1 pb-10">{children}</main>
 

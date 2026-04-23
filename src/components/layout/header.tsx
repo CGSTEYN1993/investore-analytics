@@ -7,6 +7,7 @@ import { useAuth } from '@/components/providers/AuthProvider';
 import { Menu, X, User, LogOut, Settings, ChevronDown, BarChart3, Map, Newspaper, Brain, TrendingUp, BookOpen, Users, Gem, Bot } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { KillSwitchButton } from '@/components/trading/KillSwitchButton';
+import { PlatformSwitcher } from '@/components/layout/PlatformSwitcher';
 
 function NavDropdown({ label, items, pathname, onNavigate }: {
   label: string;
@@ -98,6 +99,9 @@ export function Header() {
               priority
             />
           </Link>
+
+          {/* Platform switcher (Analysis ↔ Trading) */}
+          {!isHomePage && <PlatformSwitcher />}
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-6">
