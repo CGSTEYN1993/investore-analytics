@@ -6,6 +6,7 @@ import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Disclaimer } from '@/components/ui/disclaimer';
 import SignalNotifications from '@/components/ui/SignalNotifications';
+import GatewayAutoStart from '@/components/trading/GatewayAutoStart';
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -82,6 +83,7 @@ export default function RootLayout({
             </main>
             <Footer />
             <SignalNotifications />
+            <GatewayAutoStart />
           </div>
         </Providers>
       </body>
