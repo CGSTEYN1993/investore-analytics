@@ -134,7 +134,7 @@ function TradingDashboardInner() {
         <div className="text-center max-w-md">
           <AlertTriangle className="w-8 h-8 text-red-400 mx-auto mb-3" />
           <p className="text-red-400 text-sm mb-4">{error}</p>
-          <button onClick={loadData} className="px-4 py-2 bg-metallic-800 hover:bg-metallic-700 text-metallic-200 text-sm rounded-lg transition-colors">
+          <button onClick={() => loadData()} className="px-4 py-2 bg-metallic-800 hover:bg-metallic-700 text-metallic-200 text-sm rounded-lg transition-colors">
             Retry
           </button>
         </div>
@@ -187,7 +187,7 @@ function TradingDashboardInner() {
             </button>
           )}
           <button
-            onClick={loadData}
+            onClick={() => loadData()}
             className="flex items-center gap-2 px-3 py-2 bg-metallic-800 hover:bg-metallic-700 text-metallic-300 text-sm rounded-lg transition-colors border border-metallic-700/50"
           >
             <RefreshCw className="w-4 h-4" />
