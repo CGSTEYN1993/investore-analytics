@@ -6,6 +6,7 @@ import { useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getPublicApiV1Url } from "@/lib/public-api-url";
+import { useAuth } from "@/components/providers/AuthProvider";
 import { 
   Eye, EyeOff, Mail, Lock, AlertCircle, 
   CheckCircle, Loader2, Shield 
@@ -86,17 +87,14 @@ interface LoginFormData {
   rememberMe: boolean;
 }
 
-interface ApiError {
-  detail: string;
-}
-
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const returnUrl = searchParams.get("returnUrl") || "/analysis";
   const verified = searchParams.get("verified");
   const reason = searchParams.get("reason");
-  
+  const { login } = useAuth();
+
   const [formData, setFormData] = useState<LoginFormData>({
     email: "",
     password: "",
@@ -121,43 +119,9 @@ function LoginForm() {
     setError(null);
 
     try {
-      const apiV1Url = getPublicApiV1Url();
-
-      const response = await fetch(
-        `${apiV1Url}/auth/login`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: formData.email,
-            password: formData.password
-          })
-        }
-      );
-
-      // Check if response is JSON
-      const contentType = response.headers.get("content-type");
-      if (!contentType || !contentType.includes("application/json")) {
-        throw new Error("Backend API is currently unavailable. Please try again later.");
-      }
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        const errorData = data as ApiError;
-        throw new Error(errorData.detail || "Login failed");
-      }
-
-      // Store tokens securely
-      if (formData.rememberMe) {
-        localStorage.setItem("access_token", data.access_token);
-        localStorage.setItem("refresh_token", data.refresh_token);
-      } else {
-        sessionStorage.setItem("access_token", data.access_token);
-        sessionStorage.setItem("refresh_token", data.refresh_token);
-      }
-
-      // Redirect to return URL or analysis dashboard
+      // Use AuthProvider so tokens are stored as cookies that the
+      // Next.js middleware can read (localStorage isn't visible to middleware).
+      await login(formData.email, formData.password, formData.rememberMe);
       router.push(returnUrl);
     } catch (err) {
       if (err instanceof TypeError && err.message.includes("fetch")) {
