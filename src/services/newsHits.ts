@@ -329,6 +329,8 @@ export function getSourceIcon(provider: string): string {
     australian_mining: '🦘',
     junior_mining: '🔍',
     mining_review_africa: '🌍',
+    miningmx: '🌍',
+    afr: '🇦🇺',
   };
   return icons[provider] || '📄';
 }
