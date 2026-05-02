@@ -9,6 +9,7 @@ import {
   PieChart, Award, Building2, Gem
 } from 'lucide-react';
 import TickerTape from '@/components/ui/TickerTape';
+import NewsletterSignup from '@/components/ui/NewsletterSignup';
 
 /* ─── Stat Pill ─── */
 function StatPill({ value, label, icon: Icon }: { value: string; label: string; icon?: React.ElementType }) {
@@ -170,6 +171,10 @@ export default function HomePage() {
                 <span className="text-base flex items-center gap-2">Open Dashboard <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" /></span>
                 <span className="text-xs font-normal text-metallic-400">Signals · Maps · AI Analyst · Peers</span>
               </Link>
+            </div>
+
+            <div className="max-w-2xl w-full mb-6">
+              <NewsletterSignup variant="hero" />
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3 mb-10">
