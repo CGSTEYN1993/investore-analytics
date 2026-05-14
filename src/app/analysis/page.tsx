@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { RAILWAY_API_URL } from '@/lib/public-api-url';
 import NewsTicker from '@/components/ui/NewsTicker';
+import TickerSearch from '@/components/ui/TickerSearch';
 
 const API_BASE = RAILWAY_API_URL;
 
@@ -337,6 +338,11 @@ export default function AnalysisDashboard() {
                 <span>Watchlist</span>
               </Link>
             </div>
+          </div>
+
+          {/* Global ticker search — jump straight to any company profile */}
+          <div className="mt-6 max-w-2xl">
+            <TickerSearch placeholder="Jump to a company profile — search ticker or name (e.g. BHP, Pilbara, FMG)…" />
           </div>
 
           {/* Quick Stats */}
