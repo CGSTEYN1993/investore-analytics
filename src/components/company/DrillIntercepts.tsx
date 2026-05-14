@@ -106,8 +106,8 @@ export default function DrillIntercepts({ ticker, className = '', daysBack = 182
                 <th className="text-right py-2 pr-3">Width</th>
                 <th className="text-right py-2 pr-3">Grade</th>
                 <th className="text-left py-2 pr-3">Cmd.</th>
-                <th className="text-left py-2 pr-3">Incl.</th>
-                <th className="text-left py-2">Source</th>
+                <th className="text-left py-2 pr-3">Significant</th>
+                <th className="text-left py-2">Project / Source</th>
               </tr>
             </thead>
             <tbody className="text-metallic-200">
@@ -127,16 +127,25 @@ export default function DrillIntercepts({ ticker, className = '', daysBack = 182
                     {formatGrade(i.grade, i.grade_unit)}
                   </td>
                   <td className="py-2 pr-3 text-metallic-300">{i.commodity || '—'}</td>
-                  <td className="py-2 pr-3 text-yellow-400">
-                    {i.including?.grade
-                      ? `${(i.including.to! - i.including.from!).toFixed(1)}m @ ${i.including.grade.toFixed(2)}`
-                      : '—'}
+                  <td className="py-2 pr-3">
+                    {(i as any).is_high_grade ? (
+                      <span className="text-yellow-400">high-grade</span>
+                    ) : (i as any).is_significant ? (
+                      <span className="text-blue-400">significant</span>
+                    ) : (
+                      <span className="text-metallic-500">—</span>
+                    )}
                   </td>
-                  <td className="py-2 text-metallic-500 truncate max-w-[140px]" title={i.source_document}>
+                  <td className="py-2 text-metallic-500 truncate max-w-[180px]" title={i.source_document}>
                     {i.source_document ? (
-                      <span className="inline-flex items-center gap-1">
-                        <FileText className="w-3 h-3" /> {i.source_document}
-                      </span>
+                      <a
+                        href={i.source_document}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1 hover:text-primary-400"
+                      >
+                        <FileText className="w-3 h-3" /> source
+                      </a>
                     ) : '—'}
                   </td>
                 </tr>
