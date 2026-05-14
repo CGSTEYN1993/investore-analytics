@@ -12,6 +12,8 @@ import {
 import { getCommodityColor } from '@/lib/subscription-tiers';
 import { formatPrice } from '@/lib/utils';
 import CompanyGeoscienceWidget from '@/components/dashboard/CompanyGeoscienceWidget';import CompanyMiningDataWidget from '@/components/mining/CompanyMiningDataWidget';
+import StockBriefPanel from '@/components/company/StockBriefPanel';
+import DrillIntercepts from '@/components/company/DrillIntercepts';
 // Dynamic import for Plotly to avoid SSR issues
 const Plot = dynamic(() => import('react-plotly.js'), { ssr: false });
 
@@ -894,6 +896,12 @@ export default function CompanyProfile() {
 
             {/* Extracted Mining Data Section */}
             <CompanyMiningDataWidget symbol={ticker} className="bg-metallic-900 border border-metallic-800 rounded-xl" />
+
+            {/* Multi-factor data coverage / stock brief */}
+            <StockBriefPanel ticker={ticker} exchange={exchangeParam || companyData?.exchange || 'ASX'} />
+
+            {/* Drill intercepts (last 5 years) */}
+            <DrillIntercepts ticker={ticker} />
 
             {/* Lassonde Curve Section */}
             <section className="bg-metallic-900 border border-metallic-800 rounded-xl p-6">
