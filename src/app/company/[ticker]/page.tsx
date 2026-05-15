@@ -724,6 +724,30 @@ export default function CompanyProfile() {
                     <Loader2 className="w-8 h-8 text-primary-500 animate-spin" />
                   </div>
                 ) : plotData ? (
+                  (() => {
+                    // ── Compute a tight, TradingView-style y-axis range that
+                    // EXCLUDES zero so small price moves are clearly visible.
+                    // We use the actual high/low of the visible candles plus a
+                    // small symmetric padding (3% of the move, 0.5% of price).
+                    const priceLo = Math.min(plotData.minPrice, ...plotData.closes);
+                    const priceHi = Math.max(plotData.maxPrice, ...plotData.closes);
+                    const span = Math.max(priceHi - priceLo, priceHi * 0.005);
+                    const pad = span * 0.08;
+                    const yMin = Math.max(0, priceLo - pad);
+                    const yMax = priceHi + pad;
+
+                    // Decimal precision scales with magnitude — sub-cent stocks
+                    // need 4 dp, mid-cap dollar prices need 2.
+                    const dp = priceHi >= 100 ? 2 : priceHi >= 10 ? 2 : priceHi >= 1 ? 2 : priceHi >= 0.1 ? 3 : 4;
+                    const tickFmt = `,.${dp}f`;
+                    const hoverFmt = `,.${dp}f`;
+
+                    const lineColor = plotData.isPositive ? '#26a69a' : '#ef5350'; // TradingView green/red
+                    const fillColor = plotData.isPositive
+                      ? 'rgba(38, 166, 154, 0.12)'
+                      : 'rgba(239, 83, 80, 0.12)';
+
+                    return (
                   <Plot
                     data={[
                       // Main price trace (line or candlestick)
@@ -735,8 +759,9 @@ export default function CompanyProfile() {
                         close: plotData.closes,
                         type: 'candlestick' as const,
                         name: 'Price',
-                        increasing: { line: { color: '#22c55e' } },
-                        decreasing: { line: { color: '#ef4444' } },
+                        increasing: { line: { color: '#26a69a', width: 1 } },
+                        decreasing: { line: { color: '#ef5350', width: 1 } },
+                        whiskerwidth: 0,
                         yaxis: 'y2',
                       } : {
                         x: plotData.dates,
@@ -745,12 +770,14 @@ export default function CompanyProfile() {
                         mode: 'lines' as const,
                         fill: 'tozeroy' as const,
                         name: 'Price',
-                        line: { 
-                          color: plotData.isPositive ? '#22c55e' : '#ef4444',
-                          width: 2,
+                        line: {
+                          color: lineColor,
+                          width: 1.75,
+                          shape: 'spline' as const,
+                          smoothing: 0.3,
                         },
-                        fillcolor: plotData.isPositive ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-                        hovertemplate: '%{x}<br>$%{y:.4f}<extra></extra>',
+                        fillcolor: fillColor,
+                        hovertemplate: `$%{y:${hoverFmt}}<extra></extra>`,
                         yaxis: 'y2',
                       },
                       // Volume bars
@@ -760,12 +787,13 @@ export default function CompanyProfile() {
                         type: 'bar' as const,
                         name: 'Volume',
                         marker: {
-                          color: plotData.closes.map((close, i) => 
-                            i > 0 && close >= plotData.closes[i - 1] ? 'rgba(34, 197, 94, 0.5)' : 'rgba(239, 68, 68, 0.5)'
+                          color: plotData.closes.map((close, i) =>
+                            i > 0 && close >= plotData.closes[i - 1] ? 'rgba(38, 166, 154, 0.55)' : 'rgba(239, 83, 80, 0.55)'
                           ),
+                          line: { width: 0 },
                         },
                         yaxis: 'y',
-                        hovertemplate: '%{x}<br>Vol: %{y:,.0f}<extra></extra>',
+                        hovertemplate: 'Vol %{y:,.0f}<extra></extra>',
                       }] : []),
                       // Capital raisings markers
                       ...(showCapitalRaisings && plotData.capitalRaisings.length > 0 ? [{
@@ -780,12 +808,12 @@ export default function CompanyProfile() {
                         name: 'Capital Raising',
                         marker: {
                           symbol: 'triangle-down',
-                          size: 14,
+                          size: 12,
                           color: '#f59e0b',
-                          line: { color: '#ffffff', width: 1 },
+                          line: { color: '#0f172a', width: 1 },
                         },
                         yaxis: 'y2',
-                        text: plotData.capitalRaisings.map(cr => 
+                        text: plotData.capitalRaisings.map(cr =>
                           `${cr.raising_type}${cr.amount_raised ? ` $${(cr.amount_raised / 1e6).toFixed(1)}M` : ''}`
                         ),
                         hovertemplate: '%{text}<br>%{x}<extra>Capital Raising</extra>',
@@ -793,50 +821,112 @@ export default function CompanyProfile() {
                     ]}
                     layout={{
                       autosize: true,
-                      margin: { l: 60, r: 20, t: 20, b: 40 },
+                      margin: { l: 12, r: 64, t: 8, b: 36 },
                       paper_bgcolor: 'transparent',
                       plot_bgcolor: 'transparent',
+                      dragmode: 'pan',
                       xaxis: {
-                        showgrid: false,
-                        color: '#6b7280',
-                        tickformat: chartPeriod === '1D' ? '%H:%M' : '%b %d',
+                        showgrid: true,
+                        gridcolor: 'rgba(148, 163, 184, 0.06)',
+                        gridwidth: 1,
+                        color: '#94a3b8',
+                        tickfont: { size: 10, color: '#94a3b8' },
+                        tickformat: chartPeriod === '1D' ? '%H:%M' : chartPeriod === '5Y' || chartPeriod === '1Y' ? '%b %Y' : '%b %d',
                         rangeslider: { visible: false },
+                        showspikes: true,
+                        spikemode: 'across',
+                        spikesnap: 'cursor',
+                        spikecolor: 'rgba(148, 163, 184, 0.4)',
+                        spikethickness: 1,
+                        spikedash: 'dot',
+                        showline: false,
+                        zeroline: false,
+                        fixedrange: false,
                       },
                       yaxis: {
                         showgrid: false,
-                        color: '#6b7280',
-                        domain: showVolume ? [0, 0.25] : [0, 0],
+                        color: '#94a3b8',
+                        tickfont: { size: 10, color: '#64748b' },
+                        domain: showVolume ? [0, 0.22] : [0, 0],
                         showticklabels: showVolume,
-                        title: showVolume ? { text: 'Volume' } : undefined,
+                        zeroline: false,
+                        fixedrange: true,
                       },
                       yaxis2: {
                         showgrid: true,
-                        gridcolor: 'rgba(107, 114, 128, 0.2)',
-                        color: '#6b7280',
+                        gridcolor: 'rgba(148, 163, 184, 0.08)',
+                        gridwidth: 1,
+                        color: '#94a3b8',
+                        tickfont: { size: 11, color: '#cbd5e1' },
                         tickprefix: '$',
-                        domain: showVolume ? [0.3, 1] : [0, 1],
+                        tickformat: tickFmt,
+                        domain: showVolume ? [0.27, 1] : [0, 1],
                         side: 'right',
+                        autorange: false,
+                        range: [yMin, yMax],
+                        zeroline: false,
+                        showline: false,
+                        showspikes: true,
+                        spikemode: 'across',
+                        spikesnap: 'cursor',
+                        spikecolor: 'rgba(148, 163, 184, 0.4)',
+                        spikethickness: 1,
+                        spikedash: 'dot',
+                        nticks: 6,
+                        fixedrange: false,
                       },
                       hovermode: 'x unified',
                       hoverlabel: {
-                        bgcolor: '#1f2937',
-                        bordercolor: '#374151',
-                        font: { color: '#f3f4f6' },
+                        bgcolor: 'rgba(15, 23, 42, 0.95)',
+                        bordercolor: 'rgba(148, 163, 184, 0.3)',
+                        font: { color: '#f1f5f9', size: 11, family: 'ui-monospace, SFMono-Regular, Menlo, monospace' },
                       },
                       showlegend: false,
-                      legend: {
-                        x: 0,
-                        y: 1.1,
-                        orientation: 'h',
-                        font: { color: '#9ca3af' },
-                      },
+                      shapes: [
+                        // Last-price reference line — TradingView staple.
+                        {
+                          type: 'line',
+                          xref: 'paper',
+                          x0: 0,
+                          x1: 1,
+                          yref: 'y2',
+                          y0: plotData.closes[plotData.closes.length - 1],
+                          y1: plotData.closes[plotData.closes.length - 1],
+                          line: {
+                            color: lineColor,
+                            width: 1,
+                            dash: 'dot',
+                          },
+                        },
+                      ],
+                      annotations: [
+                        // Last-price label pinned to right axis.
+                        {
+                          xref: 'paper',
+                          x: 1,
+                          xanchor: 'left',
+                          yref: 'y2',
+                          y: plotData.closes[plotData.closes.length - 1],
+                          yanchor: 'middle',
+                          text: ` $${plotData.closes[plotData.closes.length - 1].toFixed(dp)} `,
+                          showarrow: false,
+                          font: { size: 10, color: '#0f172a', family: 'ui-monospace, monospace' },
+                          bgcolor: lineColor,
+                          bordercolor: lineColor,
+                          borderwidth: 0,
+                          borderpad: 2,
+                        },
+                      ],
                     }}
                     config={{
                       displayModeBar: false,
                       responsive: true,
+                      scrollZoom: true,
                     }}
                     style={{ width: '100%', height: '100%' }}
                   />
+                    );
+                  })()
                 ) : (
                   <div 
                     className="h-full rounded-lg flex flex-col items-center justify-center gap-2"
