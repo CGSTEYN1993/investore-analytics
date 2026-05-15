@@ -186,6 +186,38 @@ function formatMarketCap(value: number): string {
   return `$${Math.round(value).toLocaleString()}`;
 }
 
+// ---------------------------------------------------------------------------
+// Chart-overlay helpers — commodity & peer comparisons
+// ---------------------------------------------------------------------------
+/** Commodities the backend can chart via /market/commodities/{id}/history. */
+const COMMODITY_OPTIONS: Array<{ id: string; label: string }> = [
+  { id: 'gold', label: 'Gold' },
+  { id: 'silver', label: 'Silver' },
+  { id: 'platinum', label: 'Platinum' },
+  { id: 'palladium', label: 'Palladium' },
+  { id: 'copper', label: 'Copper' },
+  { id: 'nickel', label: 'Nickel' },
+  { id: 'zinc', label: 'Zinc' },
+  { id: 'iron_ore', label: 'Iron Ore' },
+  { id: 'lithium', label: 'Lithium' },
+  { id: 'uranium', label: 'Uranium' },
+  { id: 'crude_oil', label: 'Crude Oil' },
+  { id: 'natural_gas', label: 'Natural Gas' },
+];
+
+/** Map a free-text commodity name (e.g. "Gold", "Iron Ore") to a backend id. */
+function commodityNameToId(name: string | undefined | null): string | null {
+  if (!name) return null;
+  const norm = name.trim().toLowerCase().replace(/[^a-z]+/g, '_');
+  const direct = COMMODITY_OPTIONS.find(c => c.id === norm);
+  if (direct) return direct.id;
+  const byLabel = COMMODITY_OPTIONS.find(c => c.label.toLowerCase() === name.trim().toLowerCase());
+  return byLabel ? byLabel.id : null;
+}
+
+/** Distinct, color-blind friendly palette for overlay lines. */
+const OVERLAY_COLORS = ['#fbbf24', '#60a5fa', '#a78bfa', '#34d399', '#f472b6', '#fb923c'];
+
 export default function CompanyProfile() {
   const params = useParams();
   const searchParams = useSearchParams();
@@ -207,6 +239,14 @@ export default function CompanyProfile() {
   const [showCapitalRaisings, setShowCapitalRaisings] = useState(true);
   const [lassondeData, setLassondeData] = useState<LassondeResponse | null>(null);
   const [lassondeLoading, setLassondeLoading] = useState(false);
+
+  // ── Comparison overlays (commodity + peers) ─────────────────────────────
+  const [selectedCommodity, setSelectedCommodity] = useState<string | null>(null);
+  const [commodityOverlay, setCommodityOverlay] = useState<{ id: string; label: string; candles: ChartCandle[] } | null>(null);
+  const [peerTickers, setPeerTickers] = useState<string[]>([]);
+  const [peerOverlays, setPeerOverlays] = useState<Record<string, ChartCandle[]>>({});
+  const [peerInput, setPeerInput] = useState('');
+  const [overlayLoading, setOverlayLoading] = useState(false);
 
   const fetchCapitalRaisings = async () => {
     if (!ticker) return;
@@ -363,6 +403,71 @@ export default function CompanyProfile() {
       fetchChartData(chartPeriod);
     }
   }, [chartPeriod]);
+
+  // ── Fetch commodity overlay candles when commodity / period changes ───
+  useEffect(() => {
+    if (!selectedCommodity) {
+      setCommodityOverlay(null);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      setOverlayLoading(true);
+      try {
+        const res = await fetch(`${API_URL}/api/v1/market/commodities/${selectedCommodity}/history?period=${chartPeriod}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        if (cancelled) return;
+        const label = COMMODITY_OPTIONS.find(c => c.id === selectedCommodity)?.label || selectedCommodity;
+        const candles: ChartCandle[] = (data.candles || []).map((c: any) => ({
+          timestamp: c.timestamp,
+          open: c.open ?? c.close,
+          high: c.high ?? c.close,
+          low: c.low ?? c.close,
+          close: c.close,
+          volume: c.volume || 0,
+        }));
+        setCommodityOverlay({ id: selectedCommodity, label, candles });
+      } catch (err) {
+        console.warn('Commodity overlay fetch failed:', err);
+        if (!cancelled) setCommodityOverlay(null);
+      } finally {
+        if (!cancelled) setOverlayLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [selectedCommodity, chartPeriod]);
+
+  // ── Fetch peer overlay candles when peer list / period changes ────────
+  useEffect(() => {
+    if (peerTickers.length === 0) {
+      setPeerOverlays({});
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      setOverlayLoading(true);
+      try {
+        const results = await Promise.all(peerTickers.map(async (t) => {
+          try {
+            const res = await fetch(`${API_URL}/api/v1/market/chart/${t}?period=${chartPeriod}`);
+            if (!res.ok) return [t, [] as ChartCandle[]] as const;
+            const data = await res.json();
+            return [t, (data.candles || []) as ChartCandle[]] as const;
+          } catch {
+            return [t, [] as ChartCandle[]] as const;
+          }
+        }));
+        if (cancelled) return;
+        const next: Record<string, ChartCandle[]> = {};
+        for (const [t, candles] of results) next[t] = candles;
+        setPeerOverlays(next);
+      } finally {
+        if (!cancelled) setOverlayLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [peerTickers, chartPeriod]);
 
   // Prepare chart data for Plotly with OHLCV support
   const plotData = useMemo(() => {
@@ -712,7 +817,7 @@ export default function CompanyProfile() {
               </div>
               
               {/* Chart toggles */}
-              <div className="flex items-center gap-4 mb-4 text-sm">
+              <div className="flex items-center gap-4 mb-4 text-sm flex-wrap">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="checkbox"
@@ -732,6 +837,82 @@ export default function CompanyProfile() {
                   <span className="text-metallic-400">Capital Raisings ({capitalRaisings.length})</span>
                 </label>
               </div>
+
+              {/* Comparison overlays — commodity & peers */}
+              <div className="flex items-start gap-3 mb-4 text-sm flex-wrap">
+                {/* Commodity selector */}
+                <div className="flex items-center gap-2">
+                  <span className="text-metallic-500 text-xs uppercase tracking-wide">Commodity:</span>
+                  <select
+                    value={selectedCommodity || ''}
+                    onChange={(e) => setSelectedCommodity(e.target.value || null)}
+                    className="bg-metallic-800 border border-metallic-700 rounded-lg px-2 py-1 text-xs text-metallic-200 focus:outline-none focus:border-primary-500"
+                    title="Overlay a commodity price (normalized to % change)"
+                  >
+                    <option value="">— None —</option>
+                    {COMMODITY_OPTIONS.map(c => (
+                      <option key={c.id} value={c.id}>{c.label}</option>
+                    ))}
+                  </select>
+                  {commodityOverlay && commodityOverlay.candles.length === 0 && (
+                    <span className="text-amber-400 text-xs">No data for {commodityOverlay.label}</span>
+                  )}
+                </div>
+
+                {/* Peer adder */}
+                <div className="flex items-center gap-2 flex-1 min-w-[260px]">
+                  <span className="text-metallic-500 text-xs uppercase tracking-wide">Peers:</span>
+                  <input
+                    type="text"
+                    value={peerInput}
+                    onChange={(e) => setPeerInput(e.target.value.toUpperCase())}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const v = peerInput.trim().toUpperCase();
+                        if (v && v !== ticker && !peerTickers.includes(v) && peerTickers.length < OVERLAY_COLORS.length - 1) {
+                          setPeerTickers([...peerTickers, v]);
+                          setPeerInput('');
+                        }
+                      }
+                    }}
+                    placeholder="Add ticker (e.g. BHP)…"
+                    className="bg-metallic-800 border border-metallic-700 rounded-lg px-2 py-1 text-xs text-metallic-200 focus:outline-none focus:border-primary-500 w-32"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const v = peerInput.trim().toUpperCase();
+                      if (v && v !== ticker && !peerTickers.includes(v) && peerTickers.length < OVERLAY_COLORS.length - 1) {
+                        setPeerTickers([...peerTickers, v]);
+                        setPeerInput('');
+                      }
+                    }}
+                    className="px-2 py-1 text-xs rounded-lg bg-primary-500/20 border border-primary-500/40 text-primary-300 hover:bg-primary-500/30"
+                  >
+                    Add
+                  </button>
+                  {peerTickers.map((t, i) => (
+                    <span
+                      key={t}
+                      className="inline-flex items-center gap-1 px-2 py-1 text-xs rounded-lg bg-metallic-800 border border-metallic-700"
+                      style={{ borderColor: OVERLAY_COLORS[i + 1] || OVERLAY_COLORS[0] }}
+                    >
+                      <span className="w-2 h-2 rounded-full" style={{ backgroundColor: OVERLAY_COLORS[i + 1] || OVERLAY_COLORS[0] }} />
+                      <span className="text-metallic-200">{t}</span>
+                      <button
+                        type="button"
+                        onClick={() => setPeerTickers(peerTickers.filter(p => p !== t))}
+                        className="text-metallic-500 hover:text-red-400 ml-1"
+                        aria-label={`Remove ${t}`}
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                  {overlayLoading && <Loader2 className="w-3 h-3 text-metallic-500 animate-spin" />}
+                </div>
+              </div>
               
               {/* Chart */}
               <div className={showVolume ? "h-96" : "h-80"}>
@@ -741,6 +922,25 @@ export default function CompanyProfile() {
                   </div>
                 ) : plotData ? (
                   (() => {
+                    // ── Detect comparison overlays (commodity + peers) ─────
+                    const peerEntries = peerTickers
+                      .map((t, i) => ({ ticker: t, candles: peerOverlays[t] || [], color: OVERLAY_COLORS[i + 1] || OVERLAY_COLORS[0] }))
+                      .filter(p => p.candles.length > 0);
+                    const commodityEntry = commodityOverlay && commodityOverlay.candles.length > 0
+                      ? { label: commodityOverlay.label, candles: commodityOverlay.candles, color: OVERLAY_COLORS[0] }
+                      : null;
+                    const hasOverlays = !!commodityEntry || peerEntries.length > 0;
+
+                    // Helper: normalize a candle series to % change from first close.
+                    const normalize = (candles: ChartCandle[]) => {
+                      if (candles.length === 0) return { x: [] as string[], y: [] as number[] };
+                      const first = candles.find(c => c.close)?.close || candles[0].close || 1;
+                      return {
+                        x: candles.map(c => c.timestamp),
+                        y: candles.map(c => ((c.close / first) - 1) * 100),
+                      };
+                    };
+
                     // ── Compute a tight, TradingView-style y-axis range that
                     // EXCLUDES zero so small price moves are clearly visible.
                     // We use the actual high/low of the visible candles plus a
@@ -763,11 +963,47 @@ export default function CompanyProfile() {
                       ? 'rgba(38, 166, 154, 0.12)'
                       : 'rgba(239, 83, 80, 0.12)';
 
+                    // ── Normalized-mode (when overlays are active) ────────
+                    // Switch the y-axis to "% change from period start" so all
+                    // series share one scale regardless of price magnitude.
+                    const primaryNorm = normalize(
+                      plotData.dates.map((d, i) => ({
+                        timestamp: d, open: plotData.opens[i], high: plotData.highs[i],
+                        low: plotData.lows[i], close: plotData.closes[i], volume: plotData.volumes[i],
+                      }))
+                    );
+                    let normYMin = 0;
+                    let normYMax = 0;
+                    if (hasOverlays) {
+                      const allY: number[] = [...primaryNorm.y];
+                      if (commodityEntry) allY.push(...normalize(commodityEntry.candles).y);
+                      for (const p of peerEntries) allY.push(...normalize(p.candles).y);
+                      const lo = Math.min(...allY);
+                      const hi = Math.max(...allY);
+                      const nspan = Math.max(hi - lo, 1);
+                      const npad = nspan * 0.1;
+                      normYMin = lo - npad;
+                      normYMax = hi + npad;
+                    }
+
+                    const lastClose = plotData.closes[plotData.closes.length - 1];
+                    const lastPct = primaryNorm.y[primaryNorm.y.length - 1] || 0;
+
                     return (
                   <Plot
                     data={[
-                      // Main price trace (line or candlestick)
-                      chartType === 'candlestick' ? {
+                      // ── Primary price trace ──────────────────────────────
+                      hasOverlays ? {
+                        // Normalized % line for the active company
+                        x: primaryNorm.x,
+                        y: primaryNorm.y,
+                        type: 'scatter' as const,
+                        mode: 'lines' as const,
+                        name: ticker,
+                        line: { color: lineColor, width: 2, shape: 'spline' as const, smoothing: 0.3 },
+                        hovertemplate: `<b>${ticker}</b> %{y:+.2f}%<extra></extra>`,
+                        yaxis: 'y2',
+                      } : (chartType === 'candlestick' ? {
                         x: plotData.dates,
                         open: plotData.opens,
                         high: plotData.highs,
@@ -795,9 +1031,37 @@ export default function CompanyProfile() {
                         fillcolor: fillColor,
                         hovertemplate: `$%{y:${hoverFmt}}<extra></extra>`,
                         yaxis: 'y2',
-                      },
-                      // Volume bars
-                      ...(showVolume ? [{
+                      }),
+                      // ── Commodity overlay (normalized) ───────────────────
+                      ...(commodityEntry ? [(() => {
+                        const n = normalize(commodityEntry.candles);
+                        return {
+                          x: n.x,
+                          y: n.y,
+                          type: 'scatter' as const,
+                          mode: 'lines' as const,
+                          name: commodityEntry.label,
+                          line: { color: commodityEntry.color, width: 1.5, dash: 'dash' as const, shape: 'spline' as const, smoothing: 0.3 },
+                          hovertemplate: `<b>${commodityEntry.label}</b> %{y:+.2f}%<extra></extra>`,
+                          yaxis: 'y2',
+                        };
+                      })()] : []),
+                      // ── Peer overlays (normalized) ───────────────────────
+                      ...peerEntries.map(p => {
+                        const n = normalize(p.candles);
+                        return {
+                          x: n.x,
+                          y: n.y,
+                          type: 'scatter' as const,
+                          mode: 'lines' as const,
+                          name: p.ticker,
+                          line: { color: p.color, width: 1.5, shape: 'spline' as const, smoothing: 0.3 },
+                          hovertemplate: `<b>${p.ticker}</b> %{y:+.2f}%<extra></extra>`,
+                          yaxis: 'y2',
+                        };
+                      }),
+                      // ── Volume bars (suppressed in overlay mode) ─────────
+                      ...(showVolume && !hasOverlays ? [{
                         x: plotData.dates,
                         y: plotData.volumes,
                         type: 'bar' as const,
@@ -811,8 +1075,8 @@ export default function CompanyProfile() {
                         yaxis: 'y',
                         hovertemplate: 'Vol %{y:,.0f}<extra></extra>',
                       }] : []),
-                      // Capital raisings markers
-                      ...(showCapitalRaisings && plotData.capitalRaisings.length > 0 ? [{
+                      // Capital raisings markers (only in price mode)
+                      ...(showCapitalRaisings && !hasOverlays && plotData.capitalRaisings.length > 0 ? [{
                         x: plotData.capitalRaisings.map(cr => cr.announcement_date),
                         y: plotData.capitalRaisings.map(cr => {
                           // Find the close price on that date
@@ -863,12 +1127,36 @@ export default function CompanyProfile() {
                         showgrid: false,
                         color: '#94a3b8',
                         tickfont: { size: 10, color: '#64748b' },
-                        domain: showVolume ? [0, 0.22] : [0, 0],
-                        showticklabels: showVolume,
+                        domain: (showVolume && !hasOverlays) ? [0, 0.22] : [0, 0],
+                        showticklabels: showVolume && !hasOverlays,
                         zeroline: false,
                         fixedrange: true,
                       },
-                      yaxis2: {
+                      yaxis2: hasOverlays ? {
+                        showgrid: true,
+                        gridcolor: 'rgba(148, 163, 184, 0.08)',
+                        gridwidth: 1,
+                        color: '#94a3b8',
+                        tickfont: { size: 11, color: '#cbd5e1' },
+                        ticksuffix: '%',
+                        tickformat: '+,.1f',
+                        domain: [0, 1],
+                        side: 'right',
+                        autorange: false,
+                        range: [normYMin, normYMax],
+                        zeroline: true,
+                        zerolinecolor: 'rgba(148, 163, 184, 0.25)',
+                        zerolinewidth: 1,
+                        showline: false,
+                        showspikes: true,
+                        spikemode: 'across',
+                        spikesnap: 'cursor',
+                        spikecolor: 'rgba(148, 163, 184, 0.4)',
+                        spikethickness: 1,
+                        spikedash: 'dot',
+                        nticks: 6,
+                        fixedrange: false,
+                      } : {
                         showgrid: true,
                         gridcolor: 'rgba(148, 163, 184, 0.08)',
                         gridwidth: 1,
@@ -897,8 +1185,16 @@ export default function CompanyProfile() {
                         bordercolor: 'rgba(148, 163, 184, 0.3)',
                         font: { color: '#f1f5f9', size: 11, family: 'ui-monospace, SFMono-Regular, Menlo, monospace' },
                       },
-                      showlegend: false,
-                      shapes: [
+                      showlegend: hasOverlays,
+                      legend: hasOverlays ? {
+                        orientation: 'h' as const,
+                        x: 0,
+                        y: 1.06,
+                        xanchor: 'left' as const,
+                        font: { size: 10, color: '#cbd5e1' },
+                        bgcolor: 'rgba(0,0,0,0)',
+                      } : undefined,
+                      shapes: hasOverlays ? [] : [
                         // Last-price reference line — TradingView staple.
                         {
                           type: 'line',
@@ -915,16 +1211,33 @@ export default function CompanyProfile() {
                           },
                         },
                       ],
-                      annotations: [
+                      annotations: hasOverlays ? [
+                        // % change label for the active ticker pinned right.
+                        {
+                          xref: 'paper',
+                          x: 1,
+                          xanchor: 'left',
+                          yref: 'y2',
+                          y: lastPct,
+                          yanchor: 'middle',
+                          text: ` ${lastPct >= 0 ? '+' : ''}${lastPct.toFixed(2)}% `,
+                          showarrow: false,
+                          font: { size: 10, color: '#0f172a', family: 'ui-monospace, monospace' },
+                          bgcolor: lineColor,
+                          bordercolor: lineColor,
+                          borderwidth: 0,
+                          borderpad: 2,
+                        },
+                      ] : [
                         // Last-price label pinned to right axis.
                         {
                           xref: 'paper',
                           x: 1,
                           xanchor: 'left',
                           yref: 'y2',
-                          y: plotData.closes[plotData.closes.length - 1],
+                          y: lastClose,
                           yanchor: 'middle',
-                          text: ` $${plotData.closes[plotData.closes.length - 1].toFixed(dp)} `,
+                          text: ` $${lastClose.toFixed(dp)} `,
                           showarrow: false,
                           font: { size: 10, color: '#0f172a', family: 'ui-monospace, monospace' },
                           bgcolor: lineColor,
