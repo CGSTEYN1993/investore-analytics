@@ -180,9 +180,11 @@ export async function getRecentNewsHits(
 /**
  * Get news hits statistics
  */
-export async function getNewsStats(days: number = 30): Promise<NewsStatsResponse> {
+export async function getNewsStats(days: number = 30, exchange?: string): Promise<NewsStatsResponse> {
+  const params = new URLSearchParams({ days: String(days) });
+  if (exchange) params.set('exchange', exchange);
   const response = await fetch(
-    `${API_BASE_URL}/api/v1/news-hits/stats?days=${days}`
+    `${API_BASE_URL}/api/v1/news-hits/stats?${params.toString()}`
   );
   
   if (!response.ok) {

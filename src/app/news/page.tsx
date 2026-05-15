@@ -85,7 +85,7 @@ export default function NewsHitsPage() {
     
     try {
       const [statsData, newsData, sourcesData] = await Promise.all([
-        getNewsStats(selectedDays),
+        getNewsStats(selectedDays, selectedExchange || undefined),
         getRecentNewsHits(selectedDays, 50, selectedExchange || undefined),
         getNewsSources(),
       ]);
@@ -483,6 +483,9 @@ export default function NewsHitsPage() {
                 <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
                   <BarChart3 className="w-5 h-5 text-amber-400" />
                   Most Mentioned
+                  <span className="text-xs font-normal text-slate-500">
+                    {selectedExchange ? `(${selectedExchange})` : '(All Exchanges)'}
+                  </span>
                 </h3>
                 <div className="space-y-2">
                   {stats.top_companies.slice(0, 8).map((company, idx) => (
