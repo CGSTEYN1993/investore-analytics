@@ -38,9 +38,9 @@ function formatGrade(g?: number, unit?: string): string {
   return `${g.toFixed(2)} ${unit || ''}`.trim();
 }
 
-function formatInterval(from?: number, to?: number, width?: number): string {
-  if (width !== undefined && width !== null) return `${width.toFixed(1)} m`;
-  if (from !== undefined && to !== undefined) return `${(to - from).toFixed(1)} m`;
+function formatInterval(from?: number | null, to?: number | null, width?: number | null): string {
+  if (width != null) return `${width.toFixed(1)} m`;
+  if (from != null && to != null) return `${(to - from).toFixed(1)} m`;
   return '—';
 }
 
@@ -118,7 +118,7 @@ export default function DrillIntercepts({ ticker, className = '', daysBack = 182
                     {i.project_name || '—'}
                   </td>
                   <td className="py-2 pr-3 text-right">
-                    {i.from_m !== undefined && i.to_m !== undefined
+                    {i.from_m != null && i.to_m != null
                       ? `${i.from_m.toFixed(1)}–${i.to_m.toFixed(1)}`
                       : '—'}
                   </td>
