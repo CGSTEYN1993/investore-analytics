@@ -842,8 +842,14 @@ function GlobalSpatialContent() {
                     <div>
                       <div className="text-xs text-metallic-500">Market Cap</div>
                       <div className="font-semibold text-metallic-100 mt-0.5">
-                        {selectedCompanyMarketData.marketCap 
-                          ? `$${(selectedCompanyMarketData.marketCap / 1e9).toFixed(2)}B`
+                        {selectedCompanyMarketData.marketCap
+                          ? (selectedCompanyMarketData.marketCap >= 1e9
+                              ? `$${(selectedCompanyMarketData.marketCap / 1e9).toFixed(2)}B`
+                              : selectedCompanyMarketData.marketCap >= 1e6
+                                ? `$${(selectedCompanyMarketData.marketCap / 1e6).toFixed(2)}M`
+                                : selectedCompanyMarketData.marketCap >= 1e3
+                                  ? `$${(selectedCompanyMarketData.marketCap / 1e3).toFixed(0)}K`
+                                  : `$${Math.round(selectedCompanyMarketData.marketCap).toLocaleString()}`)
                           : selectedCompany.market_cap_category 
                             ? selectedCompany.market_cap_category.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())
                             : '-'}

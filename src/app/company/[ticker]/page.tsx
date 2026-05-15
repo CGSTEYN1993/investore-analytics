@@ -170,6 +170,22 @@ interface LassondeResponse {
   projects: LassondeProject[];
 }
 
+/**
+ * Format a market cap with the smallest sensible unit.
+ *  - ≥ $1B  → "$X.XXB"
+ *  - ≥ $1M  → "$X.XXM"
+ *  - ≥ $1K  → "$XXXK"
+ *  - else   → exact dollars (e.g. "$842")
+ * Avoids the "$0.0B" rounding that hides micro-cap values.
+ */
+function formatMarketCap(value: number): string {
+  if (!value || value <= 0) return 'N/A';
+  if (value >= 1e9) return `$${(value / 1e9).toFixed(2)}B`;
+  if (value >= 1e6) return `$${(value / 1e6).toFixed(2)}M`;
+  if (value >= 1e3) return `$${(value / 1e3).toFixed(0)}K`;
+  return `$${Math.round(value).toLocaleString()}`;
+}
+
 export default function CompanyProfile() {
   const params = useParams();
   const searchParams = useSearchParams();
@@ -602,7 +618,7 @@ export default function CompanyProfile() {
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   <StatCard 
                     label="Market Cap" 
-                    value={marketData.marketCap > 0 ? `$${(marketData.marketCap / 1e9).toFixed(1)}B` : 'N/A'}
+                    value={formatMarketCap(marketData.marketCap)}
                     icon={Building2}
                   />
                   <StatCard 
