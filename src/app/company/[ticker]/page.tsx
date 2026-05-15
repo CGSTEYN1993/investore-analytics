@@ -290,8 +290,14 @@ export default function CompanyProfile() {
     try {
       // Fetch market data, company details, and announcements in parallel
       setLassondeLoading(true);
+      // The /quote endpoint currently only knows ASX + Finnhub. For non-ASX
+      // listings (e.g. JSE PAN vs ASX PAN) calling it would return data for
+      // the wrong company, so skip it when the URL pins a different exchange.
+      const quoteFetch = (!exchangeParam || exchangeParam === 'ASX')
+        ? fetch(`${API_URL}/api/v1/market/quote/${ticker}`).catch(() => null)
+        : Promise.resolve(null);
       const [quoteRes, detailsRes, announcementsRes, lassondeRes] = await Promise.all([
-        fetch(`${API_URL}/api/v1/market/quote/${ticker}`).catch(() => null),
+        quoteFetch,
         fetch(`${API_URL}/api/v1/market/company/${ticker}/details${exchangeQuery}`).catch(() => null),
         fetch(`${API_URL}/api/v1/announcements/company/${ticker}?days_back=90&limit=20${exchangeParam ? `&exchange=${encodeURIComponent(exchangeParam)}` : ''}`).catch(() => null),
         fetch(`${API_URL}/api/v1/mining/company/${ticker}/lassonde`).catch(() => null)
@@ -301,7 +307,9 @@ export default function CompanyProfile() {
       let announcements: Announcement[] = [];
       let companyName = ticker;
       let commodity = 'Unknown';
-      let exchange = 'ASX';
+      // Prefer the explicit URL exchange param so cross-listed tickers (e.g. PAN:ASX vs PAN:JSE)
+      // show the correct exchange even when the /details endpoint is unavailable.
+      let exchange = exchangeParam || 'ASX';
       let website: string | undefined;
       let logoUrl: string | undefined;
       let asxUrl: string | undefined;
@@ -317,7 +325,8 @@ export default function CompanyProfile() {
         // Use details for name/commodity if available
         if (details.name) companyName = details.name;
         if (details.commodity) commodity = details.commodity;
-        if (details.exchange) exchange = details.exchange;
+        // Only let details override exchange when URL didn't pin one
+        if (details.exchange && !exchangeParam) exchange = details.exchange;
       }
       
       // Parse market data
@@ -326,7 +335,9 @@ export default function CompanyProfile() {
         // Only override if not already set from details
         if (!companyName || companyName === ticker) companyName = quote.name || ticker;
         if (commodity === 'Unknown') commodity = quote.commodity || 'Unknown';
-        if (!exchange) exchange = quote.exchange || 'ASX';
+        // Quote endpoint currently only knows ASX/Finnhub — don't let it overwrite
+        // a URL-pinned exchange (would mislabel JSE/TSX/LSE listings as ASX).
+        if (!exchangeParam && quote.exchange) exchange = quote.exchange;
         marketData = {
           price: quote.price || 0,
           change: quote.change || 0,
