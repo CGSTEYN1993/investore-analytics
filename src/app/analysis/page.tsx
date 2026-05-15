@@ -12,6 +12,7 @@ import {
 import { RAILWAY_API_URL } from '@/lib/public-api-url';
 import NewsTicker from '@/components/ui/NewsTicker';
 import TickerSearch from '@/components/ui/TickerSearch';
+import HoldingsDrawer, { type HoldingsTab } from '@/components/dashboard/HoldingsDrawer';
 
 const API_BASE = RAILWAY_API_URL;
 
@@ -248,6 +249,8 @@ export default function AnalysisDashboard() {
   const [recentAnnouncements, setRecentAnnouncements] = useState<RecentAnnouncement[]>([]);
   const [loadingCommodities, setLoadingCommodities] = useState(true);
   const [loadingAnnouncements, setLoadingAnnouncements] = useState(true);
+  const [holdingsOpen, setHoldingsOpen] = useState(false);
+  const [holdingsTab, setHoldingsTab] = useState<HoldingsTab>('portfolio');
   
   // Fetch all dynamic data from the API
   useEffect(() => {
@@ -323,20 +326,22 @@ export default function AnalysisDashboard() {
               <p className="text-metallic-400 mt-1">Your complete mining intelligence platform</p>
             </div>
             <div className="flex items-center gap-3">
-              <Link
-                href="/portfolio"
+              <button
+                type="button"
+                onClick={() => { setHoldingsTab('portfolio'); setHoldingsOpen(true); }}
                 className="flex items-center gap-2 px-4 py-2 bg-metallic-800 border border-metallic-700 rounded-lg text-metallic-300 hover:bg-metallic-700 transition-colors"
               >
                 <Briefcase className="w-4 h-4" />
                 <span>Portfolio</span>
-              </Link>
-              <Link
-                href="/watchlist"
+              </button>
+              <button
+                type="button"
+                onClick={() => { setHoldingsTab('watchlist'); setHoldingsOpen(true); }}
                 className="flex items-center gap-2 px-4 py-2 bg-metallic-800 border border-metallic-700 rounded-lg text-metallic-300 hover:bg-metallic-700 transition-colors"
               >
                 <Bookmark className="w-4 h-4" />
                 <span>Watchlist</span>
-              </Link>
+              </button>
             </div>
           </div>
 
@@ -697,6 +702,12 @@ export default function AnalysisDashboard() {
       <NewsTicker />
       {/* Spacer for fixed ticker */}
       <div className="h-10" />
+      {/* In-dashboard portfolio + watchlist drawer (no trading platform redirect) */}
+      <HoldingsDrawer
+        open={holdingsOpen}
+        initialTab={holdingsTab}
+        onClose={() => setHoldingsOpen(false)}
+      />
     </div>
   );
 }
