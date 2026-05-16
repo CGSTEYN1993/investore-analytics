@@ -53,6 +53,7 @@ interface RecentAnnouncement {
   article_date: string;
   event_type: string | null;
   sentiment_label: string | null;
+  source_url?: string | null;
 }
 
 // AI Research Analyst features from the design
@@ -281,10 +282,20 @@ export default function AnalysisDashboard() {
       
       // Fetch recent announcements/news hits
       try {
-        const response = await fetch(`${API_BASE}/api/v1/news-hits/recent?days=7&limit=8`);
+        const response = await fetch(`${API_BASE}/api/v1/news-hits/recent?days=7&limit=40`);
         if (response.ok) {
           const data = await response.json();
-          setRecentAnnouncements(data.news_hits || []);
+          // Dedupe by article title so the same syndicated article doesn't
+          // appear repeatedly across different tickers (e.g. GuruFocus pieces
+          // matched to many JSE tickers by name-based news scraping).
+          const seen = new Set<string>();
+          const hits: RecentAnnouncement[] = (data.news_hits || []).filter((h: RecentAnnouncement) => {
+            const key = (h.article_title || '').trim().toLowerCase();
+            if (!key || seen.has(key)) return false;
+            seen.add(key);
+            return true;
+          });
+          setRecentAnnouncements(hits);
         }
       } catch (err) {
         console.error('Failed to fetch announcements:', err);
@@ -628,30 +639,41 @@ export default function AnalysisDashboard() {
               <div className="text-center py-8 text-metallic-500">No recent announcements</div>
             ) : (
               <div className="space-y-3">
-                {recentAnnouncements.slice(0, 6).map((item) => (
-                  <div key={item.id} className="flex items-start gap-4 p-3 rounded-lg hover:bg-metallic-800/50 transition-colors cursor-pointer">
-                    <div className="w-10 h-10 rounded-lg bg-metallic-800 flex items-center justify-center flex-shrink-0">
-                      <FileText className="w-5 h-5 text-metallic-500" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="font-mono text-sm font-semibold text-primary-400">{item.ticker}.{item.exchange}</span>
-                        <span className={`px-2 py-0.5 text-[10px] font-medium rounded ${
-                          item.sentiment_label === 'positive' ? 'bg-green-500/20 text-green-400' :
-                          item.sentiment_label === 'negative' ? 'bg-red-500/20 text-red-400' :
-                          'bg-metallic-700 text-metallic-300'
-                        }`}>
-                          {formatEventType(item.event_type)}
-                        </span>
+                {recentAnnouncements.slice(0, 6).map((item) => {
+                  const href = item.source_url
+                    || `/company/${encodeURIComponent(item.ticker)}?exchange=${encodeURIComponent(item.exchange)}`;
+                  const isExternal = !!item.source_url;
+                  return (
+                    <a
+                      key={item.id}
+                      href={href}
+                      target={isExternal ? '_blank' : undefined}
+                      rel={isExternal ? 'noopener noreferrer' : undefined}
+                      className="flex items-start gap-4 p-3 rounded-lg hover:bg-metallic-800/50 transition-colors cursor-pointer"
+                    >
+                      <div className="w-10 h-10 rounded-lg bg-metallic-800 flex items-center justify-center flex-shrink-0">
+                        <FileText className="w-5 h-5 text-metallic-500" />
                       </div>
-                      <p className="text-sm text-metallic-200 truncate">{item.article_title}</p>
-                    </div>
-                    <div className="text-xs text-metallic-500 flex-shrink-0 flex items-center gap-1">
-                      <Clock className="w-3 h-3" />
-                      {formatTimeAgo(item.article_date)}
-                    </div>
-                  </div>
-                ))}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-mono text-sm font-semibold text-primary-400">{item.ticker}.{item.exchange}</span>
+                          <span className={`px-2 py-0.5 text-[10px] font-medium rounded ${
+                            item.sentiment_label === 'positive' ? 'bg-green-500/20 text-green-400' :
+                            item.sentiment_label === 'negative' ? 'bg-red-500/20 text-red-400' :
+                            'bg-metallic-700 text-metallic-300'
+                          }`}>
+                            {formatEventType(item.event_type)}
+                          </span>
+                        </div>
+                        <p className="text-sm text-metallic-200 truncate">{item.article_title}</p>
+                      </div>
+                      <div className="text-xs text-metallic-500 flex-shrink-0 flex items-center gap-1">
+                        <Clock className="w-3 h-3" />
+                        {formatTimeAgo(item.article_date)}
+                      </div>
+                    </a>
+                  );
+                })}
               </div>
             )}
           </div>
