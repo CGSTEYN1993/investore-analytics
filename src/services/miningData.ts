@@ -214,6 +214,9 @@ export interface DrillIntercept {
   commodity?: string;
   announcement_date?: string;
   nsr_value?: number;
+  drilling_result_id?: number | null;
+  company_name?: string;
+  exchange?: string;
 }
 
 export interface DrillInterceptsResponse {

@@ -127,9 +127,11 @@ const DrillingCard = ({ hole, onOpen }: { hole: ExplorationDrilling; onOpen: (id
 // Drill hole detail modal
 const DrillHoleDetailModal = ({
   holeId,
+  highlightInterceptId,
   onClose,
 }: {
   holeId: number | null;
+  highlightInterceptId?: number | null;
   onClose: () => void;
 }) => {
   const [detail, setDetail] = useState<DrillHoleDetail | null>(null);
@@ -249,7 +251,10 @@ const DrillHoleDetailModal = ({
                       </thead>
                       <tbody className="text-metallic-200">
                         {detail.intercepts.map((i) => (
-                          <tr key={i.id} className="border-t border-metallic-800">
+                          <tr
+                            key={i.id}
+                            className={`border-t border-metallic-800 ${highlightInterceptId === i.id ? "bg-amber-500/10 ring-1 ring-amber-500/40" : ""}`}
+                          >
                             <td className="px-3 py-2">{i.from_m != null ? `${i.from_m.toFixed(1)} m` : "—"}</td>
                             <td className="px-3 py-2">{i.to_m != null ? `${i.to_m.toFixed(1)} m` : "—"}</td>
                             <td className="px-3 py-2">{i.interval_m != null ? `${i.interval_m.toFixed(1)} m` : "—"}</td>
@@ -318,8 +323,27 @@ const DetailStat = ({ label, value }: { label: string; value: React.ReactNode })
 );
 
 // Intercept card component
-const InterceptCard = ({ intercept }: { intercept: DrillIntercept }) => (
-  <div className="bg-metallic-800/50 rounded-lg border border-metallic-700 p-4 hover:border-amber-500/50 transition-colors">
+const InterceptCard = ({
+  intercept,
+  onOpen,
+}: {
+  intercept: DrillIntercept;
+  onOpen?: (holeId: number, interceptId: number) => void;
+}) => {
+  const canOpen = onOpen != null && intercept.drilling_result_id != null;
+  const handleClick = () => {
+    if (canOpen && intercept.drilling_result_id != null) {
+      onOpen!(intercept.drilling_result_id, intercept.id);
+    }
+  };
+  return (
+  <div
+    onClick={canOpen ? handleClick : undefined}
+    role={canOpen ? "button" : undefined}
+    tabIndex={canOpen ? 0 : undefined}
+    onKeyDown={canOpen ? (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleClick(); } } : undefined}
+    className={`bg-metallic-800/50 rounded-lg border border-metallic-700 p-4 transition-colors ${canOpen ? "cursor-pointer hover:border-amber-500/50 hover:bg-metallic-800/80" : "hover:border-amber-500/50"}`}
+  >
     <div className="flex items-start justify-between mb-3">
       <div>
         <h3 className="font-semibold text-metallic-100">
@@ -390,8 +414,15 @@ const InterceptCard = ({ intercept }: { intercept: DrillIntercept }) => (
         </div>
       </div>
     )}
+
+    {canOpen && (
+      <div className="mt-3 pt-3 border-t border-metallic-700 text-xs text-accent-gold">
+        View hole detail & source PDF →
+      </div>
+    )}
   </div>
-);
+  );
+};
 
 // Loading skeleton
 const DrillingCardSkeleton = () => (
@@ -466,6 +497,7 @@ export default function ExplorationPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedHoleId, setSelectedHoleId] = useState<number | null>(null);
+  const [highlightInterceptId, setHighlightInterceptId] = useState<number | null>(null);
   
   // Summary data
   const [summary, setSummary] = useState<ExplorationSummary | null>(null);
@@ -707,7 +739,14 @@ export default function ExplorationPage() {
         return (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {interceptsData.map((intercept) => (
-              <InterceptCard key={`${intercept.symbol}-${intercept.hole_id}-${intercept.id}`} intercept={intercept} />
+              <InterceptCard
+                key={`${intercept.symbol}-${intercept.hole_id}-${intercept.id}`}
+                intercept={intercept}
+                onOpen={(holeId, interceptId) => {
+                  setHighlightInterceptId(interceptId);
+                  setSelectedHoleId(holeId);
+                }}
+              />
             ))}
           </div>
         );
@@ -1281,7 +1320,11 @@ export default function ExplorationPage() {
         )}
       </div>
 
-      <DrillHoleDetailModal holeId={selectedHoleId} onClose={() => setSelectedHoleId(null)} />
+      <DrillHoleDetailModal
+        holeId={selectedHoleId}
+        highlightInterceptId={highlightInterceptId}
+        onClose={() => { setSelectedHoleId(null); setHighlightInterceptId(null); }}
+      />
     </div>
   );
 }
