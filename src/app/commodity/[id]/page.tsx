@@ -81,6 +81,7 @@ interface NewsItem {
   stock_impact_prediction: string | null;
   url: string | null;
   commodities_mentioned: string[];
+  is_macro?: boolean;
 }
 
 interface NewsResponse {
@@ -410,6 +411,11 @@ export default function CommodityProfilePage() {
                         )}
                       </h3>
                       <div className="flex items-center flex-wrap gap-x-3 gap-y-1 mt-1 text-xs text-slate-500">
+                        {it.is_macro && (
+                          <span className="px-1.5 py-0.5 rounded bg-purple-500/15 border border-purple-500/30 text-purple-300 uppercase tracking-wide text-[10px] font-semibold">
+                            Macro driver
+                          </span>
+                        )}
                         {it.ticker && (
                           <Link
                             href={`/company/${it.ticker}${it.exchange ? `?exchange=${encodeURIComponent(it.exchange)}` : ''}`}
@@ -427,6 +433,23 @@ export default function CommodityProfilePage() {
                         {it.event_type && (
                           <span className="px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 capitalize">
                             {it.event_type.replace(/_/g, ' ')}
+                          </span>
+                        )}
+                        {it.event_significance === 'high' && (
+                          <span className="px-1.5 py-0.5 rounded bg-amber-500/15 border border-amber-500/30 text-amber-300 uppercase text-[10px] font-semibold">
+                            High impact
+                          </span>
+                        )}
+                        {it.stock_impact_prediction && it.stock_impact_prediction !== 'neutral' && (
+                          <span
+                            className={`px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase ${
+                              it.stock_impact_prediction === 'bullish'
+                                ? 'bg-green-500/15 border border-green-500/30 text-green-300'
+                                : 'bg-red-500/15 border border-red-500/30 text-red-300'
+                            }`}
+                          >
+                            {it.stock_impact_prediction === 'bullish' ? '↑ ' : '↓ '}
+                            {it.stock_impact_prediction}
                           </span>
                         )}
                       </div>
