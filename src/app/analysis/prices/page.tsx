@@ -229,7 +229,11 @@ export default function CommodityPricesPage() {
               </h3>
               <div className="space-y-3">
                 {overview.movers.gainers.slice(0, 5).map((commodity) => (
-                  <div key={commodity.id} className="flex items-center justify-between p-3 bg-green-500/5 border border-green-500/20 rounded-lg">
+                  <Link
+                    key={commodity.id}
+                    href={`/commodity/${commodity.id}`}
+                    className="flex items-center justify-between p-3 bg-green-500/5 border border-green-500/20 rounded-lg hover:bg-green-500/10 hover:border-green-500/40 transition-colors"
+                  >
                     <div>
                       <div className="font-medium text-white">{commodity.name}</div>
                       <div className="text-xs text-slate-500">{commodity.symbol}</div>
@@ -238,7 +242,7 @@ export default function CommodityPricesPage() {
                       <div className="font-mono text-white">{formatPrice(commodity.price, commodity.unit)}<span className="text-slate-500 text-xs">/{commodity.unit}</span></div>
                       <div className="text-green-400 text-sm font-medium">+{commodity.changePercent.toFixed(2)}%</div>
                     </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
             </div>
@@ -251,7 +255,11 @@ export default function CommodityPricesPage() {
               </h3>
               <div className="space-y-3">
                 {overview.movers.losers.slice(0, 5).map((commodity) => (
-                  <div key={commodity.id} className="flex items-center justify-between p-3 bg-red-500/5 border border-red-500/20 rounded-lg">
+                  <Link
+                    key={commodity.id}
+                    href={`/commodity/${commodity.id}`}
+                    className="flex items-center justify-between p-3 bg-red-500/5 border border-red-500/20 rounded-lg hover:bg-red-500/10 hover:border-red-500/40 transition-colors"
+                  >
                     <div>
                       <div className="font-medium text-white">{commodity.name}</div>
                       <div className="text-xs text-slate-500">{commodity.symbol}</div>
@@ -260,7 +268,7 @@ export default function CommodityPricesPage() {
                       <div className="font-mono text-white">{formatPrice(commodity.price, commodity.unit)}<span className="text-slate-500 text-xs">/{commodity.unit}</span></div>
                       <div className="text-red-400 text-sm font-medium">{commodity.changePercent.toFixed(2)}%</div>
                     </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
             </div>
@@ -301,13 +309,23 @@ export default function CommodityPricesPage() {
                     const CategoryIcon = CATEGORY_INFO[commodity.category]?.icon || BarChart3;
                     
                     return (
-                      <tr key={commodity.id} className="hover:bg-slate-800/30 transition-colors">
+                      <tr
+                        key={commodity.id}
+                        className="hover:bg-slate-800/30 transition-colors cursor-pointer"
+                        onClick={() => { window.location.href = `/commodity/${commodity.id}`; }}
+                      >
                         <td className="px-4 py-4">
                           <div className="flex items-center gap-3">
                             <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${CATEGORY_INFO[commodity.category]?.color || 'from-slate-500 to-slate-600'} flex items-center justify-center`}>
                               <CategoryIcon className="w-4 h-4 text-white" />
                             </div>
-                            <span className="font-medium text-white">{commodity.name}</span>
+                            <Link
+                              href={`/commodity/${commodity.id}`}
+                              onClick={(e) => e.stopPropagation()}
+                              className="font-medium text-white hover:text-amber-400"
+                            >
+                              {commodity.name}
+                            </Link>
                           </div>
                         </td>
                         <td className="px-4 py-4 font-mono text-slate-400">{commodity.symbol}</td>
