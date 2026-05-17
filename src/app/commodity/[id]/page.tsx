@@ -349,7 +349,7 @@ export default function CommodityProfilePage() {
                     <Tooltip
                       contentStyle={{ background: '#0f172a', border: '1px solid #334155', borderRadius: 8 }}
                       labelStyle={{ color: '#94a3b8' }}
-                      formatter={(value: number) => [`$${value.toLocaleString(undefined, { maximumFractionDigits: 2 })}`, history?.name || 'Price']}
+                      formatter={(value: number | undefined) => [`$${Number(value ?? 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}`, history?.name || 'Price']}
                       labelFormatter={(v) => new Date(v as string).toLocaleString()}
                     />
                     <Area type="monotone" dataKey="price" stroke="#f59e0b" strokeWidth={2} fill="url(#cprice)" />
