@@ -14,6 +14,7 @@ import { formatPrice } from '@/lib/utils';
 import CompanyGeoscienceWidget from '@/components/dashboard/CompanyGeoscienceWidget';import CompanyMiningDataWidget from '@/components/mining/CompanyMiningDataWidget';
 import StockBriefPanel from '@/components/company/StockBriefPanel';
 import DrillIntercepts from '@/components/company/DrillIntercepts';
+import { useAnalysisWatchlist } from '@/hooks/useAnalysisWatchlist';
 // Dynamic import for Plotly to avoid SSR issues
 const Plot = dynamic(() => import('react-plotly.js'), { ssr: false });
 
@@ -228,7 +229,8 @@ export default function CompanyProfile() {
   const [companyData, setCompanyData] = useState<CompanyData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isWatchlisted, setIsWatchlisted] = useState(false);
+  const { has: isInWatchlist, toggle: toggleWatchlist } = useAnalysisWatchlist();
+  const isWatchlisted = isInWatchlist(ticker, exchangeParam || companyData?.exchange);
   const [chartData, setChartData] = useState<ChartData | null>(null);
   const [chartPeriod, setChartPeriod] = useState('1M');
   const [chartLoading, setChartLoading] = useState(false);
@@ -676,7 +678,15 @@ export default function CompanyProfile() {
               {/* Action Buttons */}
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => setIsWatchlisted(!isWatchlisted)}
+                  onClick={() =>
+                    toggleWatchlist({
+                      ticker,
+                      exchange: exchangeParam || companyData?.exchange,
+                      name: companyData?.name,
+                      commodity: companyData?.commodity,
+                    })
+                  }
+                  title={isWatchlisted ? 'Remove from watchlist' : 'Add to watchlist'}
                   className={`p-2 rounded-lg border transition-colors ${
                     isWatchlisted 
                       ? 'bg-primary-500/20 border-primary-500/50 text-primary-400' 

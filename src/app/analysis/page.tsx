@@ -13,6 +13,7 @@ import { RAILWAY_API_URL } from '@/lib/public-api-url';
 import NewsTicker from '@/components/ui/NewsTicker';
 import TickerSearch from '@/components/ui/TickerSearch';
 import HoldingsDrawer, { type HoldingsTab } from '@/components/dashboard/HoldingsDrawer';
+import WatchlistPanel from '@/components/analysis/WatchlistPanel';
 
 const API_BASE = RAILWAY_API_URL;
 
@@ -407,6 +408,11 @@ export default function AnalysisDashboard() {
 
       {/* Main Content - Four Main Modals */}
       <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Independent watchlist (localStorage, decoupled from trading) */}
+        <div className="mb-8">
+          <WatchlistPanel />
+        </div>
+
         <div className="grid md:grid-cols-2 gap-8">
           
           {/* Modal 1: Spatial Explorer (renamed from Global Spatial View) */}
