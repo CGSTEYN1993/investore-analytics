@@ -167,6 +167,40 @@ export interface ExplorationDrillingResponse {
   exchanges: string[];
 }
 
+export interface DrillHoleDetailIntercept {
+  id: number;
+  from_m: number | null;
+  to_m: number | null;
+  interval_m: number | null;
+  true_width_m: number | null;
+  commodity: string;
+  grade: number | null;
+  grade_unit: string;
+  contained_metal: number | null;
+  contained_metal_unit: string | null;
+  cutoff_grade: number | null;
+  cutoff_unit: string | null;
+}
+
+export interface DrillHoleDetail extends ExplorationDrilling {
+  company_name?: string;
+  exchange?: string;
+  target_zone?: string;
+  drill_purpose?: string;
+  coordinate_system?: string;
+  elevation?: number | null;
+  precollar_depth_m?: number | null;
+  drill_date?: string | null;
+  confidence?: number | null;
+  document?: {
+    document_id: string;
+    title?: string | null;
+    pdf_url?: string | null;
+    num_pages?: number | null;
+  } | null;
+  intercepts: DrillHoleDetailIntercept[];
+}
+
 export interface DrillIntercept {
   id: number;
   symbol: string;
@@ -401,6 +435,11 @@ class MiningDataService {
     
     const query = params.toString();
     return fetchMining<ExplorationDrillingResponse>(`/exploration/drilling${query ? `?${query}` : ''}`);
+  }
+
+  /** Full detail for a single drill hole, including intercepts and source PDF */
+  async getDrillHoleDetail(id: number): Promise<DrillHoleDetail> {
+    return fetchMining<DrillHoleDetail>(`/exploration/drilling/${id}`);
   }
 
   /**

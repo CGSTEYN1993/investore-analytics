@@ -25,6 +25,7 @@ import miningDataService, {
   ExplorationDrilling, 
   DrillIntercept,
   ExplorationSummary,
+  DrillHoleDetail,
 } from "@/services/miningData";
 
 // Exploration data types
@@ -53,14 +54,13 @@ const StatusBadge = ({ status }: { status: string }) => {
 };
 
 // Drilling card component using API data
-const DrillingCard = ({ hole }: { hole: ExplorationDrilling }) => {
+const DrillingCard = ({ hole, onOpen }: { hole: ExplorationDrilling; onOpen: (id: number) => void }) => {
   const projectLabel = hole.project_name || hole.target_zone;
-  const exchangeQs = hole.exchange ? `?exchange=${encodeURIComponent(hole.exchange)}` : "";
-  const href = `/company/${hole.symbol}${exchangeQs}`;
   return (
-    <Link
-      href={href}
-      className="block bg-metallic-800/50 rounded-lg border border-metallic-700 p-4 hover:border-red-500/50 transition-colors"
+    <button
+      type="button"
+      onClick={() => onOpen(hole.id)}
+      className="text-left w-full bg-metallic-800/50 rounded-lg border border-metallic-700 p-4 hover:border-red-500/50 transition-colors"
     >
       <div className="flex items-start justify-between mb-3">
         <div className="min-w-0">
@@ -120,9 +120,202 @@ const DrillingCard = ({ hole }: { hole: ExplorationDrilling }) => {
           )}
         </div>
       )}
-    </Link>
+    </button>
   );
 };
+
+// Drill hole detail modal
+const DrillHoleDetailModal = ({
+  holeId,
+  onClose,
+}: {
+  holeId: number | null;
+  onClose: () => void;
+}) => {
+  const [detail, setDetail] = useState<DrillHoleDetail | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (holeId == null) return;
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+    setDetail(null);
+    miningDataService
+      .getDrillHoleDetail(holeId)
+      .then((d) => { if (!cancelled) setDetail(d); })
+      .catch((e) => { if (!cancelled) setError(String(e?.message || e)); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [holeId]);
+
+  if (holeId == null) return null;
+
+  const companyHref = detail
+    ? `/company/${detail.symbol}${detail.exchange ? `?exchange=${encodeURIComponent(detail.exchange)}` : ""}`
+    : "#";
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-start justify-center bg-black/70 backdrop-blur-sm p-4 overflow-y-auto"
+      onClick={onClose}
+    >
+      <div
+        className="bg-metallic-900 border border-metallic-700 rounded-xl shadow-2xl w-full max-w-4xl my-8"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-start justify-between p-5 border-b border-metallic-800">
+          <div className="min-w-0">
+            <h2 className="text-xl font-bold text-metallic-100 truncate">
+              {detail?.hole_id || "Drill hole"}
+            </h2>
+            {detail && (
+              <div className="text-sm text-metallic-400 mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
+                <Link href={companyHref} className="text-accent-gold hover:underline">
+                  {detail.symbol}{detail.company_name && detail.company_name !== detail.symbol ? ` — ${detail.company_name}` : ""}
+                </Link>
+                {detail.exchange && <span className="text-metallic-500">{detail.exchange}</span>}
+                {(detail.project_name || detail.target_zone) && (
+                  <span className="flex items-center gap-1">
+                    <FolderOpen className="w-3 h-3" />
+                    {detail.project_name || detail.target_zone}
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-metallic-400 hover:text-metallic-100 p-1"
+            aria-label="Close"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="p-5 space-y-5">
+          {loading && (
+            <div className="text-sm text-metallic-400">Loading hole detail…</div>
+          )}
+          {error && (
+            <div className="text-sm text-red-400">Failed to load: {error}</div>
+          )}
+          {detail && (
+            <>
+              {/* Key facts */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                <DetailStat label="Status" value={detail.status} />
+                <DetailStat label="Type" value={detail.drill_type} />
+                <DetailStat label="Total depth" value={detail.total_depth != null ? `${detail.total_depth.toFixed(1)} m` : null} />
+                <DetailStat label="Precollar" value={detail.precollar_depth_m != null ? `${detail.precollar_depth_m.toFixed(1)} m` : null} />
+                <DetailStat label="Azimuth" value={detail.azimuth != null ? `${detail.azimuth}°` : null} />
+                <DetailStat label="Dip" value={detail.dip != null ? `${detail.dip}°` : null} />
+                <DetailStat label="Easting" value={detail.easting != null ? detail.easting.toFixed(0) : null} />
+                <DetailStat label="Northing" value={detail.northing != null ? detail.northing.toFixed(0) : null} />
+                <DetailStat label="Elevation" value={detail.elevation != null ? `${detail.elevation} m RL` : null} />
+                <DetailStat label="Coord system" value={detail.coordinate_system} />
+                <DetailStat label="Drill date" value={detail.drill_date ? new Date(detail.drill_date).toLocaleDateString() : null} />
+                <DetailStat label="Announced" value={detail.announcement_date ? new Date(detail.announcement_date).toLocaleDateString() : null} />
+                <DetailStat label="Purpose" value={detail.drill_purpose} />
+                <DetailStat label="Target zone" value={detail.target_zone} />
+                <DetailStat label="Confidence" value={detail.confidence != null ? `${(detail.confidence * 100).toFixed(0)}%` : null} />
+              </div>
+
+              {/* Intercepts */}
+              <div>
+                <h3 className="text-sm font-semibold text-metallic-100 mb-2 flex items-center gap-2">
+                  <Gem className="w-4 h-4 text-amber-400" />
+                  Significant intercepts
+                  <span className="text-metallic-500 font-normal">({detail.intercepts.length})</span>
+                </h3>
+                {detail.intercepts.length === 0 ? (
+                  <p className="text-sm text-metallic-500">No intercepts recorded for this hole.</p>
+                ) : (
+                  <div className="overflow-x-auto rounded-lg border border-metallic-800">
+                    <table className="w-full text-sm">
+                      <thead className="bg-metallic-800/60 text-metallic-400 text-xs uppercase">
+                        <tr>
+                          <th className="text-left px-3 py-2">From</th>
+                          <th className="text-left px-3 py-2">To</th>
+                          <th className="text-left px-3 py-2">Width</th>
+                          <th className="text-left px-3 py-2">True width</th>
+                          <th className="text-left px-3 py-2">Commodity</th>
+                          <th className="text-left px-3 py-2">Grade</th>
+                          <th className="text-left px-3 py-2">Contained</th>
+                          <th className="text-left px-3 py-2">Cutoff</th>
+                        </tr>
+                      </thead>
+                      <tbody className="text-metallic-200">
+                        {detail.intercepts.map((i) => (
+                          <tr key={i.id} className="border-t border-metallic-800">
+                            <td className="px-3 py-2">{i.from_m != null ? `${i.from_m.toFixed(1)} m` : "—"}</td>
+                            <td className="px-3 py-2">{i.to_m != null ? `${i.to_m.toFixed(1)} m` : "—"}</td>
+                            <td className="px-3 py-2">{i.interval_m != null ? `${i.interval_m.toFixed(1)} m` : "—"}</td>
+                            <td className="px-3 py-2">{i.true_width_m != null ? `${i.true_width_m.toFixed(1)} m` : "—"}</td>
+                            <td className="px-3 py-2 font-medium">{i.commodity}</td>
+                            <td className="px-3 py-2">{i.grade != null ? `${i.grade} ${i.grade_unit}` : "—"}</td>
+                            <td className="px-3 py-2">{i.contained_metal != null ? `${i.contained_metal} ${i.contained_metal_unit || ""}` : "—"}</td>
+                            <td className="px-3 py-2">{i.cutoff_grade != null ? `${i.cutoff_grade} ${i.cutoff_unit || ""}` : "—"}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+
+              {/* Source document */}
+              {detail.document && (
+                <div>
+                  <h3 className="text-sm font-semibold text-metallic-100 mb-2 flex items-center gap-2">
+                    <Globe className="w-4 h-4 text-blue-400" />
+                    Source announcement
+                  </h3>
+                  <div className="bg-metallic-800/50 border border-metallic-700 rounded-lg p-3 text-sm">
+                    <div className="text-metallic-200">{detail.document.title || detail.document.document_id}</div>
+                    {detail.document.pdf_url && (
+                      <a
+                        href={detail.document.pdf_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 mt-2 text-accent-gold hover:underline"
+                      >
+                        Open source PDF
+                        {detail.document.num_pages ? <span className="text-metallic-500">({detail.document.num_pages} pages)</span> : null}
+                      </a>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              <div className="pt-2 border-t border-metallic-800 flex items-center justify-between text-sm">
+                <Link href={companyHref} className="text-accent-gold hover:underline">
+                  View {detail.symbol} company page →
+                </Link>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="px-3 py-1.5 rounded-lg border border-metallic-700 text-metallic-300 hover:border-metallic-500"
+                >
+                  Close
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const DetailStat = ({ label, value }: { label: string; value: React.ReactNode }) => (
+  <div className="bg-metallic-800/40 rounded-md px-3 py-2 border border-metallic-800">
+    <div className="text-[10px] uppercase text-metallic-500 tracking-wide">{label}</div>
+    <div className="text-metallic-100 truncate">{value ?? <span className="text-metallic-600">—</span>}</div>
+  </div>
+);
 
 // Intercept card component
 const InterceptCard = ({ intercept }: { intercept: DrillIntercept }) => (
@@ -272,6 +465,7 @@ export default function ExplorationPage() {
   const [activeType, setActiveType] = useState("drilling");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedHoleId, setSelectedHoleId] = useState<number | null>(null);
   
   // Summary data
   const [summary, setSummary] = useState<ExplorationSummary | null>(null);
@@ -466,7 +660,7 @@ export default function ExplorationPage() {
         return (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {drillingData.map((hole) => (
-              <DrillingCard key={`${hole.symbol}-${hole.hole_id}-${hole.id}`} hole={hole} />
+              <DrillingCard key={`${hole.symbol}-${hole.hole_id}-${hole.id}`} hole={hole} onOpen={setSelectedHoleId} />
             ))}
           </div>
         );
@@ -1086,6 +1280,8 @@ export default function ExplorationPage() {
           </div>
         )}
       </div>
+
+      <DrillHoleDetailModal holeId={selectedHoleId} onClose={() => setSelectedHoleId(null)} />
     </div>
   );
 }
