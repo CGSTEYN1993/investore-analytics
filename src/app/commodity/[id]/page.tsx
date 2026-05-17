@@ -88,6 +88,7 @@ interface NewsResponse {
   name: string;
   symbol: string;
   count: number;
+  aliases?: string[];
   summary: {
     total: number;
     positive: number;
