@@ -20,7 +20,7 @@ import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import Link from 'next/link';
 import {
   X, Briefcase, Bookmark, ExternalLink, RefreshCw,
-  TrendingUp, TrendingDown, AlertCircle, Loader2,
+  TrendingUp, TrendingDown, AlertCircle, Loader2, Search, Trash2,
 } from 'lucide-react';
 import {
   fetchPortfolioOverview,
@@ -31,6 +31,8 @@ import {
   type WatchlistQuotes,
   type Timeframe,
 } from '@/services/tradingService';
+import { useAnalysisWatchlist } from '@/hooks/useAnalysisWatchlist';
+import TickerSearch from '@/components/ui/TickerSearch';
 
 export type HoldingsTab = 'portfolio' | 'watchlist';
 
@@ -150,7 +152,7 @@ export default function HoldingsDrawer({ open, initialTab = 'portfolio', onClose
   useEffect(() => {
     if (!open) return;
     if (tab === 'portfolio') loadPortfolio();
-    else loadWatchlists();
+    // Watchlist tab now reads from local useAnalysisWatchlist store — no fetch needed.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, tab, timeframe]);
 
@@ -258,17 +260,7 @@ export default function HoldingsDrawer({ open, initialTab = 'portfolio', onClose
               onClose={onClose}
             />
           ) : (
-            <WatchlistBody
-              loading={watchlistLoading}
-              error={watchlistError}
-              watchlists={watchlists}
-              activeId={activeWatchlistId}
-              setActiveId={setActiveWatchlistId}
-              quotes={watchlistQuotes}
-              rows={watchlistRows}
-              dataUnavailable={dataUnavailable(watchlistQuotes?.data_source)}
-              onClose={onClose}
-            />
+            <AnalysisWatchlistBody onClose={onClose} />
           )}
         </div>
       </aside>
@@ -525,6 +517,108 @@ function Stat({ label, value, tone }: { label: string; value: React.ReactNode; t
     <div className="bg-metallic-800/50 border border-metallic-700/50 rounded-lg p-3">
       <div className="text-xs text-metallic-400">{label}</div>
       <div className={`text-base font-semibold mt-0.5 ${colour}`}>{value}</div>
+    </div>
+  );
+}
+
+/**
+ * Watchlist tab body — reads from the same independent local watchlist
+ * (`useAnalysisWatchlist`) that powers the WatchlistPanel on the analysis
+ * dashboard, so the top-right drawer and the in-page panel stay in sync.
+ */
+function AnalysisWatchlistBody({ onClose }: { onClose: () => void }) {
+  const { items, hydrated, add, remove } = useAnalysisWatchlist();
+
+  return (
+    <div>
+      <div className="mb-4">
+        <div className="flex items-center gap-2 text-xs text-metallic-400 mb-1.5">
+          <Search className="w-3.5 h-3.5" />
+          <span>Search any ticker or company to add</span>
+        </div>
+        <TickerSearch
+          placeholder="Add to watchlist — e.g. BHP, Pilbara, FMG…"
+          onSelect={(company) => {
+            add({
+              ticker: company.symbol,
+              exchange: company.exchange,
+              name: company.name,
+              commodity: company.primary_commodity,
+            });
+          }}
+        />
+        <p className="text-[11px] text-metallic-500 mt-1.5">
+          Synced with the watchlist panel on the analysis dashboard and the
+          bookmark button on every company profile.
+        </p>
+      </div>
+
+      {!hydrated ? (
+        <StateMessage icon={Loader2} title="Loading watchlist…" />
+      ) : items.length === 0 ? (
+        <StateMessage
+          icon={Bookmark}
+          title="Your watchlist is empty"
+          body="Search above, or tap the bookmark icon on any company profile."
+        />
+      ) : (
+        <div className="rounded-lg border border-metallic-800 overflow-hidden">
+          <table className="w-full text-sm">
+            <thead className="bg-metallic-800/60 text-metallic-400 text-xs uppercase">
+              <tr>
+                <th className="text-left px-3 py-2">Ticker</th>
+                <th className="text-left px-3 py-2">Name</th>
+                <th className="text-left px-3 py-2 hidden md:table-cell">Commodity</th>
+                <th className="text-right px-3 py-2 w-10"></th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-metallic-800">
+              {items.map((it) => (
+                <tr
+                  key={`${it.ticker}:${it.exchange || ''}`}
+                  className="hover:bg-metallic-800/40"
+                >
+                  <td className="px-3 py-2">
+                    <CompanyLink
+                      ticker={it.ticker}
+                      exchange={it.exchange || ''}
+                      onClose={onClose}
+                    >
+                      <span className="font-medium">{it.ticker}</span>
+                      {it.exchange && (
+                        <span className="text-xs text-metallic-500">.{it.exchange}</span>
+                      )}
+                    </CompanyLink>
+                  </td>
+                  <td className="px-3 py-2 text-metallic-300 truncate max-w-[200px]">
+                    {it.name || '—'}
+                  </td>
+                  <td className="px-3 py-2 hidden md:table-cell">
+                    {it.commodity ? (
+                      <span className="text-xs px-2 py-0.5 rounded bg-primary-500/10 text-primary-300">
+                        {it.commodity}
+                      </span>
+                    ) : (
+                      <span className="text-metallic-500">—</span>
+                    )}
+                  </td>
+                  <td className="px-3 py-2 text-right">
+                    <button
+                      type="button"
+                      onClick={() => remove(it.ticker, it.exchange)}
+                      className="p-1.5 rounded-md text-metallic-500 hover:text-rose-400 hover:bg-metallic-800 transition"
+                      aria-label={`Remove ${it.ticker}`}
+                      title="Remove from watchlist"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }
