@@ -239,6 +239,7 @@ export default function CompanyProfile() {
   const [showCapitalRaisings, setShowCapitalRaisings] = useState(true);
   const [lassondeData, setLassondeData] = useState<LassondeResponse | null>(null);
   const [lassondeLoading, setLassondeLoading] = useState(false);
+  const [macroBackdrop, setMacroBackdrop] = useState<any | null>(null);
 
   // ── Comparison overlays (commodity + peers) ─────────────────────────────
   const [selectedCommodity, setSelectedCommodity] = useState<string | null>(null);
@@ -406,6 +407,21 @@ export default function CompanyProfile() {
     fetchCompanyData();
     fetchChartData(chartPeriod);
     fetchCapitalRaisings();
+    // Fetch commodity macro backdrop (secondary sentiment signal)
+    (async () => {
+      try {
+        const ex = exchangeParam || 'ASX';
+        const r = await fetch(`${API_URL}/api/v1/news-hits/company/${ticker}?exchange=${encodeURIComponent(ex)}&days=30&limit=50`);
+        if (r.ok) {
+          const j = await r.json();
+          setMacroBackdrop(j?.macro_backdrop || null);
+        } else {
+          setMacroBackdrop(null);
+        }
+      } catch {
+        setMacroBackdrop(null);
+      }
+    })();
   }, [ticker]);
 
   // Fetch new chart data when period changes
@@ -1399,6 +1415,75 @@ export default function CompanyProfile() {
                 <p className="text-metallic-500">No Lassonde data available for {ticker}.</p>
               )}
             </section>
+
+            {/* Commodity Macro Backdrop — secondary sentiment signal */}
+            {macroBackdrop?.enabled && (macroBackdrop.events?.length || 0) > 0 && (
+              <section className="bg-metallic-900 border border-metallic-800 rounded-xl p-6">
+                <div className="flex items-center justify-between mb-3">
+                  <div>
+                    <h2 className="text-lg font-semibold text-metallic-100">Commodity Macro Backdrop</h2>
+                    <p className="text-xs text-metallic-500 mt-0.5">
+                      Secondary signal &mdash; complements exchange announcements above. Tracks: {(macroBackdrop.commodities || []).join(', ')}
+                    </p>
+                  </div>
+                  {macroBackdrop.summary && (
+                    <span className={`text-xs px-3 py-1 rounded-full font-semibold ${
+                      macroBackdrop.summary.bias === 'bullish' ? 'bg-green-500/20 text-green-400' :
+                      macroBackdrop.summary.bias === 'bearish' ? 'bg-red-500/20 text-red-400' :
+                      'bg-metallic-700 text-metallic-300'
+                    }`}>
+                      {macroBackdrop.summary.bias.toUpperCase()} &middot; net {macroBackdrop.summary.net_score > 0 ? '+' : ''}{macroBackdrop.summary.net_score}
+                    </span>
+                  )}
+                </div>
+                <div className="space-y-2 max-h-[400px] overflow-y-auto">
+                  {(macroBackdrop.events || []).slice(0, 8).map((ev: any) => (
+                    <div
+                      key={ev.id}
+                      className={`p-3 rounded-lg border bg-metallic-800/50 ${
+                        ev.company_impact === 'bullish' ? 'border-green-500/30' :
+                        ev.company_impact === 'bearish' ? 'border-red-500/30' :
+                        'border-metallic-700/50'
+                      }`}
+                    >
+                      <div className="text-sm text-metallic-200 mb-1">{ev.headline}</div>
+                      <div className="flex flex-wrap items-center gap-2 text-xs text-metallic-500">
+                        <span>{ev.source}</span>
+                        {ev.category && (
+                          <span className="px-2 py-0.5 rounded bg-metallic-700/60 text-metallic-300">
+                            {String(ev.category).replace(/_/g, ' ')}
+                          </span>
+                        )}
+                        {ev.severity && (
+                          <span className={`px-2 py-0.5 rounded ${
+                            ev.severity === 'high' ? 'bg-red-500/20 text-red-400' :
+                            ev.severity === 'medium' ? 'bg-yellow-500/20 text-yellow-400' :
+                            'bg-metallic-700/60 text-metallic-400'
+                          }`}>
+                            {ev.severity}
+                          </span>
+                        )}
+                        {(ev.matched_commodities || []).map((c: string) => {
+                          const dir = ev.expected_direction?.[c] || 'neutral';
+                          return (
+                            <span key={c} className={`px-2 py-0.5 rounded ${
+                              dir === 'bullish' ? 'bg-green-500/15 text-green-400' :
+                              dir === 'bearish' ? 'bg-red-500/15 text-red-400' :
+                              'bg-metallic-700/60 text-metallic-300'
+                            }`}>
+                              {c} {dir === 'bullish' ? '↑' : dir === 'bearish' ? '↓' : '·'}
+                            </span>
+                          );
+                        })}
+                      </div>
+                      {ev.reasoning && (
+                        <div className="text-xs text-metallic-400 mt-2 leading-relaxed">{ev.reasoning}</div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
 
             {/* All Announcements Section */}
             <section className="bg-metallic-900 border border-metallic-800 rounded-xl p-6">

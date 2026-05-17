@@ -49,12 +49,42 @@ export interface NewsHitsSummary {
   avg_sentiment: number | null;
 }
 
+export interface MacroBackdropEvent {
+  id: number;
+  source: string;
+  headline: string;
+  published_at: string | null;
+  category: string | null;
+  severity: 'high' | 'medium' | 'low' | null;
+  regions: string[];
+  commodities_affected: string[];
+  expected_direction: Record<string, 'bullish' | 'bearish' | 'neutral'>;
+  reasoning: string | null;
+  matched_commodities: string[];
+  company_impact: 'bullish' | 'bearish' | 'neutral';
+}
+
+export interface MacroBackdrop {
+  enabled: boolean;
+  commodities: string[];
+  summary?: {
+    total: number;
+    bullish: number;
+    bearish: number;
+    net_score: number;
+    bias: 'bullish' | 'bearish' | 'neutral';
+  };
+  events?: MacroBackdropEvent[];
+  source_note?: string;
+}
+
 export interface CompanyNewsResponse {
   ticker: string;
   exchange: string;
   period_days: number;
   summary: NewsHitsSummary;
   news_hits: NewsHit[];
+  macro_backdrop?: MacroBackdrop;
 }
 
 export interface RecentNewsHit {
