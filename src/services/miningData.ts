@@ -141,7 +141,11 @@ export interface ProjectPhases {
 export interface ExplorationDrilling {
   id: number;
   symbol: string;
+  company_name?: string;
+  exchange?: string;
   project_name?: string;
+  target_zone?: string;
+  drill_purpose?: string;
   hole_id: string;
   drill_type?: string;
   total_depth?: number;

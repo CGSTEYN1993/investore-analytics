@@ -53,67 +53,76 @@ const StatusBadge = ({ status }: { status: string }) => {
 };
 
 // Drilling card component using API data
-const DrillingCard = ({ hole }: { hole: ExplorationDrilling }) => (
-  <div className="bg-metallic-800/50 rounded-lg border border-metallic-700 p-4 hover:border-red-500/50 transition-colors">
-    <div className="flex items-start justify-between mb-3">
-      <div>
-        <h3 className="font-semibold text-metallic-100">{hole.hole_id}</h3>
-        <Link 
-          href={`/company/${hole.symbol}`}
-          className="text-sm text-accent-gold hover:underline"
-        >
-          {hole.symbol}
-        </Link>
-        {hole.project_name && (
-          <p className="text-sm text-metallic-400">{hole.project_name}</p>
+const DrillingCard = ({ hole }: { hole: ExplorationDrilling }) => {
+  const projectLabel = hole.project_name || hole.target_zone;
+  const exchangeQs = hole.exchange ? `?exchange=${encodeURIComponent(hole.exchange)}` : "";
+  const href = `/company/${hole.symbol}${exchangeQs}`;
+  return (
+    <Link
+      href={href}
+      className="block bg-metallic-800/50 rounded-lg border border-metallic-700 p-4 hover:border-red-500/50 transition-colors"
+    >
+      <div className="flex items-start justify-between mb-3">
+        <div className="min-w-0">
+          <h3 className="font-semibold text-metallic-100 truncate">{hole.hole_id}</h3>
+          <p className="text-sm text-accent-gold truncate">
+            {hole.symbol}
+            {hole.company_name && hole.company_name !== hole.symbol ? ` — ${hole.company_name}` : ""}
+          </p>
+          {projectLabel && (
+            <p className="text-sm text-metallic-300 truncate">{projectLabel}</p>
+          )}
+          {hole.drill_purpose && (
+            <p className="text-xs text-metallic-500 truncate">{hole.drill_purpose}</p>
+          )}
+        </div>
+        <StatusBadge status={hole.status} />
+      </div>
+      <div className="grid grid-cols-2 gap-2 text-sm mb-3">
+        {hole.drill_type && (
+          <div className="flex items-center gap-1 text-metallic-400">
+            <Layers className="w-3 h-3" />
+            <span>{hole.drill_type}</span>
+          </div>
+        )}
+        {hole.total_depth && (
+          <div className="flex items-center gap-1 text-metallic-400">
+            <Ruler className="w-3 h-3" />
+            <span>{hole.total_depth.toFixed(0)}m depth</span>
+          </div>
+        )}
+        {hole.announcement_date && (
+          <div className="flex items-center gap-1 text-metallic-400">
+            <Calendar className="w-3 h-3" />
+            <span>{new Date(hole.announcement_date).toLocaleDateString()}</span>
+          </div>
+        )}
+        {(hole.easting || hole.northing) && (
+          <div className="flex items-center gap-1 text-metallic-400">
+            <MapPin className="w-3 h-3" />
+            <span>
+              {hole.easting?.toFixed(0) || '?'}E, {hole.northing?.toFixed(0) || '?'}N
+            </span>
+          </div>
         )}
       </div>
-      <StatusBadge status={hole.status} />
-    </div>
-    <div className="grid grid-cols-2 gap-2 text-sm mb-3">
-      {hole.drill_type && (
-        <div className="flex items-center gap-1 text-metallic-400">
-          <Layers className="w-3 h-3" />
-          <span>{hole.drill_type}</span>
+      {(hole.azimuth || hole.dip) && (
+        <div className="flex flex-wrap gap-1">
+          {hole.azimuth && (
+            <span className="px-2 py-0.5 text-xs bg-red-500/20 text-red-400 rounded">
+              Az: {hole.azimuth}°
+            </span>
+          )}
+          {hole.dip && (
+            <span className="px-2 py-0.5 text-xs bg-red-500/20 text-red-400 rounded">
+              Dip: {hole.dip}°
+            </span>
+          )}
         </div>
       )}
-      {hole.total_depth && (
-        <div className="flex items-center gap-1 text-metallic-400">
-          <Ruler className="w-3 h-3" />
-          <span>{hole.total_depth.toFixed(0)}m depth</span>
-        </div>
-      )}
-      {hole.announcement_date && (
-        <div className="flex items-center gap-1 text-metallic-400">
-          <Calendar className="w-3 h-3" />
-          <span>{new Date(hole.announcement_date).toLocaleDateString()}</span>
-        </div>
-      )}
-      {(hole.easting || hole.northing) && (
-        <div className="flex items-center gap-1 text-metallic-400">
-          <MapPin className="w-3 h-3" />
-          <span>
-            {hole.easting?.toFixed(0) || '?'}E, {hole.northing?.toFixed(0) || '?'}N
-          </span>
-        </div>
-      )}
-    </div>
-    {(hole.azimuth || hole.dip) && (
-      <div className="flex flex-wrap gap-1">
-        {hole.azimuth && (
-          <span className="px-2 py-0.5 text-xs bg-red-500/20 text-red-400 rounded">
-            Az: {hole.azimuth}°
-          </span>
-        )}
-        {hole.dip && (
-          <span className="px-2 py-0.5 text-xs bg-red-500/20 text-red-400 rounded">
-            Dip: {hole.dip}°
-          </span>
-        )}
-      </div>
-    )}
-  </div>
-);
+    </Link>
+  );
+};
 
 // Intercept card component
 const InterceptCard = ({ intercept }: { intercept: DrillIntercept }) => (
