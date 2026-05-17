@@ -453,6 +453,7 @@ class MiningDataService {
     commodity?: string;
     exchange?: string;
     minGrade?: number;
+    gradeUnit?: string;
     minWidth?: number;
     dateFrom?: string;
     dateTo?: string;
@@ -464,6 +465,7 @@ class MiningDataService {
     if (options?.commodity) params.append('commodity', options.commodity);
     if (options?.exchange) params.append('exchange', options.exchange);
     if (options?.minGrade) params.append('min_grade', String(options.minGrade));
+    if (options?.gradeUnit) params.append('grade_unit', options.gradeUnit);
     if (options?.minWidth) params.append('min_width', String(options.minWidth));
     if (options?.dateFrom) params.append('date_from', options.dateFrom);
     if (options?.dateTo) params.append('date_to', options.dateTo);

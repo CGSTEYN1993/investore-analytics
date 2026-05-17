@@ -37,6 +37,40 @@ const explorationTypes = [
   { id: "streams", name: "Streams", icon: Waves, color: "bg-blue-500" },
 ];
 
+// Canonical grade unit per commodity. Used to (a) label the Min Grade filter,
+// (b) restrict the filter to rows reported in the matching unit, and (c) pick
+// a sensible default placeholder.
+const COMMODITY_GRADE_UNITS: Record<string, { unit: string; placeholder: string }> = {
+  Au:   { unit: "g/t", placeholder: "e.g., 1.0" },
+  Ag:   { unit: "g/t", placeholder: "e.g., 30" },
+  AuEq: { unit: "g/t", placeholder: "e.g., 1.0" },
+  AgEq: { unit: "g/t", placeholder: "e.g., 30" },
+  Pt:   { unit: "g/t", placeholder: "e.g., 1.0" },
+  Pd:   { unit: "g/t", placeholder: "e.g., 1.0" },
+  PGM:  { unit: "g/t", placeholder: "e.g., 1.0" },
+  Cu:   { unit: "%",   placeholder: "e.g., 0.5" },
+  Pb:   { unit: "%",   placeholder: "e.g., 1.0" },
+  Zn:   { unit: "%",   placeholder: "e.g., 1.0" },
+  Ni:   { unit: "%",   placeholder: "e.g., 0.5" },
+  Co:   { unit: "%",   placeholder: "e.g., 0.05" },
+  Sn:   { unit: "%",   placeholder: "e.g., 0.5" },
+  W:    { unit: "%",   placeholder: "e.g., 0.2" },
+  "Pb+Zn": { unit: "%", placeholder: "e.g., 2.0" },
+  ZnEq: { unit: "%",   placeholder: "e.g., 2.0" },
+  Li:   { unit: "%",   placeholder: "e.g., 0.5 (Li2O)" },
+  Nb:   { unit: "%",   placeholder: "e.g., 0.3 (Nb2O5)" },
+  REE:  { unit: "ppm", placeholder: "e.g., 1000 (TREO)" },
+  Dy:   { unit: "ppm", placeholder: "e.g., 100" },
+  Tb:   { unit: "ppm", placeholder: "e.g., 30" },
+  U3O8: { unit: "ppm", placeholder: "e.g., 300" },
+  U:    { unit: "ppm", placeholder: "e.g., 300" },
+};
+
+const getGradeUnitFor = (commodity: string | undefined | null) => {
+  if (!commodity) return null;
+  return COMMODITY_GRADE_UNITS[commodity] || null;
+};
+
 // Status badge component
 const StatusBadge = ({ status }: { status: string }) => {
   const colors: Record<string, string> = {
@@ -594,6 +628,7 @@ export default function ExplorationPage() {
           commodity: selectedCommodity || undefined,
           exchange: selectedInterceptExchange || undefined,
           minGrade: minGrade,
+          gradeUnit: selectedCommodity ? getGradeUnitFor(selectedCommodity)?.unit : undefined,
           dateFrom: interceptDateFrom || undefined,
           dateTo: interceptDateTo || undefined,
           limit: 100,
@@ -1103,7 +1138,11 @@ export default function ExplorationPage() {
                   <Gem className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-metallic-500" />
                   <select
                     value={selectedCommodity}
-                    onChange={(e) => setSelectedCommodity(e.target.value)}
+                    onChange={(e) => {
+                      setSelectedCommodity(e.target.value);
+                      // Reset stale min-grade value when switching units (Au g/t -> Cu %).
+                      setMinGrade(undefined);
+                    }}
                     className="w-full bg-metallic-900 border border-metallic-700 rounded-lg pl-9 pr-8 py-2 text-sm text-metallic-100 appearance-none focus:border-accent-gold focus:outline-none"
                   >
                     <option value="">All Commodities</option>
@@ -1154,17 +1193,34 @@ export default function ExplorationPage() {
 
               {/* Min Grade */}
               <div>
-                <label className="block text-xs text-metallic-500 mb-1.5 uppercase tracking-wide">
-                  Min Grade (g/t)
-                </label>
-                <input
-                  type="number"
-                  step="0.1"
-                  value={minGrade || ""}
-                  onChange={(e) => setMinGrade(e.target.value ? Number(e.target.value) : undefined)}
-                  placeholder="e.g., 1.0"
-                  className="w-full bg-metallic-900 border border-metallic-700 rounded-lg px-3 py-2 text-sm text-metallic-100 focus:border-accent-gold focus:outline-none"
-                />
+                {(() => {
+                  const gu = getGradeUnitFor(selectedCommodity);
+                  const unitLabel = gu?.unit ?? "select commodity";
+                  const placeholder = gu?.placeholder ?? "Pick a commodity first";
+                  const disabled = !selectedCommodity;
+                  return (
+                    <>
+                      <label className="block text-xs text-metallic-500 mb-1.5 uppercase tracking-wide">
+                        Min Grade ({unitLabel})
+                      </label>
+                      <input
+                        type="number"
+                        step="0.1"
+                        value={minGrade ?? ""}
+                        onChange={(e) => setMinGrade(e.target.value ? Number(e.target.value) : undefined)}
+                        placeholder={placeholder}
+                        disabled={disabled}
+                        title={disabled ? "Select a commodity to filter by grade (units differ: Au is g/t, Cu is %, U3O8 is ppm)" : undefined}
+                        className={`w-full bg-metallic-900 border border-metallic-700 rounded-lg px-3 py-2 text-sm text-metallic-100 focus:border-accent-gold focus:outline-none ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
+                      />
+                      {!disabled && gu && (
+                        <div className="text-[10px] text-metallic-500 mt-1">
+                          Filtered against intercepts reported in {gu.unit}.
+                        </div>
+                      )}
+                    </>
+                  );
+                })()}
               </div>
 
               {/* Date From */}
@@ -1225,7 +1281,7 @@ export default function ExplorationPage() {
                   <FilterBadge label={`Exchange: ${selectedInterceptExchange}`} onClear={() => setSelectedInterceptExchange("")} />
                 )}
                 {minGrade && (
-                  <FilterBadge label={`Min Grade: ${minGrade} g/t`} onClear={() => setMinGrade(undefined)} />
+                  <FilterBadge label={`Min Grade: ${minGrade} ${getGradeUnitFor(selectedCommodity)?.unit ?? ""}`.trim()} onClear={() => setMinGrade(undefined)} />
                 )}
                 {interceptDateFrom && (
                   <FilterBadge label={`From: ${interceptDateFrom}`} onClear={() => setInterceptDateFrom("")} />
@@ -1302,6 +1358,7 @@ export default function ExplorationPage() {
                     commodity: selectedCommodity || undefined,
                     exchange: selectedInterceptExchange || undefined,
                     minGrade: minGrade,
+                    gradeUnit: selectedCommodity ? getGradeUnitFor(selectedCommodity)?.unit : undefined,
                     dateFrom: interceptDateFrom || undefined,
                     dateTo: interceptDateTo || undefined,
                     limit: 100,
