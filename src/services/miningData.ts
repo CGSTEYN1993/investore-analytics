@@ -217,6 +217,7 @@ export interface DrillIntercept {
   drilling_result_id?: number | null;
   company_name?: string;
   exchange?: string;
+  drill_date?: string | null;
 }
 
 export interface DrillInterceptsResponse {

@@ -378,27 +378,34 @@ const InterceptCard = ({
     onKeyDown={canOpen ? (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleClick(); } } : undefined}
     className={`bg-metallic-800/50 rounded-lg border border-metallic-700 p-4 transition-colors ${canOpen ? "cursor-pointer hover:border-amber-500/50 hover:bg-metallic-800/80" : "hover:border-amber-500/50"}`}
   >
-    <div className="flex items-start justify-between mb-3">
-      <div>
-        <h3 className="font-semibold text-metallic-100">
-          {intercept.hole_id && intercept.hole_id !== 'Unknown' 
-            ? intercept.hole_id 
+    <div className="flex items-start justify-between mb-3 gap-3">
+      <div className="min-w-0">
+        <h3 className="font-semibold text-metallic-100 truncate">
+          {intercept.hole_id && intercept.hole_id !== 'Unknown'
+            ? intercept.hole_id
             : intercept.project_name || `${intercept.symbol} Intercept`}
         </h3>
-        <div className="flex items-center gap-2">
-          <Link 
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-0.5">
+          <Link
             href={`/company/${intercept.symbol}`}
             className="text-sm text-accent-gold hover:underline"
+            onClick={(e) => e.stopPropagation()}
           >
             {intercept.symbol}
+            {intercept.company_name && intercept.company_name !== intercept.symbol
+              ? ` — ${intercept.company_name}`
+              : ""}
           </Link>
-          {intercept.project_name && intercept.hole_id !== 'Unknown' && (
-            <span className="text-xs text-metallic-500">• {intercept.project_name}</span>
-          )}
+        </div>
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-1 text-xs text-metallic-500">
+          <span className="flex items-center gap-1">
+            <FolderOpen className="w-3 h-3" />
+            {intercept.project_name || "Project not disclosed"}
+          </span>
         </div>
       </div>
       {intercept.commodity && (
-        <span className="px-2 py-1 text-xs bg-amber-500/20 text-amber-400 rounded-full border border-amber-500/30">
+        <span className="px-2 py-1 text-xs bg-amber-500/20 text-amber-400 rounded-full border border-amber-500/30 shrink-0">
           {intercept.commodity}
         </span>
       )}
@@ -429,12 +436,28 @@ const InterceptCard = ({
           <span>{intercept.from_m?.toFixed(0)}-{intercept.to_m?.toFixed(0)}m</span>
         </div>
       )}
-      {intercept.announcement_date && (
-        <div className="flex items-center gap-1 text-metallic-400">
-          <Calendar className="w-3 h-3" />
-          <span>{new Date(intercept.announcement_date).toLocaleDateString()}</span>
-        </div>
-      )}
+      {(() => {
+        // Prefer the explicit drill_date when it was extracted from the report;
+        // otherwise fall back to the announcement date (most ASX intercepts only
+        // disclose the announcement date, not the actual drill date).
+        const effectiveDate = intercept.drill_date || intercept.announcement_date;
+        if (!effectiveDate) return null;
+        const isDrillDate = !!intercept.drill_date;
+        return (
+          <div
+            className="flex items-center gap-1 text-metallic-400 col-span-2"
+            title={isDrillDate ? "Drill date as reported" : "Announcement date (drill date not disclosed)"}
+          >
+            <Calendar className="w-3 h-3" />
+            <span>
+              {new Date(effectiveDate).toLocaleDateString()}
+              <span className="text-metallic-600 ml-1">
+                {isDrillDate ? "(drilled)" : "(announced)"}
+              </span>
+            </span>
+          </div>
+        );
+      })()}
     </div>
     
     {/* Grade-meter product */}
