@@ -176,8 +176,7 @@ export default function PricingPage() {
       popular: true,
     },
   ];
-  ];
-  
+
   const handleSelectPlan = async (priceKey: string) => {
     if (!isAuthenticated) {
       // Redirect to login with return URL
