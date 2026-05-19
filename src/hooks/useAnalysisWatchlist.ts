@@ -138,7 +138,7 @@ export function useAnalysisWatchlist() {
 
         // First sync after sign-in: push any local-only items up to the server.
         if (!synced) {
-          for (const [k, it] of localByKey) {
+          for (const [k, it] of Array.from(localByKey.entries())) {
             if (!serverByKey.has(k) && it.exchange) {
               try {
                 const created = await addWatchlistItem(wid, it.ticker, it.exchange);
@@ -161,7 +161,7 @@ export function useAnalysisWatchlist() {
 
         // Merge: server is the source of truth for membership; local keeps name/commodity.
         const merged: WatchlistItem[] = [];
-        for (const [k, srv] of serverByKey) {
+        for (const [k, srv] of Array.from(serverByKey.entries())) {
           const loc = localByKey.get(k);
           merged.push({
             ticker: srv.ticker.toUpperCase(),
@@ -173,7 +173,7 @@ export function useAnalysisWatchlist() {
           });
         }
         // Keep any local items the server doesn't have (e.g. no exchange known).
-        for (const [k, loc] of localByKey) {
+        for (const [k, loc] of Array.from(localByKey.entries())) {
           if (!serverByKey.has(k)) merged.push(loc);
         }
 
