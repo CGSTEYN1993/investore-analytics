@@ -1,6 +1,5 @@
 import React from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import {
   ArrowRight, BarChart3, Globe, Zap, TrendingUp, Activity,
   Brain, Sparkles, Target, Map, Users, Newspaper,
@@ -60,12 +59,13 @@ function FeatureShowcase({
 /* ─── Screenshot Preview (replaces CSS mockups with real app screenshots) ─── */
 function ScreenshotPreview({ src, alt }: { src: string; alt: string }) {
   return (
-    <div className="bg-metallic-900/80 border border-metallic-700/50 rounded-xl overflow-hidden shadow-2xl shadow-black/30">
+    <div className="bg-metallic-900/80 border border-metallic-700/50 rounded-xl overflow-hidden shadow-2xl shadow-black/30 w-full">
       <div className="flex items-center gap-2 px-4 py-2.5 border-b border-metallic-800 bg-metallic-900/50">
         <div className="flex gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-red-400/60" /><span className="w-2.5 h-2.5 rounded-full bg-yellow-400/60" /><span className="w-2.5 h-2.5 rounded-full bg-green-400/60" /></div>
         <span className="ml-2 text-[11px] text-metallic-500 font-mono">{alt}</span>
       </div>
-      <Image src={src} alt={alt} width={800} height={600} className="w-full h-auto" quality={90} />
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={src} alt={alt} className="block w-full h-auto" loading="lazy" />
     </div>
   );
 }
@@ -322,7 +322,7 @@ export default function HomePage() {
             ]}
             ctaText="Try the AI Analyst"
             ctaHref="/analysis/ai-analyst"
-            mockup={<ScreenshotPreview src="/screenshots/ai-analyst.png" alt="AI Research Analyst" />}
+            mockup={<ScreenshotPreview src="/screenshots/ai-analyst.png?v=6" alt="AI Research Analyst" />}
           />
         </div>
       </section>
@@ -343,7 +343,7 @@ export default function HomePage() {
             ]}
             ctaText="Explore Signals"
             ctaHref="/analysis/sentiment"
-            mockup={<ScreenshotPreview src="/screenshots/cross-exchange.png" alt="Cross-Exchange Intelligence" />}
+            mockup={<ScreenshotPreview src="/screenshots/cross-exchange.png?v=6" alt="Cross-Exchange Intelligence" />}
             reverse
           />
         </div>
@@ -365,7 +365,7 @@ export default function HomePage() {
             ]}
             ctaText="Compare Companies"
             ctaHref="/analysis/compare"
-            mockup={<ScreenshotPreview src="/screenshots/commodity-breakdown.png" alt="Commodity Breakdown" />}
+            mockup={<ScreenshotPreview src="/screenshots/commodity-breakdown.png?v=6" alt="Commodity Breakdown" />}
           />
         </div>
       </section>
@@ -386,7 +386,7 @@ export default function HomePage() {
             ]}
             ctaText="Explore the Map"
             ctaHref="/map"
-            mockup={<ScreenshotPreview src="/screenshots/commodity-prices.png" alt="Commodity Spot Prices" />}
+            mockup={<ScreenshotPreview src="/screenshots/commodity-prices.png?v=6" alt="Commodity Spot Prices" />}
             reverse
           />
         </div>
@@ -408,7 +408,7 @@ export default function HomePage() {
             ]}
             ctaText="Browse News"
             ctaHref="/news"
-            mockup={<ScreenshotPreview src="/screenshots/news-hits.png" alt="News Hits" />}
+            mockup={<ScreenshotPreview src="/screenshots/news-hits.png?v=6" alt="News Hits" />}
           />
         </div>
       </section>

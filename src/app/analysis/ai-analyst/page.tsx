@@ -12,8 +12,14 @@ import {
   CircleDot, Star, Hash, ExternalLink, X
 } from 'lucide-react';
 import { RAILWAY_API_URL } from '@/lib/public-api-url';
+import { useIsFreeTier } from '@/components/subscription/UpgradePrompt';
+import { useDailyQueryLimit } from '@/lib/hooks/useDailyQueryLimit';
 
 const API_BASE = RAILWAY_API_URL;
+
+// Free-tier users can run this many AI Analyst chat queries per UTC day.
+// Mirrors the limit advertised on /pricing.
+const FREE_TIER_DAILY_AI_QUERIES = 5;
 
 // ─── Types ─────────────────────────────────────────────────────────────
 interface SupportingData {
@@ -400,10 +406,29 @@ export default function AIAnalystPage() {
   }, []);
 
   // ── Chat ─────────────────────────────────────────────────────────────
+  const isFreeTier = useIsFreeTier();
+  const dailyLimit = useDailyQueryLimit('ai-analyst-queries', FREE_TIER_DAILY_AI_QUERIES);
+
   const handleSend = async (messageText?: string) => {
     const text = messageText || input.trim();
     if (!text || isLoading) return;
     setActiveTab('chat');
+
+    // Free-tier daily quota enforcement (best-effort client-side limit).
+    if (isFreeTier && dailyLimit.exhausted) {
+      setMessages(prev => [
+        ...prev,
+        { id: `u-${Date.now()}`, role: 'user', content: text, timestamp: new Date() },
+        {
+          id: `limit-${Date.now()}`,
+          role: 'assistant',
+          content: `You’ve used all ${FREE_TIER_DAILY_AI_QUERIES} of your free AI Analyst queries for today. Upgrade to Pro for unlimited queries, or wait until tomorrow for your quota to reset.`,
+          timestamp: new Date(),
+        },
+      ]);
+      setInput('');
+      return;
+    }
 
     const userMsg: Message = { id: `u-${Date.now()}`, role: 'user', content: text, timestamp: new Date() };
     setMessages(prev => [...prev, userMsg]);
@@ -431,6 +456,9 @@ export default function AIAnalystPage() {
       };
       setMessages(prev => [...prev, aMsg]);
       setExpandedMessages(prev => new Set([...Array.from(prev), aMsg.id]));
+
+      // Count this successful query against the free-tier daily quota.
+      if (isFreeTier) dailyLimit.increment();
     } catch {
       setMessages(prev => [...prev, { id: `e-${Date.now()}`, role: 'assistant', content: 'Sorry, I encountered an error. Please try again.', timestamp: new Date() }]);
     } finally {
@@ -480,6 +508,20 @@ export default function AIAnalystPage() {
 
             {/* Ticker search */}
             <form onSubmit={handleTickerSubmit} className="flex items-center gap-2 flex-shrink-0">
+              {isFreeTier && (
+                <Link
+                  href="/pricing?returnUrl=/analysis/ai-analyst"
+                  title="Free plan: 5 AI queries per day. Click to upgrade."
+                  className={`hidden md:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium border transition-colors ${
+                    dailyLimit.exhausted
+                      ? 'bg-amber-500/15 text-amber-300 border-amber-500/40 hover:bg-amber-500/25'
+                      : 'bg-metallic-800/80 text-metallic-300 border-metallic-700 hover:text-metallic-100'
+                  }`}
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  {dailyLimit.remaining}/{FREE_TIER_DAILY_AI_QUERIES} free queries today
+                </Link>
+              )}
               <div className="relative">
                 <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-metallic-500" />
                 <input

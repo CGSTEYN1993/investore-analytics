@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Bot, BarChart3 } from 'lucide-react';
+import { useAuth } from '@/components/providers/AuthProvider';
 
 /**
  * Top-level platform switcher that appears in the global header.
@@ -10,10 +11,18 @@ import { Bot, BarChart3 } from 'lucide-react';
  *
  * "Trading" includes anything under /trading.
  * Everything else (dashboard, map, analysis, news, etc.) is "Analysis".
+ *
+ * The Trading toggle is only rendered for admin users while the trading
+ * platform is in closed beta.
  */
 export function PlatformSwitcher() {
   const pathname = usePathname() || '/';
   const isTrading = pathname.startsWith('/trading');
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
+
+  // Non-admins never see the Trading switch — keep the bar clean.
+  if (!isAdmin) return null;
 
   return (
     <div className="hidden sm:flex items-center bg-metallic-900/80 border border-metallic-700/60 rounded-lg p-0.5">

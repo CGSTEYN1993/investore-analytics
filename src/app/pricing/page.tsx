@@ -137,67 +137,45 @@ export default function PricingPage() {
       price_monthly: 0,
       price_annual: 0,
       features: [
-        'Basic peer group builder',
-        '1 saved peer set',
-        'Standard valuation metrics',
-        'Basic map view',
+        'AI Research Analyst (5 queries / day)',
+        'Live commodity spot prices (read-only)',
+        'News hits feed (read-only)',
+        'Cross-exchange intelligence (read-only)',
+        'Commodity breakdown \u2014 top 5 companies preview',
         'Community support',
       ],
       limits: {
-        peer_sets: 1,
-        companies_per_set: 20,
-        exports: 0,
-        api_calls: 0,
+        ai_queries_per_day: 5,
+        peer_sets: 0,
+        exports_per_day: 0,
       },
     },
     {
       id: 'pro',
-      name: 'Professional',
+      name: 'Pro',
       price_monthly: 49,
       price_annual: 490,
       price_key_monthly: 'pro_monthly',
       price_key_annual: 'pro_annual',
       features: [
-        'Everything in Free',
-        '50 saved peer sets',
+        'Everything in Free, with no limits',
+        'Unlimited AI Research Analyst queries',
+        'Full commodity breakdown across every company',
+        'Interactive global mining map',
+        'Personal watchlists & alerts',
         'CSV & JSON export',
-        'Full API access',
-        'Custom formulas',
-        'Price alerts',
-        'Full map layers',
-        'Historical data',
+        'Full historical data',
         'Priority support',
+        'Early access to the upcoming Trading Platform',
       ],
       limits: {
-        peer_sets: 50,
-        companies_per_set: 100,
-        exports_per_day: 100,
-        api_calls_per_day: 10000,
+        ai_queries_per_day: 'Unlimited',
+        peer_sets: 'Unlimited',
+        exports_per_day: 'Unlimited',
       },
       popular: true,
     },
-    {
-      id: 'enterprise',
-      name: 'Enterprise',
-      price_monthly: 'Contact us',
-      price_annual: 'Contact us',
-      features: [
-        'Everything in Professional',
-        'Unlimited peer sets',
-        'White-label option',
-        'Custom data feeds',
-        'SSO integration',
-        'Dedicated support',
-        'Custom development',
-      ],
-      limits: {
-        peer_sets: 'Unlimited',
-        companies_per_set: 'Unlimited',
-        exports_per_day: 'Unlimited',
-        api_calls_per_day: 'Unlimited',
-      },
-      contact_sales: true,
-    },
+  ];
   ];
   
   const handleSelectPlan = async (priceKey: string) => {
@@ -264,7 +242,7 @@ export default function PricingPage() {
         </div>
         
         {/* Pricing cards */}
-        <div className="mt-12 grid gap-8 lg:grid-cols-3">
+        <div className="mt-12 grid gap-8 sm:grid-cols-2 max-w-4xl mx-auto">
           {plans.map((plan) => (
             <PricingCard
               key={plan.id}
@@ -298,7 +276,7 @@ export default function PricingPage() {
               </h3>
               <p className="mt-2 text-metallic-400">
                 We accept all major credit cards through our secure payment
-                partner, Stripe. Enterprise customers can also pay by invoice.
+                partner, Stripe.
               </p>
             </div>
             <div className="p-4 rounded-lg bg-metallic-900 border border-metallic-800">
@@ -307,8 +285,8 @@ export default function PricingPage() {
               </h3>
               <p className="mt-2 text-metallic-400">
                 Our Free tier gives you access to core features forever. When you
-                upgrade to Professional, you can cancel anytime within the first
-                30 days for a full refund.
+                upgrade to Pro, you can cancel anytime within the first 30 days
+                for a full refund.
               </p>
             </div>
             <div className="p-4 rounded-lg bg-metallic-900 border border-metallic-800">
@@ -316,7 +294,7 @@ export default function PricingPage() {
                 What&apos;s included in API access?
               </h3>
               <p className="mt-2 text-metallic-400">
-                Professional subscribers get programmatic access to all data and
+                Pro subscribers get programmatic access to all data and
                 analytics via our REST API. Perfect for building custom dashboards
                 or integrating with your existing tools.
               </p>

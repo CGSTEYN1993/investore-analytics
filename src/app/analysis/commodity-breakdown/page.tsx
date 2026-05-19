@@ -13,8 +13,12 @@ import {
 } from 'recharts';
 import { getCommodityColor } from '@/lib/subscription-tiers';
 import { RAILWAY_API_URL } from '@/lib/public-api-url';
+import { UpgradePrompt, useIsFreeTier } from '@/components/subscription/UpgradePrompt';
 
 const API_URL = RAILWAY_API_URL;
+
+// Free-tier preview limit: number of company rows visible before the paywall.
+const FREE_TIER_ROW_LIMIT = 5;
 
 // ---------------------------------------------------------------------------
 // Types
@@ -385,6 +389,16 @@ export default function CommodityBreakdownPage() {
     );
   }, [data, searchTerm]);
 
+  // Tier-gated slice: free users see only the top N rows; Pro users get all.
+  const isFreeTier = useIsFreeTier();
+  const visibleCompanies = useMemo(
+    () => (isFreeTier ? filteredCompanies.slice(0, FREE_TIER_ROW_LIMIT) : filteredCompanies),
+    [filteredCompanies, isFreeTier]
+  );
+  const hiddenRowCount = isFreeTier
+    ? Math.max(0, filteredCompanies.length - FREE_TIER_ROW_LIMIT)
+    : 0;
+
   // Unique exchanges for filter
   const exchanges = useMemo(() => {
     if (!data?.companies) return [];
@@ -470,13 +484,15 @@ export default function CommodityBreakdownPage() {
                   <BarChart3 className="w-3.5 h-3.5" /> Charts
                 </button>
               </div>
-              {/* Export */}
+              {/* Export — Pro only */}
               <button
-                onClick={() => data && exportCSV(filteredCompanies, data.commodity, meta)}
-                disabled={!data}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-metallic-800 hover:bg-metallic-700 border border-metallic-700 rounded-lg text-xs text-metallic-300 hover:text-metallic-100 transition-colors disabled:opacity-40"
+                onClick={() => data && !isFreeTier && exportCSV(filteredCompanies, data.commodity, meta)}
+                disabled={!data || isFreeTier}
+                title={isFreeTier ? 'CSV export is a Pro feature — upgrade to unlock' : 'Export the visible companies as CSV'}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-metallic-800 hover:bg-metallic-700 border border-metallic-700 rounded-lg text-xs text-metallic-300 hover:text-metallic-100 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <Download className="w-3.5 h-3.5" /> Export CSV
+                {isFreeTier && <span className="ml-1 text-[10px] text-primary-300">PRO</span>}
               </button>
               <button
                 onClick={fetchBreakdown}
@@ -600,7 +616,14 @@ export default function CommodityBreakdownPage() {
             </button>
           </div>
         ) : viewMode === 'charts' ? (
-          /* ---- Charts View ---- */
+          /* ---- Charts View (Pro-only) ---- */
+          isFreeTier ? (
+            <UpgradePrompt
+              title="Charts are a Pro feature"
+              message="Bar charts, scatter plots, and full peer comparisons are available on the Pro plan. The Free plan includes a top-5 preview of the company table."
+              returnUrl="/analysis/commodity-breakdown"
+            />
+          ) : (
           <div className="space-y-8">
             <div className="bg-metallic-900 border border-metallic-800 rounded-xl p-6">
               <h2 className="text-lg font-semibold text-metallic-100 mb-4">Resources & Reserves — Top 20 by Contained Metal</h2>
@@ -617,6 +640,7 @@ export default function CommodityBreakdownPage() {
               <EVResourceScatter data={filteredCompanies} meta={meta} />
             </div>
           </div>
+          )
         ) : (
           /* ---- Table View ---- */
           <div className="overflow-x-auto rounded-xl border border-metallic-800 bg-metallic-900/50">
@@ -644,10 +668,10 @@ export default function CommodityBreakdownPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-metallic-800/50">
-                {filteredCompanies.length === 0 ? (
+                {visibleCompanies.length === 0 ? (
                   <tr><td colSpan={18} className="text-center py-12 text-metallic-500">No companies found</td></tr>
                 ) : (
-                  filteredCompanies.map((c, idx) => {
+                  visibleCompanies.map((c, idx) => {
                     const ownershipMult = basisMode === 'attributable' && c.ownership_pct ? c.ownership_pct / 100 : 1;
                     return (
                       <tr key={`${c.exchange}-${c.ticker}`} className="hover:bg-metallic-800/40 transition-colors">
@@ -691,11 +715,23 @@ export default function CommodityBreakdownPage() {
           </div>
         )}
 
+        {/* ---- Free-tier paywall (shown when results are truncated) ---- */}
+        {!loading && data && hiddenRowCount > 0 && (
+          <div className="mt-6">
+            <UpgradePrompt
+              title={`+${hiddenRowCount} more companies available on Pro`}
+              message={`The Free plan shows the top ${FREE_TIER_ROW_LIMIT} companies per commodity. Upgrade to Pro to see the full peer table, run filters, export to CSV, and unlock the chart views.`}
+              returnUrl="/analysis/commodity-breakdown"
+              ctaLabel="Unlock the full peer table"
+            />
+          </div>
+        )}
+
         {/* ---- Footer info ---- */}
         {!loading && data && (
           <div className="mt-4 flex items-center justify-between text-xs text-metallic-500">
             <p>
-              Showing {filteredCompanies.length} of {data.total} companies •
+              Showing {visibleCompanies.length} of {data.total} companies •
               Data sourced from ASX, TSX, JSE, NYSE & LSE filings
             </p>
             <p>

@@ -66,6 +66,11 @@ const platformLinks = [
   { href: '/map', label: 'Global Map', icon: <Map className="w-4 h-4" /> },
   { href: '/analysis/commodity-breakdown', label: 'Commodities', icon: <Gem className="w-4 h-4" /> },
   { href: '/analysis/sentiment', label: 'Signals', icon: <TrendingUp className="w-4 h-4" /> },
+];
+
+// Trading is admin-only during the closed beta. These links are appended to
+// `platformLinks` for admin users only.
+const adminTradingLinks = [
   { href: '/trading', label: 'Trading Bot', icon: <Bot className="w-4 h-4" /> },
   { href: '/trading/audit', label: 'Audit Log', icon: <Settings className="w-4 h-4" /> },
 ];
@@ -107,7 +112,11 @@ export function Header() {
           <div className="hidden md:flex items-center gap-6">
             {isAuthenticated ? (
               <>
-                <NavDropdown label="Platform" items={platformLinks} pathname={pathname} />
+                <NavDropdown
+                  label="Platform"
+                  items={user?.role === 'admin' ? [...platformLinks, ...adminTradingLinks] : platformLinks}
+                  pathname={pathname}
+                />
                 <NavDropdown label="Research" items={researchLinks} pathname={pathname} />
               </>
             ) : (
@@ -234,7 +243,7 @@ export function Header() {
               {isAuthenticated ? (
                 <>
                   <p className="px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-metallic-500">Platform</p>
-                  {platformLinks.map(item => (
+                  {(user?.role === 'admin' ? [...platformLinks, ...adminTradingLinks] : platformLinks).map(item => (
                     <Link
                       key={item.href}
                       href={item.href}
