@@ -34,10 +34,11 @@ export interface WatchlistQuotesState {
 
 const REFRESH_INTERVAL_MS = 60_000;
 
-async function fetchQuote(symbol: string): Promise<WatchlistQuote> {
+async function fetchQuote(symbol: string, exchange?: string): Promise<WatchlistQuote> {
   try {
+    const qs = exchange ? `?exchange=${encodeURIComponent(exchange)}` : '';
     const res = await fetch(
-      `${API_BASE_URL}/api/v1/market/quote/${encodeURIComponent(symbol)}`,
+      `${API_BASE_URL}/api/v1/market/quote/${encodeURIComponent(symbol)}${qs}`,
       { cache: 'no-store' }
     );
     if (!res.ok) {
@@ -68,14 +69,20 @@ export function useWatchlistQuotes(items: WatchlistItem[]): WatchlistQuotesState
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const inflightRef = useRef(false);
 
-  const symbols = useMemo(
-    () => Array.from(new Set(items.map((it) => it.ticker.toUpperCase()).filter(Boolean))),
-    [items]
-  );
-  const symbolsKey = symbols.join(',');
+  const pairs = useMemo(() => {
+    const seen = new Map<string, string | undefined>();
+    for (const it of items) {
+      const sym = (it.ticker || '').toUpperCase();
+      if (!sym) continue;
+      // Keep the first exchange we see for a given symbol.
+      if (!seen.has(sym)) seen.set(sym, it.exchange);
+    }
+    return Array.from(seen.entries()).map(([symbol, exchange]) => ({ symbol, exchange }));
+  }, [items]);
+  const pairsKey = pairs.map((p) => `${p.symbol}:${p.exchange || ''}`).join(',');
 
   const refresh = useCallback(async () => {
-    if (symbols.length === 0) {
+    if (pairs.length === 0) {
       setQuotes(new Map());
       setLastUpdated(new Date());
       return;
@@ -84,7 +91,9 @@ export function useWatchlistQuotes(items: WatchlistItem[]): WatchlistQuotesState
     inflightRef.current = true;
     setLoading(true);
     try {
-      const results = await Promise.all(symbols.map((s) => fetchQuote(s)));
+      const results = await Promise.all(
+        pairs.map((p) => fetchQuote(p.symbol, p.exchange))
+      );
       const next = new Map<string, WatchlistQuote>();
       for (const q of results) next.set(q.symbol, q);
       setQuotes(next);
@@ -94,7 +103,7 @@ export function useWatchlistQuotes(items: WatchlistItem[]): WatchlistQuotesState
       setLoading(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [symbolsKey]);
+  }, [pairsKey]);
 
   useEffect(() => {
     refresh();
