@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import {
   Bookmark, X, Search, Trash2, TrendingUp, TrendingDown, RefreshCw, Minus,
@@ -59,9 +59,49 @@ function PctBadge({ value }: { value: number | null }) {
 }
 
 export default function WatchlistPanel() {
-  const { items, hydrated, add, remove } = useAnalysisWatchlist();
+  const { items, hydrated, add, remove, updateMeta } = useAnalysisWatchlist();
   const { quotes, aggregateChangePercent, loading, lastUpdated, refresh } =
     useWatchlistQuotes(items);
+
+  // Backfill OpenFIGI ids onto items as quote responses arrive.
+  useEffect(() => {
+    for (const it of items) {
+      const q = quotes.get(it.ticker.toUpperCase());
+      if (!q) continue;
+      const patch: Record<string, string> = {};
+      if (q.figi && q.figi !== it.figi) patch.figi = q.figi;
+      if (q.compositeFigi && q.compositeFigi !== it.compositeFigi) patch.compositeFigi = q.compositeFigi;
+      if (q.shareClassFigi && q.shareClassFigi !== it.shareClassFigi) patch.shareClassFigi = q.shareClassFigi;
+      if (Object.keys(patch).length > 0) updateMeta(it.ticker, it.exchange, patch);
+    }
+  }, [quotes, items, updateMeta]);
+
+  // Group items sharing a share-class FIGI (same security across venues).
+  // The first occurrence becomes the primary row; the rest surface as a
+  // compact "also: TICKER.EX" badge so the user sees the duplicate without
+  // taking up another row.
+  const { primaryItems, crossListings } = useMemo(() => {
+    const byKey = new Map<string, typeof items[number]>();
+    const extras = new Map<string, typeof items>();
+    const primary: typeof items = [];
+    for (const it of items) {
+      const k = it.shareClassFigi;
+      if (!k) {
+        primary.push(it);
+        continue;
+      }
+      const existing = byKey.get(k);
+      if (!existing) {
+        byKey.set(k, it);
+        primary.push(it);
+      } else {
+        const list = extras.get(k) || [];
+        list.push(it);
+        extras.set(k, list);
+      }
+    }
+    return { primaryItems: primary, crossListings: extras };
+  }, [items]);
 
   const aggCls = pctClass(aggregateChangePercent);
 
@@ -141,18 +181,19 @@ export default function WatchlistPanel() {
         </div>
       ) : (
         <ul className="divide-y divide-metallic-800 max-h-[420px] overflow-y-auto">
-          {items.map((it) => {
+          {primaryItems.map((it) => {
             const href = it.exchange
               ? `/company/${encodeURIComponent(it.ticker)}?exchange=${encodeURIComponent(it.exchange)}`
               : `/company/${encodeURIComponent(it.ticker)}`;
             const quote: WatchlistQuote | undefined = quotes.get(it.ticker.toUpperCase());
+            const extras = it.shareClassFigi ? crossListings.get(it.shareClassFigi) : undefined;
             return (
               <li
                 key={`${it.ticker}:${it.exchange || ''}`}
                 className="flex items-center justify-between py-2.5 gap-3"
               >
                 <Link href={href} className="flex-1 min-w-0 group">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-sm font-semibold text-metallic-100 group-hover:text-primary-400">
                       {it.ticker}
                     </span>
@@ -164,6 +205,14 @@ export default function WatchlistPanel() {
                     {it.commodity && (
                       <span className="text-[10px] text-primary-400/80 bg-primary-500/10 px-1.5 py-0.5 rounded">
                         {it.commodity}
+                      </span>
+                    )}
+                    {extras && extras.length > 0 && (
+                      <span
+                        className="text-[10px] text-amber-300/90 bg-amber-500/10 px-1.5 py-0.5 rounded"
+                        title="Same security on another venue (matched by Bloomberg share-class FIGI)"
+                      >
+                        also: {extras.map((e) => `${e.ticker}${e.exchange ? '.' + e.exchange : ''}`).join(', ')}
                       </span>
                     )}
                   </div>

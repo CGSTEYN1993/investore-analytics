@@ -34,6 +34,10 @@ export interface WatchlistItem {
   addedAt: string; // ISO
   /** Backend trading_watchlist_items.id once mirrored — used for remove. */
   serverId?: number;
+  /** OpenFIGI identifiers, backfilled from /market/quote responses. */
+  figi?: string;
+  compositeFigi?: string;
+  shareClassFigi?: string;
 }
 
 function isLoggedIn(): boolean {
@@ -290,6 +294,34 @@ export function useAnalysisWatchlist() {
     [add, has, remove]
   );
 
+  /**
+   * Patch metadata onto an existing item (no-op if not present). Used by the
+   * UI to persist OpenFIGI identifiers fetched alongside live quotes.
+   */
+  const updateMeta = useCallback(
+    (ticker: string, exchange: string | undefined, patch: Partial<WatchlistItem>) => {
+      const k = keyOf(ticker, exchange);
+      const current = readStorage();
+      let changed = false;
+      const next = current.map((it) => {
+        if (keyOf(it.ticker, it.exchange) !== k) return it;
+        const merged = { ...it, ...patch };
+        // Only persist if a tracked field actually changed.
+        const fields: (keyof WatchlistItem)[] = ['figi', 'compositeFigi', 'shareClassFigi', 'name', 'commodity'];
+        if (fields.some((f) => (merged as any)[f] !== (it as any)[f])) {
+          changed = true;
+          return merged;
+        }
+        return it;
+      });
+      if (changed) {
+        writeStorage(next);
+        setItems(next);
+      }
+    },
+    []
+  );
+
   const clear = useCallback(() => {
     const current = readStorage();
     writeStorage([]);
@@ -317,5 +349,5 @@ export function useAnalysisWatchlist() {
     }
   }, []);
 
-  return { items, hydrated, has, add, remove, toggle, clear };
+  return { items, hydrated, has, add, remove, toggle, clear, updateMeta };
 }

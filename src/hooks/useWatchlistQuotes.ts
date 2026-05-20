@@ -21,6 +21,10 @@ export interface WatchlistQuote {
   change: number | null;
   changePercent: number | null;
   currency?: string;
+  /** Bloomberg open-symbology identifiers (when backend resolved them). */
+  figi?: string;
+  compositeFigi?: string;
+  shareClassFigi?: string;
   error?: string;
 }
 
@@ -51,6 +55,9 @@ async function fetchQuote(symbol: string, exchange?: string): Promise<WatchlistQ
       change: typeof data?.change === 'number' ? data.change : null,
       changePercent: typeof data?.changePercent === 'number' ? data.changePercent : null,
       currency: typeof data?.currency === 'string' ? data.currency : undefined,
+      figi: typeof data?.figi === 'string' ? data.figi : undefined,
+      compositeFigi: typeof data?.compositeFigi === 'string' ? data.compositeFigi : undefined,
+      shareClassFigi: typeof data?.shareClassFigi === 'string' ? data.shareClassFigi : undefined,
     };
   } catch (err) {
     return {
