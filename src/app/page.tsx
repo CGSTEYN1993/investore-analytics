@@ -136,13 +136,13 @@ export default function HomePage() {
             src="/mining/headframe.jpg"
             alt=""
             aria-hidden
-            className="absolute inset-0 w-full h-full object-cover opacity-[0.22] hidden sm:block"
-            style={{ filter: 'grayscale(0.45) sepia(0.55) saturate(0.85) contrast(1.05) brightness(0.55)' }}
+            className="absolute inset-0 w-full h-full object-cover opacity-50 hidden sm:block"
+            style={{ filter: 'grayscale(0.35) sepia(0.45) saturate(0.95) contrast(1.05) brightness(0.75)' }}
           />
           {/* Top-down darken so heading stays crisp */}
-          <div className="absolute inset-0 bg-gradient-to-b from-metallic-950/85 via-metallic-950/65 to-metallic-950" />
+          <div className="absolute inset-0 bg-gradient-to-b from-metallic-950/70 via-metallic-950/45 to-metallic-950" />
           {/* Side vignette to fade the photo edges */}
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,rgba(2,6,23,0.6)_70%,rgba(2,6,23,0.95)_100%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,rgba(2,6,23,0.45)_70%,rgba(2,6,23,0.9)_100%)]" />
           {/* Topo pattern overlay */}
           <div className="absolute inset-0 opacity-[0.05] bg-[url('/topo-pattern.svg')] bg-repeat" />
           {/* Warm copper bloom centred under the headline */}
@@ -235,10 +235,10 @@ export default function HomePage() {
           src="/mining/stacker.jpg"
           alt=""
           aria-hidden
-          className="absolute inset-0 w-full h-full object-cover opacity-[0.10] hidden md:block"
-          style={{ filter: 'grayscale(0.7) sepia(0.4) saturate(0.8) contrast(1.05) brightness(0.55)' }}
+          className="absolute inset-0 w-full h-full object-cover opacity-30 hidden md:block"
+          style={{ filter: 'grayscale(0.55) sepia(0.4) saturate(0.9) contrast(1.05) brightness(0.7)' }}
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-metallic-950 via-metallic-950/85 to-metallic-950" />
+        <div className="absolute inset-0 bg-gradient-to-b from-metallic-950/85 via-metallic-950/55 to-metallic-950" />
         <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-10">
             <span className="text-accent-copper font-medium text-xs tracking-[0.22em] uppercase mb-3 block">End-to-end workflow</span>
@@ -299,10 +299,10 @@ export default function HomePage() {
           src="/mining/loader-truck.jpg"
           alt=""
           aria-hidden
-          className="absolute right-0 top-0 h-full w-1/2 object-cover opacity-[0.10] hidden lg:block"
-          style={{ filter: 'grayscale(0.7) sepia(0.35) saturate(0.85) contrast(1.05) brightness(0.55)' }}
+          className="absolute right-0 top-0 h-full w-3/5 object-cover opacity-35 hidden lg:block"
+          style={{ filter: 'grayscale(0.55) sepia(0.3) saturate(0.95) contrast(1.05) brightness(0.7)' }}
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-metallic-950 via-metallic-950/85 to-metallic-950/40" />
+        <div className="absolute inset-0 bg-gradient-to-r from-metallic-950 via-metallic-950/70 to-metallic-950/20" />
         <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-14">
             <span className="text-accent-copper font-medium text-xs tracking-[0.22em] uppercase mb-3 block">Why InvestOre</span>
@@ -609,11 +609,11 @@ export default function HomePage() {
           src="/mining/excavator-orange.jpg"
           alt=""
           aria-hidden
-          className="absolute inset-0 w-full h-full object-cover opacity-[0.25] hidden sm:block"
-          style={{ filter: 'grayscale(0.55) sepia(0.6) saturate(0.9) contrast(1.05) brightness(0.6)' }}
+          className="absolute inset-0 w-full h-full object-cover opacity-50 hidden sm:block"
+          style={{ filter: 'grayscale(0.45) sepia(0.5) saturate(0.95) contrast(1.05) brightness(0.75)' }}
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-metallic-950/85 via-metallic-950/70 to-metallic-950" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,rgba(2,6,23,0.55)_65%,rgba(2,6,23,0.95)_100%)]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-metallic-950/75 via-metallic-950/55 to-metallic-950" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,rgba(2,6,23,0.4)_65%,rgba(2,6,23,0.9)_100%)]" />
         <div className="absolute inset-0 bg-[url('/topo-pattern.svg')] bg-repeat opacity-[0.04]" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[320px] bg-accent-copper/[0.05] rounded-full blur-3xl" />
 
