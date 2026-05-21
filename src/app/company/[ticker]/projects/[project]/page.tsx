@@ -10,6 +10,8 @@ import {
 import { RAILWAY_API_URL } from '@/lib/public-api-url';
 import DrillCollarMap from '@/components/company/DrillCollarMap';
 import DownholeStripLog from '@/components/company/DownholeStripLog';
+import ProjectMap from '@/components/company/ProjectMap';
+import FigureGallery from '@/components/company/FigureGallery';
 
 interface DrillHole {
   id: number;
@@ -371,6 +373,14 @@ export default function ProjectDetailPage() {
             {/* DRILL COLLAR PLAN VIEW */}
             <DrillCollarMap holes={data.drill_holes} intercepts={data.intercepts} />
 
+            {/* GEOGRAPHIC MAP (WGS84 + tenements) */}
+            <ProjectMap
+              ticker={ticker}
+              project={project}
+              holes={data.drill_holes}
+              intercepts={data.intercepts}
+            />
+
             {/* DRILL HOLES TABLE */}
             <section className="bg-metallic-900 border border-metallic-800 rounded-xl p-6">
               <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
@@ -405,7 +415,12 @@ export default function ProjectDetailPage() {
                     {data.drill_holes.map((h) => (
                       <tr key={h.id} className="hover:bg-metallic-800/40">
                         <td className="py-2 pr-3 font-mono text-metallic-100">
-                          {h.hole_id}
+                          <Link
+                            href={`/company/${encodeURIComponent(ticker)}/projects/${encodeURIComponent(project)}/holes/${h.id}${exchange ? `?exchange=${encodeURIComponent(exchange)}` : ''}`}
+                            className="hover:text-primary-300"
+                          >
+                            {h.hole_id}
+                          </Link>
                         </td>
                         <td className="py-2 pr-3 text-metallic-400">
                           {h.drill_type || '—'}
@@ -515,6 +530,9 @@ export default function ProjectDetailPage() {
 
             {/* DOWNHOLE STRIP LOGS (collapsible) */}
             <DownholeStripLog holes={data.drill_holes} intercepts={data.intercepts} />
+
+            {/* FIGURE GALLERY (cross-sections, plan views, collar maps) */}
+            <FigureGallery ticker={ticker} project={project} />
 
             {/* SOURCE DOCUMENTS */}
             {data.documents.length > 0 && (
