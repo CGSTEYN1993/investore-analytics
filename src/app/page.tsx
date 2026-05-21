@@ -9,6 +9,13 @@ import {
 } from 'lucide-react';
 import TickerTape from '@/components/ui/TickerTape';
 import NewsletterSignup from '@/components/ui/NewsletterSignup';
+import {
+  HeadframeSilhouette,
+  DraglineSilhouette,
+  CopperBarsSilhouette,
+  OrePourSilhouette,
+  PitHorizonSilhouette,
+} from '@/components/ui/MiningSilhouettes';
 
 /* ─── Stat Pill ─── */
 function StatPill({ value, label, icon: Icon }: { value: string; label: string; icon?: React.ElementType }) {
@@ -133,6 +140,24 @@ export default function HomePage() {
           <div className="absolute inset-0 bg-gradient-to-b from-metallic-900 via-metallic-950 to-metallic-950" />
           <div className="absolute inset-0 opacity-[0.08] bg-[url('/topo-pattern.svg')] bg-repeat" />
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-primary-500/5 rounded-full blur-3xl" />
+
+          {/* Mining silhouettes — decorative, sub-10% opacity, copper/gold tinted */}
+          <HeadframeSilhouette
+            aria-hidden
+            className="pointer-events-none select-none absolute left-[2%] top-10 h-[420px] w-auto text-accent-copper opacity-[0.07] hidden md:block"
+          />
+          <CopperBarsSilhouette
+            aria-hidden
+            className="pointer-events-none select-none absolute right-[-40px] top-24 w-[340px] text-accent-copper opacity-[0.06] hidden lg:block rotate-[8deg]"
+          />
+          <DraglineSilhouette
+            aria-hidden
+            className="pointer-events-none select-none absolute right-[6%] bottom-10 w-[360px] text-accent-gold opacity-[0.05] hidden md:block"
+          />
+          <PitHorizonSilhouette
+            aria-hidden
+            className="pointer-events-none select-none absolute inset-x-0 bottom-0 w-full h-[140px] text-metallic-800 opacity-50"
+          />
         </div>
 
         <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-20 sm:pt-24 sm:pb-28">
@@ -571,7 +596,17 @@ export default function HomePage() {
       <section className="py-20 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-metallic-900/50 to-metallic-950" />
         <div className="absolute inset-0 bg-[url('/topo-pattern.svg')] bg-repeat opacity-[0.04]" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-primary-500/5 rounded-full blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-accent-copper/[0.04] rounded-full blur-3xl" />
+
+        {/* Silhouette accents */}
+        <OrePourSilhouette
+          aria-hidden
+          className="pointer-events-none select-none absolute left-[3%] bottom-0 h-[280px] w-auto text-accent-copper opacity-[0.07] hidden md:block"
+        />
+        <HeadframeSilhouette
+          aria-hidden
+          className="pointer-events-none select-none absolute right-[4%] bottom-0 h-[320px] w-auto text-accent-gold opacity-[0.06] hidden md:block"
+        />
 
         <div className="max-w-3xl mx-auto px-4 text-center relative z-10">
           <h2 className="font-display text-3xl sm:text-5xl font-semibold text-metallic-50 mb-4 leading-tight">
