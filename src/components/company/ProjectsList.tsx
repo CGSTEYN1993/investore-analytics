@@ -30,6 +30,9 @@ interface ProjectRow {
   drill_results_count: number;
   drill_holes_count: number;
   intercepts_count: number;
+  resources_count?: number;
+  reserves_count?: number;
+  has_data?: boolean;
   max_hole_depth_m: number | null;
   best_intercept: BestIntercept | null;
   last_seen: string | null;
@@ -57,9 +60,15 @@ function fmtGrade(b: BestIntercept | null): string {
 }
 
 export default function ProjectsList({ ticker, exchange, className = '' }: Props) {
-  const [data, setData] = useState<{ total: number; projects: ProjectRow[] } | null>(null);
+  const [data, setData] = useState<{
+    total: number;
+    total_candidates?: number;
+    filtered_out?: number;
+    projects: ProjectRow[];
+  } | null>(null);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
+  const [includeEmpty, setIncludeEmpty] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -68,11 +77,18 @@ export default function ProjectsList({ ticker, exchange, className = '' }: Props
       setErr(null);
       try {
         const r = await fetch(
-          `${RAILWAY_API_URL}/api/v1/mining/company/${encodeURIComponent(ticker)}/projects`,
+          `${RAILWAY_API_URL}/api/v1/mining/company/${encodeURIComponent(ticker)}` +
+            `/projects?include_empty=${includeEmpty}`,
         );
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         const j = await r.json();
-        if (!cancelled) setData({ total: j.total, projects: j.projects || [] });
+        if (!cancelled)
+          setData({
+            total: j.total,
+            total_candidates: j.total_candidates,
+            filtered_out: j.filtered_out,
+            projects: j.projects || [],
+          });
       } catch (e: any) {
         if (!cancelled) setErr(e?.message || 'Failed to load projects');
       } finally {
@@ -83,23 +99,36 @@ export default function ProjectsList({ ticker, exchange, className = '' }: Props
     return () => {
       cancelled = true;
     };
-  }, [ticker]);
+  }, [ticker, includeEmpty]);
 
   return (
     <section
       className={`bg-metallic-900 border border-metallic-800 rounded-xl p-6 ${className}`}
     >
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
         <h2 className="text-lg font-semibold text-metallic-100 flex items-center gap-2">
           <Layers className="w-5 h-5 text-primary-400" />
           Projects Portfolio
         </h2>
-        {data && (
-          <span className="text-xs text-metallic-500">
-            {data.total} project{data.total === 1 ? '' : 's'} extracted from announcements
-            &amp; reserve disclosures
-          </span>
-        )}
+        <div className="flex items-center gap-3 text-xs text-metallic-500">
+          {data && (
+            <span>
+              {data.total} populated
+              {typeof data.filtered_out === 'number' && data.filtered_out > 0
+                ? ` · ${data.filtered_out} hidden (no data)`
+                : ''}
+            </span>
+          )}
+          <label className="inline-flex items-center gap-1 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              className="accent-primary-500"
+              checked={includeEmpty}
+              onChange={(e) => setIncludeEmpty(e.target.checked)}
+            />
+            Show empty
+          </label>
+        </div>
       </div>
 
       {loading ? (
@@ -139,6 +168,11 @@ export default function ProjectsList({ ticker, exchange, className = '' }: Props
                         {p.ownership_pct != null && (
                           <span className="text-[10px] text-metallic-400 px-2 py-0.5 rounded-full border border-metallic-700">
                             {p.ownership_pct}% owned
+                          </span>
+                        )}
+                        {p.has_data === false && (
+                          <span className="text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-300 border border-amber-700/40">
+                            No data
                           </span>
                         )}
                       </div>
