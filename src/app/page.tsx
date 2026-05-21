@@ -9,13 +9,6 @@ import {
 } from 'lucide-react';
 import TickerTape from '@/components/ui/TickerTape';
 import NewsletterSignup from '@/components/ui/NewsletterSignup';
-import {
-  HeadframeSilhouette,
-  DraglineSilhouette,
-  CopperBarsSilhouette,
-  OrePourSilhouette,
-  PitHorizonSilhouette,
-} from '@/components/ui/MiningSilhouettes';
 
 /* ─── Stat Pill ─── */
 function StatPill({ value, label, icon: Icon }: { value: string; label: string; icon?: React.ElementType }) {
@@ -137,27 +130,23 @@ export default function HomePage() {
       {/* ═══ HERO ═══ */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 -z-10">
-          <div className="absolute inset-0 bg-gradient-to-b from-metallic-900 via-metallic-950 to-metallic-950" />
-          <div className="absolute inset-0 opacity-[0.08] bg-[url('/topo-pattern.svg')] bg-repeat" />
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-primary-500/5 rounded-full blur-3xl" />
-
-          {/* Mining silhouettes — decorative, sub-10% opacity, copper/gold tinted */}
-          <HeadframeSilhouette
+          {/* Photographic backdrop — headframe at sunset, heavily darkened + sepia-graded so it reads as atmosphere, not a feature image */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/mining/headframe.jpg"
+            alt=""
             aria-hidden
-            className="pointer-events-none select-none absolute left-[2%] top-10 h-[420px] w-auto text-accent-copper opacity-[0.07] hidden md:block"
+            className="absolute inset-0 w-full h-full object-cover opacity-[0.22] hidden sm:block"
+            style={{ filter: 'grayscale(0.45) sepia(0.55) saturate(0.85) contrast(1.05) brightness(0.55)' }}
           />
-          <CopperBarsSilhouette
-            aria-hidden
-            className="pointer-events-none select-none absolute right-[-40px] top-24 w-[340px] text-accent-copper opacity-[0.06] hidden lg:block rotate-[8deg]"
-          />
-          <DraglineSilhouette
-            aria-hidden
-            className="pointer-events-none select-none absolute right-[6%] bottom-10 w-[360px] text-accent-gold opacity-[0.05] hidden md:block"
-          />
-          <PitHorizonSilhouette
-            aria-hidden
-            className="pointer-events-none select-none absolute inset-x-0 bottom-0 w-full h-[140px] text-metallic-800 opacity-50"
-          />
+          {/* Top-down darken so heading stays crisp */}
+          <div className="absolute inset-0 bg-gradient-to-b from-metallic-950/85 via-metallic-950/65 to-metallic-950" />
+          {/* Side vignette to fade the photo edges */}
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,rgba(2,6,23,0.6)_70%,rgba(2,6,23,0.95)_100%)]" />
+          {/* Topo pattern overlay */}
+          <div className="absolute inset-0 opacity-[0.05] bg-[url('/topo-pattern.svg')] bg-repeat" />
+          {/* Warm copper bloom centred under the headline */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[420px] bg-accent-copper/[0.06] rounded-full blur-3xl" />
         </div>
 
         <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-20 sm:pt-24 sm:pb-28">
@@ -239,8 +228,18 @@ export default function HomePage() {
       </section>
 
       {/* ═══ RESEARCH → STRATEGISE → EXECUTE ═══ */}
-      <section className="py-16 border-b border-metallic-800/50 bg-gradient-to-b from-metallic-950 to-metallic-900/20">
-        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="relative py-16 border-b border-metallic-800/50 bg-gradient-to-b from-metallic-950 to-metallic-900/20 overflow-hidden">
+        {/* Stacker-reclaimer backdrop — industrial scale, very subtle */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/mining/stacker.jpg"
+          alt=""
+          aria-hidden
+          className="absolute inset-0 w-full h-full object-cover opacity-[0.10] hidden md:block"
+          style={{ filter: 'grayscale(0.7) sepia(0.4) saturate(0.8) contrast(1.05) brightness(0.55)' }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-metallic-950 via-metallic-950/85 to-metallic-950" />
+        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-10">
             <span className="text-accent-copper font-medium text-xs tracking-[0.22em] uppercase mb-3 block">End-to-end workflow</span>
             <h2 className="font-display text-3xl sm:text-4xl font-semibold text-metallic-50 mb-3">Research. Strategise. Execute.</h2>
@@ -293,8 +292,18 @@ export default function HomePage() {
       </section>
 
       {/* ═══ WHAT MAKES US DIFFERENT ═══ */}
-      <section className="py-20 border-b border-metallic-800/50">
-        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="relative py-20 border-b border-metallic-800/50 overflow-hidden">
+        {/* Loader/truck backdrop, very faint */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/mining/loader-truck.jpg"
+          alt=""
+          aria-hidden
+          className="absolute right-0 top-0 h-full w-1/2 object-cover opacity-[0.10] hidden lg:block"
+          style={{ filter: 'grayscale(0.7) sepia(0.35) saturate(0.85) contrast(1.05) brightness(0.55)' }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-metallic-950 via-metallic-950/85 to-metallic-950/40" />
+        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-14">
             <span className="text-accent-copper font-medium text-xs tracking-[0.22em] uppercase mb-3 block">Why InvestOre</span>
             <div className="metal-divider w-32 mx-auto mb-5" />
@@ -594,19 +603,19 @@ export default function HomePage() {
 
       {/* ═══ FINAL CTA ═══ */}
       <section className="py-20 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-metallic-900/50 to-metallic-950" />
+        {/* Photographic backdrop — mine excavator, heavily desaturated and copper-graded */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/mining/excavator-orange.jpg"
+          alt=""
+          aria-hidden
+          className="absolute inset-0 w-full h-full object-cover opacity-[0.25] hidden sm:block"
+          style={{ filter: 'grayscale(0.55) sepia(0.6) saturate(0.9) contrast(1.05) brightness(0.6)' }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-metallic-950/85 via-metallic-950/70 to-metallic-950" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,rgba(2,6,23,0.55)_65%,rgba(2,6,23,0.95)_100%)]" />
         <div className="absolute inset-0 bg-[url('/topo-pattern.svg')] bg-repeat opacity-[0.04]" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-accent-copper/[0.04] rounded-full blur-3xl" />
-
-        {/* Silhouette accents */}
-        <OrePourSilhouette
-          aria-hidden
-          className="pointer-events-none select-none absolute left-[3%] bottom-0 h-[280px] w-auto text-accent-copper opacity-[0.07] hidden md:block"
-        />
-        <HeadframeSilhouette
-          aria-hidden
-          className="pointer-events-none select-none absolute right-[4%] bottom-0 h-[320px] w-auto text-accent-gold opacity-[0.06] hidden md:block"
-        />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[320px] bg-accent-copper/[0.05] rounded-full blur-3xl" />
 
         <div className="max-w-3xl mx-auto px-4 text-center relative z-10">
           <h2 className="font-display text-3xl sm:text-5xl font-semibold text-metallic-50 mb-4 leading-tight">
