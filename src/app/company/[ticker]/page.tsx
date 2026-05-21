@@ -14,6 +14,7 @@ import { formatPrice } from '@/lib/utils';
 import CompanyGeoscienceWidget from '@/components/dashboard/CompanyGeoscienceWidget';import CompanyMiningDataWidget from '@/components/mining/CompanyMiningDataWidget';
 import StockBriefPanel from '@/components/company/StockBriefPanel';
 import DrillIntercepts from '@/components/company/DrillIntercepts';
+import ProjectsList from '@/components/company/ProjectsList';
 import { useAnalysisWatchlist } from '@/hooks/useAnalysisWatchlist';
 // Dynamic import for Plotly to avoid SSR issues
 const Plot = dynamic(() => import('react-plotly.js'), { ssr: false });
@@ -1355,6 +1356,9 @@ export default function CompanyProfile() {
 
             {/* Multi-factor data coverage / stock brief */}
             <StockBriefPanel ticker={ticker} exchange={exchangeParam || companyData?.exchange || 'ASX'} />
+
+            {/* Project portfolio with drilldown links */}
+            <ProjectsList ticker={ticker} exchange={exchangeParam || companyData?.exchange} />
 
             {/* Drill intercepts (last 5 years) */}
             <DrillIntercepts ticker={ticker} />
