@@ -8,6 +8,8 @@ import {
   Activity, Loader2, MapPin, Gauge, TrendingUp, DollarSign,
 } from 'lucide-react';
 import { RAILWAY_API_URL } from '@/lib/public-api-url';
+import DrillCollarMap from '@/components/company/DrillCollarMap';
+import DownholeStripLog from '@/components/company/DownholeStripLog';
 
 interface DrillHole {
   id: number;
@@ -366,13 +368,15 @@ export default function ProjectDetailPage() {
               </section>
             )}
 
+            {/* DRILL COLLAR PLAN VIEW */}
+            <DrillCollarMap holes={data.drill_holes} intercepts={data.intercepts} />
+
             {/* DRILL HOLES TABLE */}
             <section className="bg-metallic-900 border border-metallic-800 rounded-xl p-6">
               <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
                 <h2 className="text-lg font-semibold flex items-center gap-2">
                   <Hammer className="w-5 h-5 text-primary-400" /> Drill Holes
-                </h2>
-                <span className="text-xs text-metallic-500">
+                </h2>                <span className="text-xs text-metallic-500">
                   {data.drill_holes.length} hole(s)
                   {data.summary.has_collar_coordinates && (
                     <span className="ml-2 inline-flex items-center gap-1 text-emerald-400">
@@ -508,6 +512,9 @@ export default function ProjectDetailPage() {
                 </table>
               </div>
             </section>
+
+            {/* DOWNHOLE STRIP LOGS (collapsible) */}
+            <DownholeStripLog holes={data.drill_holes} intercepts={data.intercepts} />
 
             {/* SOURCE DOCUMENTS */}
             {data.documents.length > 0 && (
