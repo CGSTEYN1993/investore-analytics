@@ -137,14 +137,6 @@ export default function HomePage() {
 
         <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-20 sm:pt-24 sm:pb-28">
           <div className="flex flex-col items-center text-center max-w-4xl mx-auto">
-            <div className="trim-copper-rounded inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-metallic-900/60 text-metallic-200 text-xs font-medium mb-6">
-              <span className="relative flex h-1.5 w-1.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent-copper opacity-75" />
-                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-accent-copper" />
-              </span>
-              Now live: Automated Trading Platform · Interactive Brokers integration
-            </div>
-
             <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-semibold tracking-tight leading-[1.05] mb-6">
               <span className="text-metallic-50">Research, Strategise &amp; </span>
               <span className="metal-text metal-text-gold italic">

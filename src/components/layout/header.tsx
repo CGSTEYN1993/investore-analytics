@@ -6,7 +6,6 @@ import { usePathname } from 'next/navigation';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { Menu, X, User, LogOut, Settings, ChevronDown, BarChart3, Map, Newspaper, Brain, TrendingUp, BookOpen, Users, Gem, Bot } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
-import { KillSwitchButton } from '@/components/trading/KillSwitchButton';
 import { PlatformSwitcher } from '@/components/layout/PlatformSwitcher';
 
 function NavDropdown({ label, items, pathname, onNavigate }: {
@@ -159,7 +158,6 @@ export function Header() {
 
           {/* Auth Buttons / User Menu */}
           <div className="hidden md:flex items-center gap-3">
-            {isAuthenticated && <KillSwitchButton />}
             {isAuthenticated ? (
               <div className="relative">
                 <button
