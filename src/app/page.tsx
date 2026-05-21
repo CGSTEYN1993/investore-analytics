@@ -450,7 +450,7 @@ export default function HomePage() {
               { icon: Layers, text: 'Overlay geological maps, infrastructure layers, and prospectivity scoring' },
             ]}
             ctaText="Explore the Map"
-            ctaHref="/map"
+            ctaHref="/analysis/map"
             mockup={<ScreenshotPreview src="/screenshots/commodity-prices.png?v=6" alt="Commodity Spot Prices" />}
             reverse
           />
