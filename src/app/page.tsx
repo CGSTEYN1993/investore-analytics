@@ -10,6 +10,40 @@ import {
 import TickerTape from '@/components/ui/TickerTape';
 import NewsletterSignup from '@/components/ui/NewsletterSignup';
 
+/* ─── Photo backdrop helper ─── */
+function PhotoBackdrop({
+  src,
+  opacity = 0.3,
+  brightness = 0.7,
+  sepia = 0.4,
+  position = 'inset-0',
+  overlay = 'bg-gradient-to-b from-metallic-950/80 via-metallic-950/55 to-metallic-950',
+  hidden = 'hidden sm:block',
+}: {
+  src: string;
+  opacity?: number;
+  brightness?: number;
+  sepia?: number;
+  position?: string;
+  overlay?: string;
+  hidden?: string;
+}) {
+  const filter = `grayscale(0.5) sepia(${sepia}) saturate(0.9) contrast(1.05) brightness(${brightness})`;
+  return (
+    <>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={src}
+        alt=""
+        aria-hidden
+        className={`absolute ${position} w-full h-full object-cover ${hidden}`}
+        style={{ opacity, filter }}
+      />
+      <div className={`absolute inset-0 ${overlay}`} />
+    </>
+  );
+}
+
 /* ─── Stat Pill ─── */
 function StatPill({ value, label, icon: Icon }: { value: string; label: string; icon?: React.ElementType }) {
   return (
@@ -335,6 +369,7 @@ export default function HomePage() {
 
       {/* ═══ FEATURE 1: AI ANALYST ═══ */}
       <section className="py-20 border-b border-metallic-800/50 relative overflow-hidden">
+        <PhotoBackdrop src="/mining/tunnel.jpg" opacity={0.28} brightness={0.75} sepia={0.55} />
         <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-emerald-500/5 rounded-full blur-3xl" />
         <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <FeatureShowcase
@@ -356,6 +391,7 @@ export default function HomePage() {
 
       {/* ═══ FEATURE 2: SENTIMENT SIGNALS ═══ */}
       <section className="py-20 border-b border-metallic-800/50 bg-metallic-900/20 relative overflow-hidden">
+        <PhotoBackdrop src="/mining/plant-sunset.jpg" opacity={0.32} brightness={0.7} sepia={0.5} />
         <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-violet-500/5 rounded-full blur-3xl" />
         <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <FeatureShowcase
@@ -378,6 +414,7 @@ export default function HomePage() {
 
       {/* ═══ FEATURE 3: PEER ANALYTICS ═══ */}
       <section className="py-20 border-b border-metallic-800/50 relative overflow-hidden">
+        <PhotoBackdrop src="/mining/bucket-wheel.jpg" opacity={0.3} brightness={0.7} sepia={0.4} />
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[300px] bg-cyan-500/5 rounded-full blur-3xl" />
         <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <FeatureShowcase
@@ -399,6 +436,7 @@ export default function HomePage() {
 
       {/* ═══ FEATURE 4: COMMODITY PRICES ═══ */}
       <section className="py-20 border-b border-metallic-800/50 bg-metallic-900/20 relative overflow-hidden">
+        <PhotoBackdrop src="/mining/spreaders.jpg" opacity={0.32} brightness={0.7} sepia={0.45} />
         <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-blue-500/5 rounded-full blur-3xl" />
         <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <FeatureShowcase
@@ -421,6 +459,7 @@ export default function HomePage() {
 
       {/* ═══ FEATURE 5: NEWS & SENTIMENT ═══ */}
       <section className="py-20 border-b border-metallic-800/50 relative overflow-hidden">
+        <PhotoBackdrop src="/mining/headframe.jpg" opacity={0.28} brightness={0.7} sepia={0.5} />
         <div className="absolute top-0 left-0 w-[400px] h-[400px] bg-amber-500/5 rounded-full blur-3xl" />
         <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <FeatureShowcase
@@ -441,8 +480,9 @@ export default function HomePage() {
       </section>
 
       {/* ═══ REAL DATA EXAMPLES ═══ */}
-      <section className="py-20 border-b border-metallic-800/50">
-        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="relative py-20 border-b border-metallic-800/50 overflow-hidden">
+        <PhotoBackdrop src="/mining/stacker.jpg" opacity={0.18} brightness={0.65} sepia={0.4} overlay="bg-gradient-to-b from-metallic-950/90 via-metallic-950/75 to-metallic-950" />
+        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-12">
             <span className="text-accent-copper font-medium text-xs tracking-[0.22em] uppercase mb-3 block">Real Data</span>
             <h2 className="font-display text-3xl font-semibold text-metallic-50 mb-3">See What&apos;s Inside the Platform</h2>
@@ -481,8 +521,9 @@ export default function HomePage() {
       </section>
 
       {/* ═══ MORE FEATURES GRID ═══ */}
-      <section className="py-20 border-b border-metallic-800/50 bg-metallic-900/20">
-        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="relative py-20 border-b border-metallic-800/50 bg-metallic-900/20 overflow-hidden">
+        <PhotoBackdrop src="/mining/loader-truck.jpg" opacity={0.18} brightness={0.65} sepia={0.4} overlay="bg-gradient-to-b from-metallic-950/90 via-metallic-950/75 to-metallic-950" />
+        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-12">
             <span className="text-accent-copper font-medium text-xs tracking-[0.22em] uppercase mb-3 block">Full Feature Set</span>
             <h2 className="font-display text-3xl font-semibold text-metallic-50 mb-3">Built for Serious Mining Investors</h2>
@@ -508,8 +549,9 @@ export default function HomePage() {
       </section>
 
       {/* ═══ PRICING SECTION ═══ */}
-      <section id="pricing" className="py-20 border-b border-metallic-800/50">
-        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8">
+      <section id="pricing" className="relative py-20 border-b border-metallic-800/50 overflow-hidden">
+        <PhotoBackdrop src="/mining/plant-sunset.jpg" opacity={0.16} brightness={0.6} sepia={0.55} overlay="bg-gradient-to-b from-metallic-950/92 via-metallic-950/78 to-metallic-950" />
+        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-12">
             <span className="text-accent-gold font-medium text-xs tracking-[0.22em] uppercase mb-3 block">Pricing</span>
             <div className="metal-divider w-32 mx-auto mb-5" />
@@ -577,8 +619,9 @@ export default function HomePage() {
       </section>
 
       {/* ═══ WHO IT'S FOR ═══ */}
-      <section className="py-20 border-b border-metallic-800/50 bg-metallic-900/20">
-        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="relative py-20 border-b border-metallic-800/50 bg-metallic-900/20 overflow-hidden">
+        <PhotoBackdrop src="/mining/excavator-orange.jpg" opacity={0.2} brightness={0.65} sepia={0.5} overlay="bg-gradient-to-b from-metallic-950/90 via-metallic-950/75 to-metallic-950" />
+        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-12">
             <span className="text-accent-copper font-medium text-xs tracking-[0.22em] uppercase mb-3 block">Who It&apos;s For</span>
             <h2 className="font-display text-3xl font-semibold text-metallic-50 mb-3">Built for Every Mining Investor</h2>
