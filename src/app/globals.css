@@ -119,6 +119,120 @@ body {
   @apply bg-primary-900/30 text-primary-400 border border-primary-700/50;
 }
 
+/* ───────────────────────── Metallic Design System ─────────────────────────
+ * Real-metal text gradients with a slow animated sheen, dynamic button glints,
+ * and "trim" borders that read as polished copper/silver/gold edges. Use these
+ * sparingly: trim ONE accent per section, not every element. */
+
+.font-display { font-family: var(--font-fraunces), Fraunces, Georgia, serif;
+  font-feature-settings: "ss01" 1, "ss02" 1, "salt" 1;
+  font-optical-sizing: auto;
+  letter-spacing: -0.015em;
+}
+
+/* Animated metal text */
+.metal-text {
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: metal-sheen 8s linear infinite;
+  /* Subtle inner shadow for engraved depth (only renders on supporting browsers) */
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);
+}
+.metal-text-gold   { background-image: linear-gradient(110deg,#7a5a12 0%,#d4af37 22%,#fff1b8 48%,#d4af37 72%,#7a5a12 100%); }
+.metal-text-copper { background-image: linear-gradient(110deg,#5e2c0d 0%,#b87333 22%,#ffd1a3 48%,#b87333 72%,#5e2c0d 100%); }
+.metal-text-silver { background-image: linear-gradient(110deg,#334155 0%,#cbd5e1 22%,#ffffff 48%,#cbd5e1 72%,#334155 100%); }
+
+@keyframes metal-sheen {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Metallic trim — a 1px gradient border using border-image */
+.trim-copper {
+  border: 1px solid transparent;
+  border-image: linear-gradient(135deg, #5e2c0d 0%, #b87333 30%, #ffd1a3 50%, #b87333 70%, #5e2c0d 100%) 1;
+}
+.trim-gold {
+  border: 1px solid transparent;
+  border-image: linear-gradient(135deg, #7a5a12 0%, #d4af37 30%, #fff1b8 50%, #d4af37 70%, #7a5a12 100%) 1;
+}
+.trim-silver {
+  border: 1px solid transparent;
+  border-image: linear-gradient(135deg, #334155 0%, #cbd5e1 30%, #ffffff 50%, #cbd5e1 70%, #334155 100%) 1;
+}
+
+/* Trim that preserves rounded corners (uses two stacked backgrounds in lieu of border-image) */
+.trim-copper-rounded,
+.trim-gold-rounded,
+.trim-silver-rounded {
+  position: relative;
+  background-clip: padding-box;
+  border: 1px solid transparent;
+}
+.trim-copper-rounded::before,
+.trim-gold-rounded::before,
+.trim-silver-rounded::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  pointer-events: none;
+  z-index: 0;
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+}
+.trim-copper-rounded::before { background: linear-gradient(135deg,#5e2c0d 0%,#b87333 30%,#ffd1a3 50%,#b87333 70%,#5e2c0d 100%); }
+.trim-gold-rounded::before   { background: linear-gradient(135deg,#7a5a12 0%,#d4af37 30%,#fff1b8 50%,#d4af37 70%,#7a5a12 100%); }
+.trim-silver-rounded::before { background: linear-gradient(135deg,#334155 0%,#cbd5e1 30%,#ffffff 50%,#cbd5e1 70%,#334155 100%); }
+.trim-copper-rounded > *,
+.trim-gold-rounded   > *,
+.trim-silver-rounded > * { position: relative; z-index: 1; }
+
+/* Button glint — single-sweep light bar that passes on hover */
+.btn-metal { position: relative; overflow: hidden; isolation: isolate; }
+.btn-metal::after {
+  content: "";
+  position: absolute;
+  top: 0; bottom: 0;
+  left: -75%;
+  width: 45%;
+  background: linear-gradient(110deg, transparent 0%, rgba(255,255,255,0.22) 50%, transparent 100%);
+  transform: skewX(-18deg);
+  transition: left 0.7s cubic-bezier(.2,.7,.3,1);
+  pointer-events: none;
+}
+.btn-metal:hover::after { left: 130%; }
+
+/* Subtle ore-grain background (use on dark cards) */
+.ore-grain {
+  background-image:
+    radial-gradient(60% 50% at 30% 20%, rgba(184,115,51,0.10) 0%, transparent 60%),
+    radial-gradient(50% 40% at 80% 10%, rgba(212,175,55,0.08) 0%, transparent 70%);
+}
+
+/* Hairline divider in metallic gradient */
+.metal-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(184,115,51,0.45) 25%, rgba(212,175,55,0.55) 50%, rgba(184,115,51,0.45) 75%, transparent 100%);
+}
+
+/* Focus ring tuned to metallic palette */
+:where(a, button, [role="button"]):focus-visible {
+  outline: 2px solid #d4af37;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* Refined typography defaults — calmer letter spacing, real ligatures */
+h1, h2, h3 { letter-spacing: -0.02em; }
+.tabular { font-variant-numeric: tabular-nums; }
+
 .filter-pill-remove {
   @apply ml-1.5 text-primary-500 hover:text-primary-300 cursor-pointer;
 }

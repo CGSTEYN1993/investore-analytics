@@ -32,7 +32,7 @@ function NavDropdown({ label, items, pathname, onNavigate }: {
       <button
         onClick={() => setOpen(!open)}
         className={`flex items-center gap-1 text-sm font-medium transition-colors ${
-          isActive ? 'text-primary-400' : 'text-metallic-300 hover:text-metallic-100'
+          isActive ? 'text-accent-copper' : 'text-metallic-300 hover:text-metallic-100'
         }`}
       >
         {label}
@@ -47,7 +47,7 @@ function NavDropdown({ label, items, pathname, onNavigate }: {
               onClick={() => { setOpen(false); onNavigate?.(); }}
               className={`flex items-center gap-2.5 px-4 py-2.5 text-sm transition-colors ${
                 pathname.startsWith(item.href) 
-                  ? 'text-primary-400 bg-primary-500/10' 
+                    ? 'text-accent-copper bg-accent-copper/10' 
                   : 'text-metallic-300 hover:text-metallic-100 hover:bg-metallic-700/50'
               }`}
             >
@@ -90,7 +90,7 @@ export function Header() {
   const isHomePage = pathname === '/';
 
   return (
-    <header className="bg-metallic-950/90 backdrop-blur-md border-b border-metallic-800/50 sticky top-0 z-50">
+    <header className="bg-metallic-950/90 backdrop-blur-md sticky top-0 z-50 border-b border-metallic-800/50">
       <nav className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
@@ -124,7 +124,7 @@ export function Header() {
                 <Link
                   href="/about"
                   className={`text-sm font-medium transition-colors ${
-                    pathname === '/about' ? 'text-primary-400' : 'text-metallic-300 hover:text-metallic-100'
+                    pathname === '/about' ? 'text-accent-copper' : 'text-metallic-300 hover:text-metallic-100'
                   }`}
                 >
                   About
@@ -132,7 +132,7 @@ export function Header() {
                 <Link
                   href="/pricing"
                   className={`text-sm font-medium transition-colors ${
-                    pathname === '/pricing' ? 'text-primary-400' : 'text-metallic-300 hover:text-metallic-100'
+                    pathname === '/pricing' ? 'text-accent-gold' : 'text-metallic-300 hover:text-metallic-100'
                   }`}
                 >
                   Pricing
@@ -140,7 +140,7 @@ export function Header() {
                 <Link
                   href="/faq"
                   className={`text-sm font-medium transition-colors ${
-                    pathname === '/faq' ? 'text-primary-400' : 'text-metallic-300 hover:text-metallic-100'
+                    pathname === '/faq' ? 'text-accent-copper' : 'text-metallic-300 hover:text-metallic-100'
                   }`}
                 >
                   FAQ
@@ -148,7 +148,7 @@ export function Header() {
                 <Link
                   href="/contact"
                   className={`text-sm font-medium transition-colors ${
-                    pathname === '/contact' ? 'text-primary-400' : 'text-metallic-300 hover:text-metallic-100'
+                    pathname === '/contact' ? 'text-accent-copper' : 'text-metallic-300 hover:text-metallic-100'
                   }`}
                 >
                   Contact

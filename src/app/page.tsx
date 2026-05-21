@@ -13,9 +13,9 @@ import NewsletterSignup from '@/components/ui/NewsletterSignup';
 /* ─── Stat Pill ─── */
 function StatPill({ value, label, icon: Icon }: { value: string; label: string; icon?: React.ElementType }) {
   return (
-    <div className="flex items-center gap-2 px-4 py-2 bg-metallic-800/60 rounded-full border border-metallic-700/50 backdrop-blur-sm">
-      {Icon && <Icon className="w-3.5 h-3.5 text-primary-400" />}
-      <span className="text-sm font-bold text-primary-400">{value}</span>
+    <div className="flex items-center gap-2 px-4 py-2 bg-metallic-900/60 rounded-full border border-metallic-700/50 backdrop-blur-sm">
+      {Icon && <Icon className="w-3.5 h-3.5 text-accent-copper" />}
+      <span className="text-sm font-bold text-metallic-100 tabular">{value}</span>
       <span className="text-xs text-metallic-400">{label}</span>
     </div>
   );
@@ -76,20 +76,20 @@ function PricingMini({ name, price, period, features, popular = false, cta, ctaH
   popular?: boolean; cta: string; ctaHref: string;
 }) {
   return (
-    <div className={`rounded-2xl border p-6 transition-all ${popular ? 'border-primary-500 bg-metallic-800/80 shadow-lg shadow-primary-500/20 scale-[1.02]' : 'border-metallic-700 bg-metallic-800/50 hover:border-metallic-600'}`}>
-      {popular && <div className="text-center mb-3"><span className="rounded-full bg-gradient-to-r from-primary-500 to-primary-600 px-3 py-1 text-xs font-medium text-white">Most Popular</span></div>}
+    <div className={`relative rounded-2xl p-6 transition-all ${popular ? 'trim-gold-rounded bg-metallic-900/80 shadow-metal-gold scale-[1.02]' : 'border border-metallic-700 bg-metallic-800/50 hover:border-metallic-600'}`}>
+      {popular && <div className="text-center mb-3"><span className="inline-block rounded-full bg-metal-gold bg-[length:200%_100%] animate-sheen px-3 py-1 text-xs font-bold text-metallic-950 tracking-wide uppercase">Most Popular</span></div>}
       <div className="text-center mb-5">
-        <h3 className="text-lg font-semibold text-metallic-100">{name}</h3>
-        <div className="mt-2"><span className="text-3xl font-bold text-metallic-50">{price}</span>{period && <span className="text-metallic-400 text-sm">{period}</span>}</div>
+        <h3 className="font-display text-xl font-semibold text-metallic-100">{name}</h3>
+        <div className="mt-2 tabular"><span className="font-display text-4xl font-bold text-metallic-50">{price}</span>{period && <span className="text-metallic-400 text-sm">{period}</span>}</div>
       </div>
       <ul className="space-y-2 mb-6">
         {features.map((f, i) => (
           <li key={i} className="flex items-start gap-2 text-sm text-metallic-300">
-            <Check className="w-4 h-4 text-primary-400 flex-shrink-0 mt-0.5" />{f}
+            <Check className={`w-4 h-4 flex-shrink-0 mt-0.5 ${popular ? 'text-accent-gold' : 'text-primary-400'}`} />{f}
           </li>
         ))}
       </ul>
-      <Link href={ctaHref} className={`block w-full text-center px-4 py-2.5 rounded-lg text-sm font-semibold transition-all ${popular ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white hover:from-primary-600 hover:to-primary-700 shadow-lg shadow-primary-500/25' : 'bg-metallic-700 text-metallic-100 hover:bg-metallic-600'}`}>
+      <Link href={ctaHref} className={`btn-metal block w-full text-center px-4 py-2.5 rounded-lg text-sm font-semibold transition-all ${popular ? 'bg-metal-gold bg-[length:200%_100%] animate-sheen text-metallic-950 hover:brightness-110' : 'bg-metallic-800 text-metallic-100 hover:bg-metallic-700 border border-metallic-700 hover:border-metallic-600'}`}>
         {cta}
       </Link>
     </div>
@@ -137,38 +137,38 @@ export default function HomePage() {
 
         <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-20 sm:pt-24 sm:pb-28">
           <div className="flex flex-col items-center text-center max-w-4xl mx-auto">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary-900/30 border border-primary-700/50 text-primary-400 text-xs font-medium mb-6">
+            <div className="trim-copper-rounded inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-metallic-900/60 text-metallic-200 text-xs font-medium mb-6">
               <span className="relative flex h-1.5 w-1.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-primary-500" />
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent-copper opacity-75" />
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-accent-copper" />
               </span>
               Now live: Automated Trading Platform · Interactive Brokers integration
             </div>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.1] mb-5">
-              <span className="text-metallic-100">Research, Strategise &amp; </span>
-              <span className="bg-gradient-to-r from-primary-400 via-primary-300 to-accent-copper bg-clip-text text-transparent">
+            <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-semibold tracking-tight leading-[1.05] mb-6">
+              <span className="text-metallic-50">Research, Strategise &amp; </span>
+              <span className="metal-text metal-text-gold italic">
                 Trade Mining
               </span>
               <br />
-              <span className="text-metallic-100">From One Platform</span>
+              <span className="text-metallic-50">From One Platform</span>
             </h1>
 
-            <p className="text-lg sm:text-xl text-metallic-400 max-w-2xl leading-relaxed mb-8">
+            <p className="text-lg sm:text-xl text-metallic-400 max-w-2xl leading-relaxed mb-8 font-sans">
               AI that reads every mining announcement, scores sentiment, and routes trades through Interactive Brokers — across ASX, TSX, JSE, NYSE &amp; LSE. Two platforms, one login.
             </p>
 
             <div className="grid sm:grid-cols-2 gap-3 mb-6 max-w-2xl w-full">
               <Link href="/trading"
-                className="group relative overflow-hidden px-6 py-4 bg-gradient-to-br from-primary-600 to-primary-700 hover:from-primary-500 hover:to-primary-600 text-white font-semibold rounded-xl transition-all shadow-[0_0_30px_rgba(20,184,166,0.3)] hover:shadow-[0_0_40px_rgba(20,184,166,0.5)] flex flex-col items-start gap-1 text-left">
-                <span className="text-[10px] uppercase tracking-widest text-primary-200/80 font-bold">Trading Platform</span>
-                <span className="text-base flex items-center gap-2">Open Workstation <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" /></span>
-                <span className="text-xs font-normal text-primary-100/80">Live IB orders · Strategies · Watchlists</span>
+                className="btn-metal trim-copper-rounded group relative overflow-hidden px-6 py-4 bg-gradient-to-br from-[#3a1e08] via-[#5e2c0d] to-[#3a1e08] hover:from-[#4a2810] hover:via-[#7a3c10] hover:to-[#4a2810] text-metallic-50 font-semibold rounded-xl transition-all shadow-metal-copper hover:shadow-ring-copper flex flex-col items-start gap-1 text-left">
+                <span className="text-[10px] uppercase tracking-[0.18em] text-accent-copper font-bold">Trading Platform</span>
+                <span className="font-display text-lg flex items-center gap-2">Open Workstation <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" /></span>
+                <span className="text-xs font-normal text-metallic-300">Live IB orders · Strategies · Watchlists</span>
               </Link>
               <Link href="/dashboard"
-                className="group relative overflow-hidden px-6 py-4 bg-metallic-800/80 hover:bg-metallic-700/80 border border-metallic-700 hover:border-metallic-600 text-metallic-100 font-semibold rounded-xl transition-all flex flex-col items-start gap-1 text-left">
-                <span className="text-[10px] uppercase tracking-widest text-metallic-400 font-bold">Analysis Platform</span>
-                <span className="text-base flex items-center gap-2">Open Dashboard <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" /></span>
+                className="btn-metal trim-silver-rounded group relative overflow-hidden px-6 py-4 bg-metallic-900/60 hover:bg-metallic-800/80 text-metallic-100 font-semibold rounded-xl transition-all flex flex-col items-start gap-1 text-left">
+                <span className="text-[10px] uppercase tracking-[0.18em] text-metallic-300 font-bold">Analysis Platform</span>
+                <span className="font-display text-lg flex items-center gap-2">Open Dashboard <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" /></span>
                 <span className="text-xs font-normal text-metallic-400">Signals · Maps · AI Analyst · Peers</span>
               </Link>
             </div>
@@ -225,8 +225,8 @@ export default function HomePage() {
       <section className="py-16 border-b border-metallic-800/50 bg-gradient-to-b from-metallic-950 to-metallic-900/20">
         <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10">
-            <span className="text-primary-400 font-medium text-xs tracking-widest uppercase mb-3 block">End-to-end workflow</span>
-            <h2 className="text-3xl sm:text-4xl font-bold text-metallic-100 mb-3">Research. Strategise. Execute.</h2>
+            <span className="text-accent-copper font-medium text-xs tracking-[0.22em] uppercase mb-3 block">End-to-end workflow</span>
+            <h2 className="font-display text-3xl sm:text-4xl font-semibold text-metallic-50 mb-3">Research. Strategise. Execute.</h2>
             <p className="text-metallic-400 max-w-2xl mx-auto text-sm">
               From reading drill results to firing live orders into Interactive Brokers — the whole loop, automated and auditable.
             </p>
@@ -236,33 +236,33 @@ export default function HomePage() {
             {[
               {
                 num: '1', title: 'Research', icon: Search,
-                color: 'border-emerald-500/30 bg-emerald-500/[0.04]',
-                chip: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30',
+                color: 'trim-copper-rounded bg-metallic-900/40',
+                chip: 'text-accent-copper bg-[#2a160a] border border-accent-copper/40',
                 desc: 'AI-parsed announcements, drill results, resource estimates, peer benchmarks, sentiment.',
                 cta: 'Explore data', href: '/dashboard',
               },
               {
                 num: '2', title: 'Strategise', icon: Brain,
-                color: 'border-primary-500/30 bg-primary-500/[0.04]',
-                chip: 'text-primary-400 bg-primary-500/10 border-primary-500/30',
+                color: 'trim-silver-rounded bg-metallic-900/40',
+                chip: 'text-metallic-200 bg-metallic-800 border border-metallic-500/40',
                 desc: 'Design rule-based strategies with Claude Opus 4.7 or the visual builder. Backtest in seconds.',
                 cta: 'AI Strategy Architect', href: '/trading/strategies',
               },
               {
                 num: '3', title: 'Execute', icon: Zap,
-                color: 'border-amber-500/30 bg-amber-500/[0.04]',
-                chip: 'text-amber-400 bg-amber-500/10 border-amber-500/30',
+                color: 'trim-gold-rounded bg-metallic-900/40',
+                chip: 'text-accent-gold bg-[#2a2008] border border-accent-gold/40',
                 desc: 'Paper trade live, or connect Interactive Brokers via OAuth for real execution — with an emergency kill switch.',
                 cta: 'Connect Interactive Brokers', href: '/onboarding/broker',
               },
             ].map((band) => {
               const Icon = band.icon;
               return (
-                <div key={band.num} className={`relative rounded-xl border ${band.color} p-6 flex flex-col`}>
+                <div key={band.num} className={`relative rounded-xl ${band.color} p-6 flex flex-col`}>
                   <div className="flex items-center gap-3 mb-3">
-                    <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full border text-sm font-bold ${band.chip}`}>{band.num}</span>
+                    <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold tabular ${band.chip}`}>{band.num}</span>
                     <Icon className="w-5 h-5 text-metallic-300" />
-                    <h3 className="text-lg font-semibold text-metallic-100">{band.title}</h3>
+                    <h3 className="font-display text-xl font-semibold text-metallic-50">{band.title}</h3>
                   </div>
                   <p className="text-sm text-metallic-400 leading-relaxed mb-5 flex-1">{band.desc}</p>
                   <Link href={band.href} className="inline-flex items-center gap-2 text-sm font-medium text-primary-400 hover:text-primary-300 transition-colors group">
@@ -279,8 +279,9 @@ export default function HomePage() {
       <section className="py-20 border-b border-metallic-800/50">
         <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-14">
-            <span className="text-primary-400 font-medium text-xs tracking-widest uppercase mb-3 block">Why InvestOre</span>
-            <h2 className="text-3xl sm:text-4xl font-bold text-metallic-100 mb-4">
+            <span className="text-accent-copper font-medium text-xs tracking-[0.22em] uppercase mb-3 block">Why InvestOre</span>
+            <div className="metal-divider w-32 mx-auto mb-5" />
+            <h2 className="font-display text-3xl sm:text-4xl font-semibold text-metallic-50 mb-4">
               Everything a Mining Investor Needs.<br />One Platform.
             </h2>
             <p className="text-metallic-400 max-w-2xl mx-auto text-sm leading-relaxed">
@@ -417,8 +418,8 @@ export default function HomePage() {
       <section className="py-20 border-b border-metallic-800/50">
         <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <span className="text-primary-400 font-medium text-xs tracking-widest uppercase mb-3 block">Real Data</span>
-            <h2 className="text-3xl font-bold text-metallic-100 mb-3">See What&apos;s Inside the Platform</h2>
+            <span className="text-accent-copper font-medium text-xs tracking-[0.22em] uppercase mb-3 block">Real Data</span>
+            <h2 className="font-display text-3xl font-semibold text-metallic-50 mb-3">See What&apos;s Inside the Platform</h2>
             <p className="text-metallic-400 max-w-lg mx-auto text-sm">
               Here are examples of the data and analysis you get access to — updated daily from 5 exchanges.
             </p>
@@ -457,8 +458,8 @@ export default function HomePage() {
       <section className="py-20 border-b border-metallic-800/50 bg-metallic-900/20">
         <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <span className="text-primary-400 font-medium text-xs tracking-widest uppercase mb-3 block">Full Feature Set</span>
-            <h2 className="text-3xl font-bold text-metallic-100 mb-3">Built for Serious Mining Investors</h2>
+            <span className="text-accent-copper font-medium text-xs tracking-[0.22em] uppercase mb-3 block">Full Feature Set</span>
+            <h2 className="font-display text-3xl font-semibold text-metallic-50 mb-3">Built for Serious Mining Investors</h2>
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -484,8 +485,9 @@ export default function HomePage() {
       <section id="pricing" className="py-20 border-b border-metallic-800/50">
         <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <span className="text-primary-400 font-medium text-xs tracking-widest uppercase mb-3 block">Pricing</span>
-            <h2 className="text-3xl sm:text-4xl font-bold text-metallic-100 mb-3">Simple, Transparent Pricing</h2>
+            <span className="text-accent-gold font-medium text-xs tracking-[0.22em] uppercase mb-3 block">Pricing</span>
+            <div className="metal-divider w-32 mx-auto mb-5" />
+            <h2 className="font-display text-3xl sm:text-4xl font-semibold text-metallic-50 mb-3">Simple, Transparent Pricing</h2>
             <p className="text-metallic-400 max-w-lg mx-auto text-sm">
               Start free. Upgrade when you need exports, API access, and premium features.
             </p>
@@ -552,8 +554,8 @@ export default function HomePage() {
       <section className="py-20 border-b border-metallic-800/50 bg-metallic-900/20">
         <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <span className="text-primary-400 font-medium text-xs tracking-widest uppercase mb-3 block">Who It&apos;s For</span>
-            <h2 className="text-3xl font-bold text-metallic-100 mb-3">Built for Every Mining Investor</h2>
+            <span className="text-accent-copper font-medium text-xs tracking-[0.22em] uppercase mb-3 block">Who It&apos;s For</span>
+            <h2 className="font-display text-3xl font-semibold text-metallic-50 mb-3">Built for Every Mining Investor</h2>
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -580,19 +582,20 @@ export default function HomePage() {
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-primary-500/5 rounded-full blur-3xl" />
 
         <div className="max-w-3xl mx-auto px-4 text-center relative z-10">
-          <h2 className="text-3xl sm:text-4xl font-bold text-metallic-100 mb-4">
-            Ready to Find Your Next Mining Investment?
+          <h2 className="font-display text-3xl sm:text-5xl font-semibold text-metallic-50 mb-4 leading-tight">
+            Ready to Find Your <span className="metal-text metal-text-copper italic">Next Mining Investment</span>?
           </h2>
+          <div className="metal-divider w-40 mx-auto mb-6" />
           <p className="text-metallic-400 mb-8 max-w-lg mx-auto leading-relaxed">
             Join analysts, fund managers, and investors who use InvestOre to discover undervalued mining companies and make data-driven decisions.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center mb-8">
             <Link href="/register"
-              className="px-8 py-3.5 bg-gradient-to-r from-primary-600 to-primary-500 text-white font-semibold rounded-lg hover:from-primary-500 hover:to-primary-400 transition-all shadow-lg shadow-primary-900/30 flex items-center justify-center gap-2 text-sm">
+              className="btn-metal trim-gold-rounded px-8 py-3.5 bg-metal-gold bg-[length:200%_100%] animate-sheen text-metallic-950 font-bold rounded-lg hover:brightness-110 transition-all shadow-metal-gold flex items-center justify-center gap-2 text-sm tracking-wide uppercase">
               Get Started Free <ArrowRight className="w-4 h-4" />
             </Link>
             <Link href="/pricing"
-              className="px-8 py-3.5 text-metallic-300 font-medium rounded-lg border border-metallic-700 hover:border-metallic-500 hover:text-metallic-100 transition-all text-sm text-center">
+              className="trim-silver-rounded px-8 py-3.5 text-metallic-200 font-medium rounded-lg hover:text-metallic-50 transition-all text-sm text-center bg-metallic-900/40">
               Compare Plans
             </Link>
           </div>

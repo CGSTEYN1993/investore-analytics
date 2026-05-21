@@ -3,7 +3,8 @@ import Image from 'next/image';
 
 export function Footer() {
   return (
-    <footer className="bg-metallic-950 text-metallic-400 border-t border-metallic-800/50">
+    <footer className="bg-metallic-950 text-metallic-400 relative">
+      <div className="metal-divider" />
       <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid md:grid-cols-4 gap-8">
           {/* Brand */}
@@ -72,11 +73,12 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-10 pt-6 border-t border-metallic-800/50 flex flex-col sm:flex-row justify-between items-center gap-3">
+        <div className="metal-divider mt-10 mb-6" />
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-3">
           <p className="text-xs text-metallic-600">
-            © {new Date().getFullYear()} InvestOre Analytics. All rights reserved.
+            © {new Date().getFullYear()} <span className="font-display italic text-metallic-400">InvestOre</span> Analytics. All rights reserved.
           </p>
-          <p className="text-[10px] text-metallic-700">
+          <p className="text-[10px] text-metallic-700 tracking-wide uppercase">
             Data for informational purposes only · Not investment advice
           </p>
         </div>

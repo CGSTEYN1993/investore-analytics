@@ -82,8 +82,40 @@ const config: Config = {
         },
       },
       fontFamily: {
-        sans: ["Inter", "system-ui", "sans-serif"],
-        mono: ["JetBrains Mono", "monospace"],
+        sans: ["var(--font-inter)", "Inter", "system-ui", "sans-serif"],
+        display: ["var(--font-fraunces)", "Fraunces", "Georgia", "serif"],
+        mono: ["var(--font-mono)", "JetBrains Mono", "monospace"],
+      },
+      backgroundImage: {
+        "metal-gold":
+          "linear-gradient(110deg,#7a5a12 0%,#d4af37 22%,#fff1b8 48%,#d4af37 72%,#7a5a12 100%)",
+        "metal-copper":
+          "linear-gradient(110deg,#5e2c0d 0%,#b87333 22%,#ffd1a3 48%,#b87333 72%,#5e2c0d 100%)",
+        "metal-silver":
+          "linear-gradient(110deg,#475569 0%,#cbd5e1 22%,#ffffff 48%,#cbd5e1 72%,#475569 100%)",
+        "ore-soft":
+          "radial-gradient(60% 50% at 30% 20%,rgba(184,115,51,0.12) 0%,transparent 60%),radial-gradient(50% 40% at 80% 10%,rgba(212,175,55,0.10) 0%,transparent 70%)",
+      },
+      boxShadow: {
+        "metal-gold": "0 1px 0 0 rgba(255,241,184,0.35) inset, 0 8px 24px -8px rgba(212,175,55,0.35)",
+        "metal-copper": "0 1px 0 0 rgba(255,209,163,0.30) inset, 0 8px 24px -8px rgba(184,115,51,0.40)",
+        "metal-silver": "0 1px 0 0 rgba(255,255,255,0.35) inset, 0 8px 24px -10px rgba(148,163,184,0.40)",
+        "ring-copper": "0 0 0 1px rgba(184,115,51,0.45), 0 0 32px -8px rgba(184,115,51,0.45)",
+      },
+      keyframes: {
+        sheen: {
+          "0%": { backgroundPosition: "200% 0" },
+          "100%": { backgroundPosition: "-200% 0" },
+        },
+        "btn-glint": {
+          "0%": { transform: "translateX(-120%) skewX(-18deg)" },
+          "100%": { transform: "translateX(220%) skewX(-18deg)" },
+        },
+      },
+      animation: {
+        sheen: "sheen 8s linear infinite",
+        "sheen-fast": "sheen 4.5s linear infinite",
+        "btn-glint": "btn-glint 1.1s ease-out",
       },
     },
   },
