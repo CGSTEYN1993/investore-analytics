@@ -1,0 +1,7 @@
+[submodule "frontend"]
+	path = frontend
+	url = https://github.com/CGSTEYN1993/investore-analytics.git
+	branch = main
+[submodule "backend"]
+	path = backend
+	url = https://github.com/CGSTEYN1993/investore-analytics-backend.git
