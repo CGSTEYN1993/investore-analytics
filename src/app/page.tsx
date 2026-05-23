@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import TickerTape from '@/components/ui/TickerTape';
 import NewsletterSignup from '@/components/ui/NewsletterSignup';
+import SpinningLogo3D from '@/components/ui/SpinningLogo3D';
 
 /* ─── Quiet photo backdrop ─── */
 function PhotoBackdrop({
@@ -270,22 +271,17 @@ export default function HomePage() {
               </dl>
             </div>
 
-            {/* Right: bullish chart */}
+            {/* Right: spinning 3D logo */}
             <div className="lg:col-span-7">
               <div className="relative border border-metallic-700 rounded-lg bg-metallic-800/60 overflow-hidden">
                 <div className="flex items-center justify-between px-4 py-2 border-b border-metallic-700 bg-metallic-800/80">
                   <div className="flex items-center gap-3">
-                    <span className="text-[10px] tracking-[0.22em] uppercase text-metallic-400">Sample</span>
-                    <span className="text-xs font-mono text-metallic-200">GOLD.IDX · 1D</span>
+                    <span className="text-[10px] tracking-[0.22em] uppercase text-metallic-400">Brand</span>
+                    <span className="text-xs font-mono text-metallic-200">INVESTORE · 3D</span>
                   </div>
-                  <span className="text-[10px] tracking-[0.22em] uppercase text-accent-gold">Bullish</span>
+                  <span className="text-[10px] tracking-[0.22em] uppercase text-accent-copper">Live</span>
                 </div>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src="/hero-bullish-chart.svg"
-                  alt="Bullish mining stock chart"
-                  className="block w-full h-auto"
-                />
+                <SpinningLogo3D />
               </div>
             </div>
 
