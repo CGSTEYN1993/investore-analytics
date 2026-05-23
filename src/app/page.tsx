@@ -273,16 +273,7 @@ export default function HomePage() {
 
             {/* Right: spinning 3D logo */}
             <div className="lg:col-span-7">
-              <div className="relative border border-metallic-700 rounded-lg bg-metallic-800/60 overflow-hidden">
-                <div className="flex items-center justify-between px-4 py-2 border-b border-metallic-700 bg-metallic-800/80">
-                  <div className="flex items-center gap-3">
-                    <span className="text-[10px] tracking-[0.22em] uppercase text-metallic-400">Brand</span>
-                    <span className="text-xs font-mono text-metallic-200">INVESTORE · 3D</span>
-                  </div>
-                  <span className="text-[10px] tracking-[0.22em] uppercase text-accent-copper">Live</span>
-                </div>
-                <SpinningLogo3D />
-              </div>
+              <SpinningLogo3D />
             </div>
 
           </div>
