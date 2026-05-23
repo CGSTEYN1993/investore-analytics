@@ -15,7 +15,7 @@ function PhotoBackdrop({
   src,
   opacity = 0.18,
   brightness = 0.65,
-  overlay = 'bg-gradient-to-b from-metallic-950/90 via-metallic-950/80 to-metallic-950',
+  overlay = 'bg-gradient-to-b from-metallic-900/90 via-metallic-900/80 to-metallic-900',
 }: {
   src: string;
   opacity?: number;
@@ -69,7 +69,7 @@ function PlainCard({
   children, className = '',
 }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={`bg-metallic-900/40 border border-metallic-800/70 rounded-lg p-5 hover:border-metallic-700 transition-colors ${className}`}>
+    <div className={`bg-metallic-800/60 border border-metallic-700/60 rounded-lg p-5 hover:border-metallic-600 transition-colors ${className}`}>
       {children}
     </div>
   );
@@ -84,11 +84,11 @@ function CTA({
   variant?: 'default' | 'copper' | 'gold' | 'silver' | 'ghost';
 }) {
   const styles = {
-    default: 'border border-metallic-700 text-metallic-100 hover:border-metallic-500 bg-metallic-900/40',
-    copper: 'border border-accent-copper/50 text-accent-copper hover:bg-accent-copper/10 hover:border-accent-copper',
-    gold: 'border border-accent-gold/50 text-accent-gold hover:bg-accent-gold/10 hover:border-accent-gold',
-    silver: 'border border-metallic-400/40 text-metallic-200 hover:bg-metallic-700/30 hover:border-metallic-300',
-    ghost: 'text-metallic-300 hover:text-metallic-50',
+    default: 'border border-metallic-600 text-metallic-50 hover:border-metallic-400 bg-metallic-800/60',
+    copper: 'border border-accent-copper/60 text-accent-copper hover:bg-accent-copper/10 hover:border-accent-copper',
+    gold: 'border border-accent-gold/60 text-accent-gold hover:bg-accent-gold/10 hover:border-accent-gold',
+    silver: 'border border-metallic-300/50 text-metallic-100 hover:bg-metallic-700/40 hover:border-metallic-200',
+    ghost: 'text-metallic-200 hover:text-white',
   }[variant];
   return (
     <Link
@@ -103,12 +103,12 @@ function CTA({
 /* ─── Screenshot card with quiet chrome ─── */
 function ScreenshotPreview({ src, alt }: { src: string; alt: string }) {
   return (
-    <div className="bg-metallic-900/70 border border-metallic-800 rounded-lg overflow-hidden">
-      <div className="flex items-center gap-2 px-4 py-2 border-b border-metallic-800/80 bg-metallic-900/60">
-        <span className="w-2 h-2 rounded-full bg-metallic-600" />
-        <span className="w-2 h-2 rounded-full bg-metallic-600" />
-        <span className="w-2 h-2 rounded-full bg-metallic-600" />
-        <span className="ml-2 text-[10px] text-metallic-500 font-mono tracking-wider">{alt}</span>
+    <div className="bg-metallic-800/70 border border-metallic-700 rounded-lg overflow-hidden">
+      <div className="flex items-center gap-2 px-4 py-2 border-b border-metallic-700 bg-metallic-800/80">
+        <span className="w-2 h-2 rounded-full bg-metallic-500" />
+        <span className="w-2 h-2 rounded-full bg-metallic-500" />
+        <span className="w-2 h-2 rounded-full bg-metallic-500" />
+        <span className="ml-2 text-[10px] text-metallic-400 font-mono tracking-wider">{alt}</span>
       </div>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={src} alt={alt} className="block w-full h-auto" loading="lazy" />
@@ -162,8 +162,8 @@ function PriceCard({
   return (
     <div className={`rounded-lg p-6 flex flex-col ${
       highlighted
-        ? 'border border-accent-gold/50 bg-metallic-900/60'
-        : 'border border-metallic-800 bg-metallic-900/30'
+        ? 'border border-accent-gold/60 bg-metallic-800/70'
+        : 'border border-metallic-700/70 bg-metallic-800/50'
     }`}>
       <div className="mb-5">
         <div className="text-[11px] tracking-[0.22em] uppercase text-metallic-400 mb-2">{name}</div>
@@ -193,13 +193,13 @@ function DataSample({
   items: { label: string; value: string }[];
 }) {
   return (
-    <div className="border border-metallic-800/70 rounded-lg p-4 bg-metallic-900/30">
-      <div className="text-[11px] tracking-[0.22em] uppercase text-metallic-500 mb-3">{title}</div>
+    <div className="border border-metallic-700/70 rounded-lg p-4 bg-metallic-800/50">
+      <div className="text-[11px] tracking-[0.22em] uppercase text-metallic-400 mb-3">{title}</div>
       <div className="space-y-2">
         {items.map((item, i) => (
           <div key={i} className="flex justify-between text-sm">
-            <span className="text-metallic-500">{item.label}</span>
-            <span className="text-metallic-200 font-mono">{item.value}</span>
+            <span className="text-metallic-400">{item.label}</span>
+            <span className="text-metallic-50 font-mono">{item.value}</span>
           </div>
         ))}
       </div>
@@ -212,11 +212,11 @@ function DataSample({
    ═══════════════════════════════════════════════════════════════════════ */
 export default function HomePage() {
   return (
-    <div className="bg-metallic-950 min-h-screen flex flex-col">
+    <div className="bg-metallic-900 text-metallic-100 min-h-screen flex flex-col">
       <TickerTape />
 
       {/* ═══ HERO ═══ */}
-      <section className="relative border-b border-metallic-800/60">
+      <section className="relative border-b border-metallic-700/60">
         <div className="absolute inset-0 -z-10">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
@@ -226,7 +226,7 @@ export default function HomePage() {
             className="absolute inset-0 w-full h-full object-cover opacity-25 hidden sm:block"
             style={{ filter: 'grayscale(0.85) contrast(1.02) brightness(0.55)' }}
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-metallic-950/85 via-metallic-950/75 to-metallic-950" />
+          <div className="absolute inset-0 bg-gradient-to-b from-metallic-900/85 via-metallic-900/75 to-metallic-900" />
         </div>
 
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
@@ -254,7 +254,7 @@ export default function HomePage() {
                 <NewsletterSignup variant="hero" />
               </div>
 
-              <dl className="grid grid-cols-3 gap-6 max-w-md border-t border-metallic-800/60 pt-5">
+              <dl className="grid grid-cols-3 gap-6 max-w-md border-t border-metallic-700/60 pt-5">
                 <div>
                   <dt className="text-[10px] tracking-[0.22em] uppercase text-metallic-500">Companies</dt>
                   <dd className="font-display text-xl text-metallic-100 tabular">2,000+</dd>
@@ -272,11 +272,11 @@ export default function HomePage() {
 
             {/* Right: bullish chart */}
             <div className="lg:col-span-7">
-              <div className="relative border border-metallic-800 rounded-lg bg-metallic-900/40 overflow-hidden">
-                <div className="flex items-center justify-between px-4 py-2 border-b border-metallic-800/80 bg-metallic-900/60">
+              <div className="relative border border-metallic-700 rounded-lg bg-metallic-800/60 overflow-hidden">
+                <div className="flex items-center justify-between px-4 py-2 border-b border-metallic-700 bg-metallic-800/80">
                   <div className="flex items-center gap-3">
-                    <span className="text-[10px] tracking-[0.22em] uppercase text-metallic-500">Sample</span>
-                    <span className="text-xs font-mono text-metallic-300">GOLD.IDX · 1D</span>
+                    <span className="text-[10px] tracking-[0.22em] uppercase text-metallic-400">Sample</span>
+                    <span className="text-xs font-mono text-metallic-200">GOLD.IDX · 1D</span>
                   </div>
                   <span className="text-[10px] tracking-[0.22em] uppercase text-accent-gold">Bullish</span>
                 </div>
@@ -294,7 +294,7 @@ export default function HomePage() {
       </section>
 
       {/* ═══ EXCHANGES ═══ */}
-      <section className="border-b border-metallic-800/60">
+      <section className="border-b border-metallic-700/60">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="text-[11px] tracking-[0.22em] uppercase text-metallic-500">Coverage</div>
@@ -319,7 +319,7 @@ export default function HomePage() {
       </section>
 
       {/* ═══ RESEARCH → STRATEGISE → EXECUTE ═══ */}
-      <section className="relative border-b border-metallic-800/60">
+      <section className="relative border-b border-metallic-700/60">
         <PhotoBackdrop src="/mining/stacker.jpg" />
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-16 relative">
           <SectionHeader
@@ -328,7 +328,7 @@ export default function HomePage() {
             lede="From reading drill results to firing live orders into Interactive Brokers — the whole loop, automated and auditable."
           />
 
-          <div className="grid md:grid-cols-3 gap-px bg-metallic-800/60 border border-metallic-800/60 rounded-lg overflow-hidden">
+          <div className="grid md:grid-cols-3 gap-px bg-metallic-800/60 border border-metallic-700/60 rounded-lg overflow-hidden">
             {[
               {
                 num: '01', accent: 'text-accent-copper', title: 'Research', icon: Search,
@@ -336,7 +336,7 @@ export default function HomePage() {
                 cta: 'Explore data', href: '/dashboard',
               },
               {
-                num: '02', accent: 'text-metallic-300', title: 'Strategise', icon: Brain,
+                num: '02', accent: 'text-metallic-200', title: 'Strategise', icon: Brain,
                 desc: 'Design rule-based strategies with Claude or the visual builder. Backtest in seconds.',
                 cta: 'Strategy architect', href: '/trading/strategies',
               },
@@ -348,7 +348,7 @@ export default function HomePage() {
             ].map((band) => {
               const Icon = band.icon;
               return (
-                <div key={band.num} className="bg-metallic-950 p-6">
+                <div key={band.num} className="bg-metallic-900 p-6">
                   <div className="flex items-center justify-between mb-4">
                     <span className={`font-mono text-xs tracking-widest ${band.accent}`}>{band.num}</span>
                     <Icon className="w-4 h-4 text-metallic-500" />
@@ -366,7 +366,7 @@ export default function HomePage() {
       </section>
 
       {/* ═══ WHY ═══ */}
-      <section className="relative border-b border-metallic-800/60">
+      <section className="relative border-b border-metallic-700/60">
         <PhotoBackdrop src="/mining/loader-truck.jpg" opacity={0.16} />
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-16 relative">
           <SectionHeader
@@ -393,7 +393,7 @@ export default function HomePage() {
       </section>
 
       {/* ═══ FEATURE ROWS ═══ */}
-      <section className="relative border-b border-metallic-800/60">
+      <section className="relative border-b border-metallic-700/60">
         <PhotoBackdrop src="/mining/tunnel.jpg" />
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-16 relative">
           <FeatureRow
@@ -413,7 +413,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="relative border-b border-metallic-800/60 bg-metallic-900/20">
+      <section className="relative border-b border-metallic-700/60 bg-metallic-800/30">
         <PhotoBackdrop src="/mining/plant-sunset.jpg" />
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-16 relative">
           <FeatureRow
@@ -434,7 +434,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="relative border-b border-metallic-800/60">
+      <section className="relative border-b border-metallic-700/60">
         <PhotoBackdrop src="/mining/bucket-wheel.jpg" />
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-16 relative">
           <FeatureRow
@@ -454,7 +454,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="relative border-b border-metallic-800/60 bg-metallic-900/20">
+      <section className="relative border-b border-metallic-700/60 bg-metallic-800/30">
         <PhotoBackdrop src="/mining/spreaders.jpg" />
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-16 relative">
           <FeatureRow
@@ -475,7 +475,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="relative border-b border-metallic-800/60">
+      <section className="relative border-b border-metallic-700/60">
         <PhotoBackdrop src="/mining/headframe.jpg" />
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-16 relative">
           <FeatureRow
@@ -496,7 +496,7 @@ export default function HomePage() {
       </section>
 
       {/* ═══ REAL DATA ═══ */}
-      <section className="relative border-b border-metallic-800/60">
+      <section className="relative border-b border-metallic-700/60">
         <PhotoBackdrop src="/mining/stacker.jpg" opacity={0.14} />
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-16 relative">
           <SectionHeader
@@ -534,7 +534,7 @@ export default function HomePage() {
       </section>
 
       {/* ═══ MORE FEATURES ═══ */}
-      <section className="relative border-b border-metallic-800/60 bg-metallic-900/20">
+      <section className="relative border-b border-metallic-700/60 bg-metallic-800/30">
         <PhotoBackdrop src="/mining/loader-truck.jpg" opacity={0.14} />
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-16 relative">
           <SectionHeader
@@ -561,7 +561,7 @@ export default function HomePage() {
       </section>
 
       {/* ═══ PRICING ═══ */}
-      <section id="pricing" className="relative border-b border-metallic-800/60">
+      <section id="pricing" className="relative border-b border-metallic-700/60">
         <PhotoBackdrop src="/mining/plant-sunset.jpg" opacity={0.12} />
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-16 relative">
           <SectionHeader
@@ -625,7 +625,7 @@ export default function HomePage() {
       </section>
 
       {/* ═══ WHO IT'S FOR ═══ */}
-      <section className="relative border-b border-metallic-800/60 bg-metallic-900/20">
+      <section className="relative border-b border-metallic-700/60 bg-metallic-800/30">
         <PhotoBackdrop src="/mining/excavator-orange.jpg" opacity={0.14} />
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-16 relative">
           <SectionHeader

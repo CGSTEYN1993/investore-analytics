@@ -71,7 +71,7 @@ const TickerTape: React.FC = () => {
   const tickerItems = [...items, ...items, ...items];
 
   return (
-    <div className="w-full bg-metallic-950 border-b border-metallic-800/50 overflow-hidden h-8 flex items-center">
+    <div className="w-full bg-metallic-900 border-b border-metallic-700/60 overflow-hidden h-8 flex items-center">
       <div className="animate-ticker flex whitespace-nowrap">
         {tickerItems.map((item, index) => {
           const up = item.change_pct > 0;

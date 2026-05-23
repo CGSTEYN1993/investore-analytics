@@ -89,7 +89,7 @@ export function Header() {
   const isHomePage = pathname === '/';
 
   return (
-    <header className="bg-metallic-950/90 backdrop-blur-md sticky top-0 z-50 border-b border-metallic-800/50">
+    <header className="bg-metallic-900/95 backdrop-blur-md sticky top-0 z-50 border-b border-metallic-700/60">
       <nav className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}

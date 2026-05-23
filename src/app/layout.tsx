@@ -79,7 +79,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable} ${fraunces.variable}`}>
-      <body className={`${inter.className} bg-metallic-950 text-metallic-100`}>
+      <body className={`${inter.className} bg-metallic-900 text-metallic-100`}>
         <Providers>
           <div className="min-h-screen flex flex-col">
             <Disclaimer />
