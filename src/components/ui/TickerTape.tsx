@@ -79,8 +79,8 @@ const TickerTape: React.FC = () => {
           const colorClass = flat
             ? 'text-metallic-500'
             : up
-            ? 'text-emerald-500'
-            : 'text-red-400';
+            ? 'text-accent-gold'
+            : 'text-accent-copper';
           const arrow = flat ? '·' : up ? '▲' : '▼';
           return (
             <div key={index} className="inline-flex items-center mx-5 text-xs font-mono">

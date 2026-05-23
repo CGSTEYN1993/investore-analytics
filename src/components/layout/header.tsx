@@ -164,8 +164,8 @@ export function Header() {
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
                   className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-metallic-800/50 transition-colors"
                 >
-                  <div className="w-7 h-7 bg-gradient-to-br from-primary-500 to-diamond-600 rounded-full flex items-center justify-center">
-                    <User className="w-3.5 h-3.5 text-white" />
+                  <div className="w-7 h-7 rounded-full flex items-center justify-center border border-accent-copper/50 bg-metallic-900">
+                    <User className="w-3.5 h-3.5 text-accent-copper" />
                   </div>
                   <span className="text-sm font-medium text-metallic-200">
                     {user?.full_name || user?.email?.split('@')[0]}
@@ -213,7 +213,7 @@ export function Header() {
                 </Link>
                 <Link
                   href="/register"
-                  className="px-4 py-2 bg-gradient-to-r from-primary-500 to-primary-600 text-white text-sm font-medium rounded-lg hover:from-primary-600 hover:to-primary-700 transition-all shadow-lg shadow-primary-500/20"
+                  className="px-4 py-2 border border-accent-copper/60 text-accent-copper text-sm font-medium rounded-lg hover:bg-accent-copper/10 hover:border-accent-copper transition-all"
                 >
                   Get Started Free
                 </Link>
@@ -246,7 +246,7 @@ export function Header() {
                       key={item.href}
                       href={item.href}
                       className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                        pathname.startsWith(item.href) ? 'text-primary-400 bg-primary-500/10' : 'text-metallic-300 hover:bg-metallic-800/50'
+                        pathname.startsWith(item.href) ? 'text-accent-copper bg-accent-copper/10' : 'text-metallic-300 hover:bg-metallic-800/50'
                       }`}
                       onClick={() => setMobileMenuOpen(false)}
                     >
@@ -260,7 +260,7 @@ export function Header() {
                       key={item.href}
                       href={item.href}
                       className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                        pathname.startsWith(item.href) ? 'text-primary-400 bg-primary-500/10' : 'text-metallic-300 hover:bg-metallic-800/50'
+                        pathname.startsWith(item.href) ? 'text-accent-copper bg-accent-copper/10' : 'text-metallic-300 hover:bg-metallic-800/50'
                       }`}
                       onClick={() => setMobileMenuOpen(false)}
                     >
@@ -306,7 +306,7 @@ export function Header() {
                       </Link>
                       <Link
                         href="/register"
-                        className="mx-3 mt-1 px-4 py-2.5 bg-gradient-to-r from-primary-500 to-primary-600 text-white text-sm font-medium rounded-lg text-center"
+                        className="mx-3 mt-1 px-4 py-2.5 border border-accent-copper/60 text-accent-copper text-sm font-medium rounded-lg text-center hover:bg-accent-copper/10"
                         onClick={() => setMobileMenuOpen(false)}
                       >
                         Get Started Free

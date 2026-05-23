@@ -22,7 +22,7 @@ export function Footer() {
                   <span className="text-metallic-100">Invest</span>
                   <span className="text-accent-copper">Ore</span>
                 </span>
-                <span className="text-[10px] text-primary-500 -mt-0.5">Analytics</span>
+                <span className="text-[10px] text-metallic-400 tracking-wider -mt-0.5">Analytics</span>
               </div>
             </Link>
             <p className="text-xs text-metallic-500 mb-4 leading-relaxed">
@@ -42,11 +42,11 @@ export function Footer() {
           <div>
             <h3 className="font-semibold text-metallic-200 text-sm mb-4">Product</h3>
             <ul className="space-y-2 text-xs">
-              <li><Link href="/dashboard" className="hover:text-primary-400 transition-colors">Dashboard</Link></li>
-              <li><Link href="/analysis/compare" className="hover:text-primary-400 transition-colors">Peer Analytics</Link></li>
-              <li><Link href="/analysis/ai-analyst" className="hover:text-primary-400 transition-colors">AI Analyst</Link></li>
-              <li><Link href="/map" className="hover:text-primary-400 transition-colors">Global Map</Link></li>
-              <li><Link href="/pricing" className="hover:text-primary-400 transition-colors">Pricing</Link></li>
+              <li><Link href="/dashboard" className="hover:text-accent-copper transition-colors">Dashboard</Link></li>
+              <li><Link href="/analysis/compare" className="hover:text-accent-copper transition-colors">Peer Analytics</Link></li>
+              <li><Link href="/analysis/ai-analyst" className="hover:text-accent-copper transition-colors">AI Analyst</Link></li>
+              <li><Link href="/map" className="hover:text-accent-copper transition-colors">Global Map</Link></li>
+              <li><Link href="/pricing" className="hover:text-accent-gold transition-colors">Pricing</Link></li>
             </ul>
           </div>
 
@@ -54,10 +54,10 @@ export function Footer() {
           <div>
             <h3 className="font-semibold text-metallic-200 text-sm mb-4">Resources</h3>
             <ul className="space-y-2 text-xs">
-              <li><Link href="/resources/mining-economics" className="hover:text-primary-400 transition-colors">Knowledge Base</Link></li>
-              <li><Link href="/news" className="hover:text-primary-400 transition-colors">News Feed</Link></li>
-              <li><Link href="/faq" className="hover:text-primary-400 transition-colors">FAQ</Link></li>
-              <li><Link href="/contact" className="hover:text-primary-400 transition-colors">Support</Link></li>
+              <li><Link href="/resources/mining-economics" className="hover:text-accent-copper transition-colors">Knowledge Base</Link></li>
+              <li><Link href="/news" className="hover:text-accent-copper transition-colors">News Feed</Link></li>
+              <li><Link href="/faq" className="hover:text-accent-copper transition-colors">FAQ</Link></li>
+              <li><Link href="/contact" className="hover:text-accent-copper transition-colors">Support</Link></li>
             </ul>
           </div>
 
@@ -65,10 +65,10 @@ export function Footer() {
           <div>
             <h3 className="font-semibold text-metallic-200 text-sm mb-4">Legal</h3>
             <ul className="space-y-2 text-xs">
-              <li><Link href="/privacy" className="hover:text-primary-400 transition-colors">Privacy Policy</Link></li>
-              <li><Link href="/terms" className="hover:text-primary-400 transition-colors">Terms of Service</Link></li>
-              <li><Link href="/disclaimer" className="hover:text-primary-400 transition-colors">Disclaimer</Link></li>
-              <li><Link href="/about" className="hover:text-primary-400 transition-colors">About Us</Link></li>
+              <li><Link href="/privacy" className="hover:text-metallic-200 transition-colors">Privacy Policy</Link></li>
+              <li><Link href="/terms" className="hover:text-metallic-200 transition-colors">Terms of Service</Link></li>
+              <li><Link href="/disclaimer" className="hover:text-metallic-200 transition-colors">Disclaimer</Link></li>
+              <li><Link href="/about" className="hover:text-metallic-200 transition-colors">About Us</Link></li>
             </ul>
           </div>
         </div>

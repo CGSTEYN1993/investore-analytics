@@ -30,7 +30,7 @@ export function PlatformSwitcher() {
         href="/dashboard"
         className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
           !isTrading
-            ? 'bg-metallic-700/80 text-primary-300 shadow-sm'
+            ? 'bg-metallic-800 text-metallic-100 border border-metallic-400/30'
             : 'text-metallic-400 hover:text-metallic-200'
         }`}
       >
@@ -41,7 +41,7 @@ export function PlatformSwitcher() {
         href="/trading"
         className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
           isTrading
-            ? 'bg-gradient-to-r from-primary-600/30 to-primary-500/30 text-primary-200 shadow-sm border border-primary-500/40'
+            ? 'bg-metallic-800 text-accent-copper border border-accent-copper/40'
             : 'text-metallic-400 hover:text-metallic-200'
         }`}
       >
